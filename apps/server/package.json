@@ -16,7 +16,8 @@
     "dotenv": "catalog:",
     "zod": "catalog:",
     "@anilog/auth": "workspace:*",
-    "@anilog/db": "workspace:*"
+    "@anilog/db": "workspace:*",
+    "@anilog/api": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
