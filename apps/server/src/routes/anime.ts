@@ -83,7 +83,7 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
       } catch (error) {
         return {
           success: false,
-          data: { id: "", title: { english: "", native: "" }, episodes: "", coverImage: { color: "", large: "" } }
+
         };
       }
     },
@@ -91,14 +91,5 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
       params: t.Object({
         query: t.String()
       }),
-      response: t.Object({
-        success: t.Boolean(),
-        data: t.Object({
-          id: t.String(),
-          title: t.Object({ english: t.String(), native: t.String() }),
-          episodes: t.String(),
-          coverImage: t.Object({ large: t.String(), color: t.String() }),
-        }),
-      })
     }
   );
