@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from '@anilog/db'
-import { anime } from "@anilog/db/schema/anime";
+import { anime, trendingAnime } from "@anilog/db/schema/anime";
 
 export async function GET(req: Request) {
   const auth = req.headers.get("authorization");
@@ -94,7 +94,33 @@ export async function GET(req: Request) {
     //   animeInsertSchema.parse(row)
     // );
 
-    await db.insert(anime).values(inserts);
+    // Upsert anime data
+    await db.insert(anime).values(inserts).onConflictDoUpdate({
+      target: anime.id,
+      set: {
+        title: anime.title,
+        titleJapanese: anime.titleJapanese,
+        description: anime.description,
+        episodes: anime.episodes,
+        status: anime.status,
+        genres: anime.genres,
+        imageUrl: anime.imageUrl,
+        year: anime.year,
+        rating: anime.rating,
+        updatedAt: new Date()
+      }
+    });
+
+    // Clear existing trending data
+    await db.delete(trendingAnime);
+
+    // Insert new trending data with ranks
+    const trendingInserts = json.data.Page.media.map((media, index) => ({
+      animeId: media.id,
+      rank: index + 1
+    }));
+
+    await db.insert(trendingAnime).values(trendingInserts);
 
     return NextResponse.json({ success: true });
   } catch {

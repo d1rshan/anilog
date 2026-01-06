@@ -51,6 +51,7 @@ export const anime = pgTable(
   ],
 );
 
+
 export const listEntry = pgTable(
   "list_entry",
   {
@@ -76,6 +77,25 @@ export const listEntry = pgTable(
     index("list_entry_unique_idx").on(table.listId, table.animeId),
   ],
 );
+
+export const trendingAnime = pgTable(
+  "trending_anime",
+  {
+    animeId: integer("anime_id").references(() => anime.id, { onDelete: "cascade" })
+      .notNull().primaryKey(),
+    rank: integer("rank")
+      .notNull(),
+    createdAt: timestamp("created_at")
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("trending_rank_idx").on(table.rank),
+  ]
+);
+
+
+// TODO: add relations for trending_anime table
 
 export const userListRelations = relations(userList, ({ one, many }) => ({
   user: one(user, {
