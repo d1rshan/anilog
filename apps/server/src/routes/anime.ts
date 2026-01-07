@@ -15,24 +15,24 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
       };
     }
   })
-  .get("/:id", async ({ params }) => {
-    try {
-      const anime = await AnimeService.getAnimeById(params.id);
-      if (!anime) {
-        return { success: false, error: "Anime not found" };
-      }
-      return { success: true, data: anime };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Failed to fetch anime"
-      };
-    }
-  }, {
-    params: t.Object({
-      id: t.String()
-    })
-  })
+  // .get("/:id", async ({ params }) => {
+  //   try {
+  //     const anime = await AnimeService.getAnimeById(params.id);
+  //     if (!anime) {
+  //       return { success: false, error: "Anime not found" };
+  //     }
+  //     return { success: true, data: anime };
+  //   } catch (error) {
+  //     return {
+  //       success: false,
+  //       error: error instanceof Error ? error.message : "Failed to fetch anime"
+  //     };
+  //   }
+  // }, {
+  //   params: t.Object({
+  //     id: t.String()
+  //   })
+  // })
   .get(
     "/search/:query",
     async ({ params }) => {

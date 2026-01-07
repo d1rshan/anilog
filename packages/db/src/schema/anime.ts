@@ -36,7 +36,7 @@ export const anime = pgTable(
     episodes: integer("episodes"),
     status: text("status"),
     genres: text("genres").array(),
-    imageUrl: text("image_url"),
+    imageUrl: text("image_url").notNull(),
     year: integer("year"),
     rating: integer("rating"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -51,6 +51,7 @@ export const anime = pgTable(
   ],
 );
 
+export type Anime = typeof anime.$inferSelect;
 
 export const listEntry = pgTable(
   "list_entry",

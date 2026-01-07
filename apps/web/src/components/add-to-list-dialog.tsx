@@ -31,7 +31,7 @@ interface UserList {
 }
 
 interface AddToListDialogProps {
-  animeId: string;
+  animeId: number;
   animeTitle: string;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;

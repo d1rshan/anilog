@@ -64,8 +64,8 @@ export async function GET(req: Request) {
             status: "FINISHED" | "RELEASING" | "NOT_YET_RELEASED" | "CANCELLED" | "HIATUS" | null;
             genres: string[];
             coverImage: {
-              large: string | null;
-            } | null;
+              large: string;
+            };
             seasonYear: number | null;
             averageScore: number | null;
           }>;

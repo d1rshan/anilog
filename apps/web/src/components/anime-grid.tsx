@@ -5,7 +5,7 @@ import { AnimeCard } from "./anime-card";
 import { AddToListDialog } from "./add-to-list-dialog";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
-import type { Anime } from "@anilog/api";
+import { type Anime } from "@anilog/db/schema/anime";
 
 export function AnimeGrid() {
   const [anime, setAnime] = useState<Anime[]>([]);
@@ -13,11 +13,11 @@ export function AnimeGrid() {
   const [error, setError] = useState<string | null>(null);
   const [addToListDialog, setAddToListDialog] = useState<{
     isOpen: boolean;
-    animeId: string;
+    animeId: number;
     animeTitle: string;
   }>({
     isOpen: false,
-    animeId: "",
+    animeId: 0,
     animeTitle: ""
   });
 
@@ -43,7 +43,7 @@ export function AnimeGrid() {
     }
   };
 
-  const handleAddToList = async (animeId: string) => {
+  const handleAddToList = async (animeId: number) => {
     const { data: session } = await authClient.getSession();
     if (!session?.user?.id) {
       toast.error("Please sign in to add anime to lists", {
