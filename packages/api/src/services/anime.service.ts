@@ -1,5 +1,6 @@
 import { db } from "@anilog/db";
-import { anime } from "@anilog/db/schema/anime";
+import { anime, trendingAnime } from "@anilog/db/schema/anime";
+import { desc, eq, getTableColumns } from "drizzle-orm"
 
 export class AnimeService {
   // Seed database with mock data if empty
@@ -16,9 +17,14 @@ export class AnimeService {
   // }
   //
   // // Get all anime
-  static async getAllAnime() {
+  static async getTrendingAnime() {
     try {
-      return await db.select().from(anime);
+      const result = await db.select({
+        ...getTableColumns(anime)
+      }).from(anime).innerJoin(trendingAnime, eq(anime.id, trendingAnime.animeId)).orderBy(trendingAnime.rank)
+      console.log(result)
+      return result
+
     } catch (error) {
       console.error("Error getting all anime:", error);
       throw new Error("Failed to fetch anime");
@@ -44,7 +50,7 @@ export class AnimeService {
   // Search anime by title
   static async searchAnime(query: string) {
     try {
-      const allAnime = await this.getAllAnime();
+      const allAnime = await this.getTrendingAnime();
       return allAnime.filter(anime =>
         anime.title.toLowerCase().includes(query.toLowerCase()) ||
         anime.titleJapanese?.toLowerCase().includes(query.toLowerCase())

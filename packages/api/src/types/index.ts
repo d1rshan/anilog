@@ -1,14 +1,14 @@
 export interface Anime {
   id: number;
   title: string;
-  titleJapanese?: string;
-  description?: string;
-  episodes?: number;
-  status?: string;
-  genres?: string;
-  imageUrl?: string;
-  year?: number;
-  rating?: string;
+  titleJapanese?: string | null;
+  description?: string | null;
+  episodes?: number | null;
+  status?: string | null;
+  genres?: string[] | null;
+  imageUrl?: string | null;
+  year?: number | null;
+  rating?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,7 +18,7 @@ export interface UserList {
   userId: string;
   name: string;
   type: "favorites" | "watching" | "completed" | "planned" | "dropped" | "custom";
-  description?: string;
+  description?: string | null | undefined;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,10 +26,10 @@ export interface UserList {
 export interface ListEntry {
   id: string;
   listId: string;
-  animeId: string;
+  animeId: number;
   currentEpisode: number;
-  rating?: number;
-  notes?: string;
+  rating?: number | null;
+  notes?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

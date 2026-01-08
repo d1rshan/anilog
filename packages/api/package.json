@@ -14,8 +14,7 @@
   },
   "dependencies": {
     "@anilog/db": "workspace:*",
-    "@anilog/config": "workspace:*",
-    "drizzle-orm": "^0.36.3"
+    "@anilog/config": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest",

@@ -24,7 +24,7 @@ export class ListService {
 				{ userId, name: "Dropped", type: "dropped" as const },
 			];
 
-			return await db.insert(userList).values(defaultLists).returning();
+			return await db.insert(userList).values(defaultLists).returning() as UserList[];
 		} catch (error) {
 			console.error("Error creating default lists:", error);
 			throw new Error("Failed to create default lists");
@@ -37,7 +37,7 @@ export class ListService {
 			return await db
 				.select()
 				.from(userList)
-				.where(eq(userList.userId, userId));
+				.where(eq(userList.userId, userId)) as UserList[];
 		} catch (error) {
 			console.error("Error getting user lists:", error);
 			throw new Error("Failed to fetch user lists");
@@ -82,7 +82,7 @@ export class ListService {
 
 					return {
 						...list,
-						entries: entries as ListEntryWithAnime[]
+						entries: entries as unknown as ListEntryWithAnime[]
 					};
 				})
 			);
@@ -107,7 +107,7 @@ export class ListService {
 				})
 				.returning();
 
-			return newList;
+			return newList as UserList;
 		} catch (error) {
 			console.error("Error creating list:", error);
 			throw new Error("Failed to create list");
@@ -127,7 +127,7 @@ export class ListService {
 				.where(and(eq(userList.id, listId), eq(userList.userId, userId)))
 				.returning();
 
-			return updatedList || null;
+			return (updatedList || null) as UserList | null;
 		} catch (error) {
 			console.error("Error updating list:", error);
 			throw new Error("Failed to update list");
@@ -167,7 +167,7 @@ export class ListService {
 			const existingEntry = await db
 				.select()
 				.from(listEntry)
-				.where(and(eq(listEntry.listId, listId), eq(listEntry.animeId, entryData.animeId)))
+				.where(and(eq(listEntry.listId, listId), eq(listEntry.animeId, Number(entryData.animeId))))
 				.limit(1);
 
 			if (existingEntry.length) {
@@ -178,14 +178,14 @@ export class ListService {
 				.insert(listEntry)
 				.values({
 					listId,
-					animeId: entryData.animeId,
+					animeId: Number(entryData.animeId),
 					currentEpisode: entryData.currentEpisode || 0,
 					rating: entryData.rating,
 					notes: entryData.notes,
 				})
 				.returning();
 
-			return newEntry;
+			return newEntry as ListEntry;
 		} catch (error) {
 			console.error("Error adding anime to list:", error);
 			throw new Error(error instanceof Error ? error.message : "Failed to add anime to list");
@@ -218,7 +218,7 @@ export class ListService {
 				.where(eq(listEntry.id, entryId))
 				.returning();
 
-			return updatedEntry || null;
+			return (updatedEntry || null) as ListEntry | null;
 		} catch (error) {
 			console.error("Error updating list entry:", error);
 			throw new Error(error instanceof Error ? error.message : "Failed to update list entry");

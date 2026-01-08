@@ -6,7 +6,7 @@ const ANILIST_API = "https://graphql.anilist.co";
 export const animeRoutes = new Elysia({ prefix: "/anime" })
   .get("/", async () => {
     try {
-      const anime = await AnimeService.getAllAnime();
+      const anime = await AnimeService.getTrendingAnime();
       return { success: true, data: anime };
     } catch (error) {
       return {
