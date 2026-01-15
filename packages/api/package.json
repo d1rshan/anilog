@@ -13,8 +13,9 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@anilog/config": "workspace:*",
     "@anilog/db": "workspace:*",
-    "@anilog/config": "workspace:*"
+    "drizzle-orm": "^0.45.1"
   },
   "devDependencies": {
     "@types/bun": "latest",
