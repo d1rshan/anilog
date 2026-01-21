@@ -15,7 +15,7 @@ export function AnimeCard({ anime, onAddToList }: AnimeCardProps) {
   return (
     <Card className="h-full">
       <CardHeader className="pb-3">
-        <div className="aspect-3/4 rounded-lg bg-muted overflow-hidden">
+        <div className="aspect-3/4 rounded-lg  overflow-hidden">
           <img
             src={anime.imageUrl}
             alt={anime.title}
@@ -30,9 +30,9 @@ export function AnimeCard({ anime, onAddToList }: AnimeCardProps) {
       <CardContent className="space-y-3">
         <div>
           <CardTitle className="line-clamp-2 text-lg">{anime.title}</CardTitle>
-          {anime.titleJapanese && (
-            <p className="text-sm text-muted-foreground mt-1">{anime.titleJapanese}</p>
-          )}
+          {/* {anime.titleJapanese && ( */}
+          {/*   <p className="text-sm text-muted-foreground mt-1">{anime.titleJapanese}</p> */}
+          {/* )} */}
         </div>
 
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
