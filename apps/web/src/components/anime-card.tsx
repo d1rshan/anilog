@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Plus, Star } from "lucide-react";
@@ -13,38 +13,44 @@ export function AnimeCard({ anime, onAddToList }: AnimeCardProps) {
   const genres = anime.genres || [];
 
   return (
-    <Card className="h-full">
-      <CardHeader className="pb-3">
-        <div className="aspect-3/4 rounded-lg  overflow-hidden">
+    <Card>
+      {/* IMAGE */}
+      <CardHeader>
+        <div className="aspect-3/4 overflow-hidden rounded-lg">
           <img
             src={anime.imageUrl}
             alt={anime.title}
-            className="w-full h-full object-cover"
+            className="h-full w-full object-cover"
             onError={(e) => {
               const img = e.target as HTMLImageElement;
-              img.src = `https://via.placeholder.com/300x400?text=${encodeURIComponent(anime.title)}`;
+              img.src = `https://via.placeholder.com/300x400?text=${encodeURIComponent(
+                anime.title
+              )}`;
             }}
           />
         </div>
+        <CardTitle className="line-clamp-2 text-lg">
+          {anime.title}
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div>
-          <CardTitle className="line-clamp-2 text-lg">{anime.title}</CardTitle>
-          {/* {anime.titleJapanese && ( */}
-          {/*   <p className="text-sm text-muted-foreground mt-1">{anime.titleJapanese}</p> */}
-          {/* )} */}
-        </div>
+
+      {/* CONTENT */}
+      <CardContent className="flex flex-1 flex-col gap-2">
 
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span>{anime.year}</span>
           <span>•</span>
-          <span>{anime.episodes} ep{anime.episodes !== 1 ? 's' : ''}</span>
+          <span>
+            {anime.episodes} ep{anime.episodes !== 1 ? "s" : ""}
+          </span>
           <span>•</span>
-          <Badge variant="outline" className="text-xs">{anime.status}</Badge>
+          <Badge className="text-xs">
+            {anime.status}
+          </Badge>
         </div>
 
         {anime.description && (
-          <p className="text-sm text-muted-foreground line-clamp-3">
+          <p className="line-clamp-3 text-sm text-muted-foreground">
             {anime.description}
           </p>
         )}
@@ -61,21 +67,22 @@ export function AnimeCard({ anime, onAddToList }: AnimeCardProps) {
             </Badge>
           )}
         </div>
-
-        <div className="flex gap-2 pt-2">
-          <Button
-            size="sm"
-            className="flex-1"
-            onClick={() => onAddToList?.(anime.id)}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add to List
-          </Button>
-          <Button size="sm" variant="outline">
-            <Star className="w-4 h-4" />
-          </Button>
-        </div>
       </CardContent>
+
+      {/* FOOTER (ALWAYS BOTTOM) */}
+      <CardFooter className="mt-auto flex gap-2">
+        <Button
+          size="sm"
+          className="flex-1"
+          onClick={() => onAddToList?.(anime.id)}
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Add to List
+        </Button>
+        <Button size="sm" variant="outline">
+          <Star className="h-4 w-4" />
+        </Button>
+      </CardFooter>
     </Card>
   );
 }

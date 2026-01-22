@@ -1,6 +1,6 @@
 import { db } from "@anilog/db";
 import { anime, trendingAnime } from "@anilog/db/schema/anime";
-import { desc, eq, getTableColumns } from "drizzle-orm"
+import { eq, getTableColumns } from "drizzle-orm"
 
 export class AnimeService {
   // Seed database with mock data if empty
