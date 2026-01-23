@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import Dashboard from "./dashboard";
 import { headers } from "next/headers";
 import { authClient } from "@/lib/auth-client";
+import { UserProfile } from "@/features/profile/components/user-profile";
 
-export default async function DashboardPage() {
+export default async function ProfilePage() {
 	const session = await authClient.getSession({
 		fetchOptions: {
 			headers: await headers(),
@@ -15,5 +15,5 @@ export default async function DashboardPage() {
 		redirect("/login");
 	}
 
-	return <Dashboard session={session} />;
+	return <UserProfile />;
 }

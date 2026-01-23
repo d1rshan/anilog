@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/select";
 import { Plus, Edit, Trash2, Star, Calendar } from "lucide-react";
 import { toast } from "sonner";
-import { authClient } from "@/lib/auth-client";
 
 interface UserList {
   id: string;
