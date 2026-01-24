@@ -1,8 +1,9 @@
+import { Plus, Star } from "lucide-react";
+import { type Anime } from "@anilog/db/schema/anime";
+
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Star } from "lucide-react";
-import { type Anime } from "@anilog/db/schema/anime";
 
 interface AnimeCardProps {
   anime: Anime;

@@ -26,6 +26,9 @@ export const userList = pgTable(
   ],
 );
 
+export type UserList = typeof userList.$inferSelect;
+export type NewUserList = typeof userList.$inferInsert;
+
 export const anime = pgTable(
   "anime",
   {
@@ -52,6 +55,7 @@ export const anime = pgTable(
 );
 
 export type Anime = typeof anime.$inferSelect;
+export type NewAnime = typeof anime.$inferInsert;
 
 export const listEntry = pgTable(
   "list_entry",
@@ -78,6 +82,9 @@ export const listEntry = pgTable(
     index("list_entry_unique_idx").on(table.listId, table.animeId),
   ],
 );
+
+export type ListEntry = typeof listEntry.$inferSelect;
+export type NewListEntry = typeof listEntry.$inferInsert;
 
 export const trendingAnime = pgTable(
   "trending_anime",

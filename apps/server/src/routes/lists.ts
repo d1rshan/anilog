@@ -2,8 +2,7 @@ import { Elysia, t } from "elysia";
 import { ListService } from "@anilog/api";
 import { auth } from "@anilog/auth";
 
-// Middleware to extract user ID from auth session
-const authMiddleware = (app: Elysia) => app.derive(async ({ cookie, request }) => {
+const authMiddleware = (app: Elysia) => app.derive(async ({ request }) => {
   try {
     const session = await auth.api.getSession({ headers: request.headers });
     if (!session?.user?.id) {
@@ -18,26 +17,26 @@ const authMiddleware = (app: Elysia) => app.derive(async ({ cookie, request }) =
 export const listRoutes = new Elysia({ prefix: "/lists" })
   .use(authMiddleware)
   .get("/", async ({ userId }) => {
-    try {
-      const lists = await ListService.getUserListsWithEntries(userId);
-      return { success: true, data: lists };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Failed to fetch lists"
-      };
-    }
+    // try {
+    //   const lists = await ListService.getUserListsWithEntries(userId);
+    //   return { success: true, data: lists };
+    // } catch (error) {
+    //   return {
+    //     success: false,
+    //     error: error instanceof Error ? error.message : "Failed to fetch lists"
+    //   };
+    // }
   })
   .post("/", async ({ body, userId }) => {
-    try {
-      const list = await ListService.createList(userId, body);
-      return { success: true, data: list };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Failed to create list"
-      };
-    }
+    // try {
+    //   const list = await ListService.createList(userId, body);
+    //   return { success: true, data: list };
+    // } catch (error) {
+    //   return {
+    //     success: false,
+    //     error: error instanceof Error ? error.message : "Failed to create list"
+    //   };
+    // }
   }, {
     body: t.Object({
       name: t.String(),
@@ -93,15 +92,15 @@ export const listRoutes = new Elysia({ prefix: "/lists" })
     })
   })
   .post("/:id/anime", async ({ params, body, userId }) => {
-    try {
-      const entry = await ListService.addAnimeToList(params.id, userId, body);
-      return { success: true, data: entry };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Failed to add anime to list"
-      };
-    }
+    // try {
+    //   const entry = await ListService.addAnimeToList(params.id, userId, body);
+    //   return { success: true, data: entry };
+    // } catch (error) {
+    //   return {
+    //     success: false,
+    //     error: error instanceof Error ? error.message : "Failed to add anime to list"
+    //   };
+    // }
   }, {
     params: t.Object({
       id: t.String()

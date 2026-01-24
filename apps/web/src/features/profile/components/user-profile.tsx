@@ -23,40 +23,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, Edit, Trash2, Star, Calendar } from "lucide-react";
-import { toast } from "sonner";
-
-interface UserList {
-  id: string;
-  name: string;
-  type: string;
-  description?: string;
-  entries: ListEntry[];
-}
-
-interface ListEntry {
-  id: string;
-  currentEpisode: number;
-  rating?: number;
-  notes?: string;
-  anime: {
-    id: string;
-    title: string;
-    imageUrl: string;
-    episodes: number;
-    status: string;
-    year: number;
-  };
-}
-
-interface CreateListData {
-  name: string;
-  type: string;
-  description: string;
-}
+import { useRequireAuth } from "@/features/auth/lib/hooks";
+import {
+  useUserLists,
+  useInitializeDefaultLists,
+  useCreateList,
+  useUpdateList,
+  useDeleteList,
+  useRemoveAnimeFromList,
+} from "../lib/hooks";
+import { type CreateListData } from "../lib/requests";
 
 export function UserProfile() {
-  const [lists, setLists] = useState<UserList[]>([]);
-  const [loading, setLoading] = useState(true);
+  useRequireAuth();
+  const { data: lists, isLoading: isAuthPending } = useUserLists();
+  const initializeDefaultLists = useInitializeDefaultLists();
+  const createList = useCreateList();
+  const updateList = useUpdateList();
+  const deleteList = useDeleteList();
+  const removeAnimeFromList = useRemoveAnimeFromList();
+
   const [createListDialog, setCreateListDialog] = useState(false);
   const [editListDialog, setEditListDialog] = useState<{
     isOpen: boolean;
@@ -76,165 +62,46 @@ export function UserProfile() {
   });
 
   useEffect(() => {
-    fetchUserLists();
-    initializeDefaultListsIfNeeded();
-  }, []);
-
-  const fetchUserLists = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch("http://localhost:3000/api/lists", {
-        credentials: "include"
-      });
-      const data = await response.json();
-
-      if (data.success) {
-        setLists(data.data);
-      } else {
-        throw new Error(data.error || "Failed to fetch lists");
-      }
-    } catch (error) {
-      console.error("Error fetching lists:", error);
-      toast.error("Failed to load your lists");
-    } finally {
-      setLoading(false);
+    if (lists && lists.length === 0) {
+      initializeDefaultLists.mutate();
     }
-  };
+  }, [lists, initializeDefaultLists]);
 
-  const initializeDefaultListsIfNeeded = async () => {
-    try {
-      // Check if user has any lists
-      const response = await fetch("http://localhost:3000/api/lists", {
-        credentials: "include"
-      });
-      const data = await response.json();
-
-      if (data.success && data.data.length === 0) {
-        // No lists exist, create default ones
-        const initResponse = await fetch("http://localhost:3000/api/lists/initialize", {
-          method: "POST",
-          credentials: "include"
-        });
-        const initData = await initResponse.json();
-
-        if (initData.success) {
-          toast.success("Default lists created successfully!");
-          fetchUserLists(); // Refresh the list
-        }
-      }
-    } catch (error) {
-      console.error("Error initializing default lists:", error);
-    }
-  };
-
-  const handleCreateList = async () => {
-    if (!newList.name.trim()) {
-      toast.error("Please enter a list name");
-      return;
-    }
-
-    try {
-      const response = await fetch("http://localhost:3000/api/lists", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(newList),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        toast.success("List created successfully!");
+  const handleCreateList = () => {
+    createList.mutate(newList, {
+      onSuccess: () => {
         setCreateListDialog(false);
         setNewList({ name: "", type: "custom", description: "" });
-        fetchUserLists();
-      } else {
-        throw new Error(data.error || "Failed to create list");
-      }
-    } catch (error) {
-      console.error("Error creating list:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to create list");
-    }
+      },
+    });
   };
 
-  const handleEditList = async () => {
-    try {
-      const response = await fetch(`http://localhost:3000/api/lists/${editListDialog.listId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
+  const handleEditList = () => {
+    updateList.mutate(
+      {
+        listId: editListDialog.listId,
+        name: editListDialog.name,
+        description: editListDialog.description,
+      },
+      {
+        onSuccess: () => {
+          setEditListDialog({ isOpen: false, listId: "", name: "", description: "" });
         },
-        credentials: "include",
-        body: JSON.stringify({
-          name: editListDialog.name,
-          description: editListDialog.description,
-        }),
-      });
+      },
+    );
+  };
 
-      const data = await response.json();
-
-      if (data.success) {
-        toast.success("List updated successfully!");
-        setEditListDialog({ isOpen: false, listId: "", name: "", description: "" });
-        fetchUserLists();
-      } else {
-        throw new Error(data.error || "Failed to update list");
-      }
-    } catch (error) {
-      console.error("Error updating list:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to update list");
+  const handleDeleteList = (listId: string, listName: string) => {
+    if (confirm(`Are you sure you want to delete "${listName}"? This action cannot be undone.`)) {
+      deleteList.mutate(listId);
     }
   };
 
-  const handleDeleteList = async (listId: string, listName: string) => {
-    if (!confirm(`Are you sure you want to delete "${listName}"? This action cannot be undone.`)) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`http://localhost:3000/api/lists/${listId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        toast.success("List deleted successfully!");
-        fetchUserLists();
-      } else {
-        throw new Error(data.error || "Failed to delete list");
-      }
-    } catch (error) {
-      console.error("Error deleting list:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to delete list");
-    }
+  const handleRemoveFromList = (entryId: string) => {
+    removeAnimeFromList.mutate(entryId);
   };
 
-  const handleRemoveFromList = async (entryId: string, animeTitle: string) => {
-    try {
-      const response = await fetch(`http://localhost:3000/api/lists/entries/${entryId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        toast.success(`Removed "${animeTitle}" from list`);
-        fetchUserLists();
-      } else {
-        throw new Error(data.error || "Failed to remove anime from list");
-      }
-    } catch (error) {
-      console.error("Error removing from list:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to remove anime from list");
-    }
-  };
-
-  if (loading) {
+  if (isAuthPending) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
@@ -273,7 +140,7 @@ export function UserProfile() {
       </div>
 
       <div className="grid gap-6">
-        {lists.map((list) => (
+        {lists?.map((list) => (
           <Card key={list.id}>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
@@ -320,13 +187,13 @@ export function UserProfile() {
                 </p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {list.entries.map((entry) => (
+                  {list.entries.map((entry: any) => (
                     <Card key={entry.id} className="relative">
                       <Button
                         variant="destructive"
                         size="sm"
                         className="absolute top-2 right-2 h-6 w-6 p-0"
-                        onClick={() => handleRemoveFromList(entry.id, entry.anime.title)}
+                        onClick={() => handleRemoveFromList(entry.id)}
                       >
                         ×
                       </Button>
@@ -429,7 +296,9 @@ export function UserProfile() {
             <Button variant="outline" onClick={() => setCreateListDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handleCreateList}>Create List</Button>
+            <Button onClick={handleCreateList} disabled={createList.isPending}>
+              {createList.isPending ? "Creating..." : "Create List"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -468,7 +337,9 @@ export function UserProfile() {
             <Button variant="outline" onClick={() => setEditListDialog({ isOpen: false, listId: "", name: "", description: "" })}>
               Cancel
             </Button>
-            <Button onClick={handleEditList}>Update List</Button>
+            <Button onClick={handleEditList} disabled={updateList.isPending}>
+              {updateList.isPending ? "Updating..." : "Update List"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

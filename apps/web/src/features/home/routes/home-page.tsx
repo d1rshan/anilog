@@ -1,6 +1,19 @@
-import { AnimeGrid } from "./../components/anime-grid";
+import {
+  HydrationBoundary,
+  QueryClient,
+  dehydrate,
+} from "@tanstack/react-query";
+import { getTrendingAnime } from "../lib/requests";
+import { AnimeGrid } from "../components/anime-grid";
 
-export default function Home() {
+export default async function HomePage() {
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery({
+    queryKey: ["trending-anime"],
+    queryFn: getTrendingAnime,
+  });
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
@@ -12,7 +25,10 @@ export default function Home() {
 
       <div className="mb-6">
         <h2 className="text-2xl font-semibold mb-4">Popular Anime</h2>
-        <AnimeGrid />
+
+        <HydrationBoundary state={dehydrate(queryClient)}>
+          <AnimeGrid />
+        </HydrationBoundary>
       </div>
     </div>
   );

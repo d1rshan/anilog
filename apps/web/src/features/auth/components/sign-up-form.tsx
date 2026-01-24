@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../lib/hooks";
 
 export default function SignUpForm({
   onSwitchToSignIn,
@@ -14,7 +15,7 @@ export default function SignUpForm({
   onSwitchToSignIn: () => void;
 }) {
   const router = useRouter();
-  const { isPending } = authClient.useSession();
+  const { isPending } = useAuth();
 
   const form = useForm({
     defaultValues: {
