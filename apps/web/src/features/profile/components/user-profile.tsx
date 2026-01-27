@@ -23,7 +23,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, Edit, Trash2, Star, Calendar } from "lucide-react";
-import { useRequireAuth } from "@/features/auth/lib/hooks";
+import { useSession } from "@/features/auth/lib/hooks";
+import { useRouter } from "next/navigation";
 import {
   useUserLists,
   useInitializeDefaultLists,
@@ -35,8 +36,16 @@ import {
 import { type CreateListData } from "../lib/requests";
 
 export function UserProfile() {
-  useRequireAuth();
-  const { data: lists, isLoading: isAuthPending } = useUserLists();
+  const router = useRouter();
+  const { data: session, isPending: isAuthPending } = useSession();
+
+  useEffect(() => {
+    if (!isAuthPending && !session) {
+      router.push("/login");
+    }
+  }, [isAuthPending, session, router]);
+
+  const { data: lists, isLoading: isListsLoading } = useUserLists();
   const initializeDefaultLists = useInitializeDefaultLists();
   const createList = useCreateList();
   const updateList = useUpdateList();

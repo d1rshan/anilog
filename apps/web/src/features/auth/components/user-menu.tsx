@@ -6,7 +6,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuth } from "../lib/hooks";
+import { useSession } from "../lib/hooks";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
@@ -15,7 +15,7 @@ import { authClient } from "@/lib/auth-client";
 
 export default function UserMenu() {
   const router = useRouter();
-  const { data: session, isPending } = useAuth();
+  const { data: session, isPending } = useSession();
 
   if (isPending) {
     return <Skeleton className="h-9 w-24" />;

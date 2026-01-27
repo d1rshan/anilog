@@ -2,13 +2,21 @@
 
 import SignInForm from "@/features/auth/components/sign-in-form";
 import SignUpForm from "@/features/auth/components/sign-up-form";
-import { useRedirectIfAuthenticated } from "../lib/hooks";
-import { useState } from "react";
+import { useSession } from "../lib/hooks";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Loader from "@/components/loader";
 
 export default function LoginPage() {
+	const router = useRouter();
 	const [showSignIn, setShowSignIn] = useState(false);
-	const { isPending } = useRedirectIfAuthenticated();
+	const { data: session, isPending } = useSession();
+
+	useEffect(() => {
+		if (!isPending && session) {
+			router.push("/");
+		}
+	}, [isPending, session, router]);
 
 	if (isPending) {
 		return <Loader />;

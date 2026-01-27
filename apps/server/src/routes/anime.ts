@@ -3,10 +3,10 @@ import { AnimeService } from "@anilog/api";
 
 
 export const animeRoutes = new Elysia({ prefix: "/anime" })
-  .get("/", async () => {
+  .get("/trending", async () => {
     try {
       const anime = await AnimeService.getTrendingAnime();
-      return { success: true, data: anime };
+      return anime;
     } catch (error) {
       return {
         success: false,

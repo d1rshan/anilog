@@ -1,12 +1,11 @@
-import { type Anime } from "@anilog/db/schema/anime";
+import { api } from "@/lib/api";
 
-export async function getTrendingAnime(): Promise<Anime[]> {
-  const response = await fetch("http://localhost:3000/api/anime");
-  const data = await response.json();
+export async function getTrendingAnime() {
+  const res = await api.anime.trending.get();
 
-  if (!data.success) {
-    throw new Error(data.error || "Failed to fetch anime");
+  if (res.error) {
+    throw new Error(res.error.message);
   }
 
-  return data.data;
+  return res.data;
 }
