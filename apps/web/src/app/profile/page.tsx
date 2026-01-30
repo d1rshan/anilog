@@ -1,3 +1,3 @@
-import ProfilePage from "@/features/profile/routes/profile-page";
+import ProfilePage from "@/features/lists/routes/profile-page";
 
 export default ProfilePage;

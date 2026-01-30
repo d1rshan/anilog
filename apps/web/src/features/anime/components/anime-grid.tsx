@@ -2,16 +2,19 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { type Anime } from "@anilog/db/schema/anime";
+import { type Anime } from "@anilog/db/schema/anilog";
 
 import { authClient } from "@/lib/auth-client";
+import { useAddToFavorites, useUserLists } from "@/features/lists/lib/hooks";
 
 import { useTrendingAnime } from "../lib/hooks";
 import { AnimeCard } from "./anime-card";
 import { AddToListDialog } from "./add-to-list-dialog";
 
 export function AnimeGrid() {
-  const { data: anime, isLoading, isError, error } = useTrendingAnime();
+  const { data: anime = [], isLoading, isError, error } = useTrendingAnime();
+  const { data: lists } = useUserLists();
+  const addToFavorites = useAddToFavorites();
   const [addToListDialog, setAddToListDialog] = useState<{
     isOpen: boolean;
     animeId: number;
@@ -22,6 +25,10 @@ export function AnimeGrid() {
     animeTitle: "",
   });
 
+  // Derive favorite anime IDs from user lists
+  const favoritesList = lists?.find(list => list.name === "Favorites");
+  const favoriteIds = new Set(favoritesList?.entries.map(entry => entry.animeId) || []);
+
   const handleAddToList = async (animeId: number) => {
     const { data: session } = await authClient.getSession();
     if (!session?.user?.id) {
@@ -31,12 +38,24 @@ export function AnimeGrid() {
       return;
     }
 
-    const animeItem = anime?.find((a) => a.id === animeId);
+    const animeItem = anime?.find((a: Anime) => a.id === animeId);
     setAddToListDialog({
       isOpen: true,
       animeId,
       animeTitle: animeItem?.title || "Unknown Anime",
     });
+  };
+
+  const handleFavorite = async (animeId: number) => {
+    const { data: session } = await authClient.getSession();
+    if (!session?.user?.id) {
+      toast.error("Please sign in to add favorites", {
+        description: "You need to be logged in to add anime to favorites.",
+      });
+      return;
+    }
+
+    addToFavorites.mutate(animeId);
   };
 
   if (isLoading) {
@@ -77,6 +96,8 @@ export function AnimeGrid() {
             key={animeItem.id}
             anime={animeItem}
             onAddToList={handleAddToList}
+            onFavorite={handleFavorite}
+            isFavorited={favoriteIds.has(animeItem.id)}
           />
         ))}
       </div>

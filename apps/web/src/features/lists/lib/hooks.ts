@@ -3,32 +3,19 @@ import { toast } from "sonner";
 
 import {
   getUserLists,
-  initializeDefaultLists,
   createList,
   updateList,
   deleteList,
   removeAnimeFromList,
   addAnimeToList,
+  addToFavorites,
+  type ListWithEntries,
 } from "./requests";
 
 export const useUserLists = () => {
-  return useQuery({
+  return useQuery<ListWithEntries[]>({
     queryKey: ["user-lists"],
     queryFn: getUserLists,
-  });
-};
-
-export const useInitializeDefaultLists = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: initializeDefaultLists,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user-lists"] });
-      toast.success("Default lists created successfully!");
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
   });
 };
 
@@ -78,9 +65,9 @@ export const useRemoveAnimeFromList = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: removeAnimeFromList,
-    onSuccess: (data, variables, context) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-lists"] });
-      toast.success(`Anime removed from list`);
+      toast.success("Anime removed from list");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -95,6 +82,20 @@ export const useAddAnimeToList = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-lists"] });
       toast.success("Anime added to list successfully!");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+};
+
+export const useAddToFavorites = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: addToFavorites,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-lists"] });
+      toast.success("Added to Favorites!");
     },
     onError: (error) => {
       toast.error(error.message);

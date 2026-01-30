@@ -1,16 +1,20 @@
 import { Plus, Star } from "lucide-react";
-import { type Anime } from "@anilog/db/schema/anime";
+import { type Anime } from "@anilog/db/schema/anilog";
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+import { cn } from "@/lib/utils";
+
 interface AnimeCardProps {
   anime: Anime;
   onAddToList?: (animeId: number) => void;
+  onFavorite?: (animeId: number) => void;
+  isFavorited?: boolean;
 }
 
-export function AnimeCard({ anime, onAddToList }: AnimeCardProps) {
+export function AnimeCard({ anime, onAddToList, onFavorite, isFavorited }: AnimeCardProps) {
   const genres = anime.genres || [];
 
   return (
@@ -80,8 +84,17 @@ export function AnimeCard({ anime, onAddToList }: AnimeCardProps) {
           <Plus className="mr-2 h-4 w-4" />
           Add to List
         </Button>
-        <Button size="sm" variant="outline">
-          <Star className="h-4 w-4" />
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => onFavorite?.(anime.id)}
+          disabled={isFavorited}
+          className={cn(
+            "transition-colors",
+            isFavorited && "text-yellow-500 border-yellow-500 hover:text-yellow-500 hover:border-yellow-500"
+          )}
+        >
+          <Star className={cn("h-4 w-4", isFavorited && "fill-current")} />
         </Button>
       </CardFooter>
     </Card>

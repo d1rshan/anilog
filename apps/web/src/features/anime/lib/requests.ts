@@ -4,7 +4,7 @@ export async function getTrendingAnime() {
   const res = await api.anime.trending.get();
 
   if (res.error) {
-    throw new Error(res.error.message);
+    throw res.error
   }
 
   return res.data;

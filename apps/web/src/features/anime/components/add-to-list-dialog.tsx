@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useUserLists, useAddAnimeToList } from "@/features/profile/lib/hooks";
+import { useUserLists, useAddAnimeToList } from "@/features/lists/lib/hooks";
 
 
 interface AddToListDialogProps {

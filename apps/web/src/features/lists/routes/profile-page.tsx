@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 
 import { getSession } from "@/features/auth/lib/server";
-import { UserProfile } from "@/features/profile/components/user-profile";
+import { UserProfile } from "@/features/lists/components/user-profile";
 import {
   HydrationBoundary,
   QueryClient,

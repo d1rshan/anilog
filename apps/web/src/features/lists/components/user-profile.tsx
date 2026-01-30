@@ -3,10 +3,8 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -15,19 +13,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Plus, Edit, Trash2, Star, Calendar } from "lucide-react";
 import { useSession } from "@/features/auth/lib/hooks";
 import { useRouter } from "next/navigation";
 import {
   useUserLists,
-  useInitializeDefaultLists,
   useCreateList,
   useUpdateList,
   useDeleteList,
@@ -46,7 +36,6 @@ export function UserProfile() {
   }, [isAuthPending, session, router]);
 
   const { data: lists, isLoading: isListsLoading } = useUserLists();
-  const initializeDefaultLists = useInitializeDefaultLists();
   const createList = useCreateList();
   const updateList = useUpdateList();
   const deleteList = useDeleteList();
@@ -57,51 +46,35 @@ export function UserProfile() {
     isOpen: boolean;
     listId: string;
     name: string;
-    description: string;
   }>({
     isOpen: false,
     listId: "",
     name: "",
-    description: ""
   });
-  const [newList, setNewList] = useState<CreateListData>({
-    name: "",
-    type: "custom",
-    description: ""
-  });
-
-  useEffect(() => {
-    if (lists && lists.length === 0) {
-      initializeDefaultLists.mutate();
-    }
-  }, [lists, initializeDefaultLists]);
+  const [newList, setNewList] = useState<CreateListData>({ name: "" });
 
   const handleCreateList = () => {
     createList.mutate(newList, {
       onSuccess: () => {
         setCreateListDialog(false);
-        setNewList({ name: "", type: "custom", description: "" });
+        setNewList({ name: "" });
       },
     });
   };
 
   const handleEditList = () => {
     updateList.mutate(
-      {
-        listId: editListDialog.listId,
-        name: editListDialog.name,
-        description: editListDialog.description,
-      },
+      { listId: editListDialog.listId, name: editListDialog.name },
       {
         onSuccess: () => {
-          setEditListDialog({ isOpen: false, listId: "", name: "", description: "" });
+          setEditListDialog({ isOpen: false, listId: "", name: "" });
         },
       },
     );
   };
 
   const handleDeleteList = (listId: string, listName: string) => {
-    if (confirm(`Are you sure you want to delete "${listName}"? This action cannot be undone.`)) {
+    if (confirm(`Are you sure you want to delete "${listName}"?`)) {
       deleteList.mutate(listId);
     }
   };
@@ -153,15 +126,7 @@ export function UserProfile() {
           <Card key={list.id}>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="flex items-center gap-2">
-                  {list.name}
-                  <Badge variant={list.type === "custom" ? "default" : "secondary"}>
-                    {list.type}
-                  </Badge>
-                </CardTitle>
-                {list.description && (
-                  <p className="text-sm text-muted-foreground mt-1">{list.description}</p>
-                )}
+                <CardTitle>{list.name}</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
                   {list.entries.length} anime{list.entries.length !== 1 ? "s" : ""}
                 </p>
@@ -170,12 +135,7 @@ export function UserProfile() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setEditListDialog({
-                    isOpen: true,
-                    listId: list.id,
-                    name: list.name,
-                    description: list.description || ""
-                  })}
+                  onClick={() => setEditListDialog({ isOpen: true, listId: list.id, name: list.name })}
                 >
                   <Edit className="w-4 h-4" />
                 </Button>
@@ -183,7 +143,6 @@ export function UserProfile() {
                   variant="destructive"
                   size="sm"
                   onClick={() => handleDeleteList(list.id, list.name)}
-                  disabled={["favorites", "watching", "completed", "planned", "dropped"].includes(list.type)}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -196,7 +155,7 @@ export function UserProfile() {
                 </p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {list.entries.map((entry: any) => (
+                  {list.entries.map((entry) => (
                     <Card key={entry.id} className="relative">
                       <Button
                         variant="destructive"
@@ -237,11 +196,6 @@ export function UserProfile() {
                                   {entry.rating}/5
                                 </div>
                               )}
-                              {entry.notes && (
-                                <p className="text-xs text-muted-foreground line-clamp-2">
-                                  {entry.notes}
-                                </p>
-                              )}
                             </div>
                           </div>
                         </div>
@@ -255,13 +209,12 @@ export function UserProfile() {
         ))}
       </div>
 
-      {/* Create List Dialog */}
       <Dialog open={createListDialog} onOpenChange={setCreateListDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New List</DialogTitle>
             <DialogDescription>
-              Create a custom list to organize your anime collection
+              Create a new list to organize your anime collection
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -270,34 +223,8 @@ export function UserProfile() {
               <Input
                 id="name"
                 value={newList.name}
-                onChange={(e) => setNewList({ ...newList, name: e.target.value })}
-                placeholder="My Custom List"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="type">List Type</Label>
-              <Select value={newList.type} onValueChange={(value) => setNewList({ ...newList, type: value })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="custom">Custom</SelectItem>
-                  <SelectItem value="favorites">Favorites</SelectItem>
-                  <SelectItem value="watching">Currently Watching</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="planned">Plan to Watch</SelectItem>
-                  <SelectItem value="dropped">Dropped</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="description">Description (Optional)</Label>
-              <Textarea
-                id="description"
-                value={newList.description}
-                onChange={(e) => setNewList({ ...newList, description: e.target.value })}
-                placeholder="Describe your list..."
-                rows={3}
+                onChange={(e) => setNewList({ name: e.target.value })}
+                placeholder="My List"
               />
             </div>
           </div>
@@ -312,13 +239,12 @@ export function UserProfile() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit List Dialog */}
       <Dialog open={editListDialog.isOpen} onOpenChange={(open) => setEditListDialog(prev => ({ ...prev, isOpen: open }))}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit List</DialogTitle>
             <DialogDescription>
-              Update your list details
+              Update your list name
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -328,22 +254,12 @@ export function UserProfile() {
                 id="edit-name"
                 value={editListDialog.name}
                 onChange={(e) => setEditListDialog(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="My Custom List"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-description">Description</Label>
-              <Textarea
-                id="edit-description"
-                value={editListDialog.description}
-                onChange={(e) => setEditListDialog(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Describe your list..."
-                rows={3}
+                placeholder="My List"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditListDialog({ isOpen: false, listId: "", name: "", description: "" })}>
+            <Button variant="outline" onClick={() => setEditListDialog({ isOpen: false, listId: "", name: "" })}>
               Cancel
             </Button>
             <Button onClick={handleEditList} disabled={updateList.isPending}>

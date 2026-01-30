@@ -1,8 +1,6 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, integer, index, uuid, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, integer, index, uuid } from "drizzle-orm/pg-core";
 import { user } from "./auth";
-
-export const listTypeEnum = pgEnum("list_type", ["favorites", "watching", "completed", "planned", "dropped", "custom"]);
 
 export const userList = pgTable(
   "user_list",
@@ -12,8 +10,6 @@ export const userList = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
-    type: listTypeEnum("type").notNull().default("custom"),
-    description: text("description"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -22,7 +18,6 @@ export const userList = pgTable(
   },
   (table) => [
     index("user_list_userId_idx").on(table.userId),
-    index("user_list_type_idx").on(table.type),
   ],
 );
 
@@ -69,7 +64,6 @@ export const listEntry = pgTable(
       .references(() => anime.id, { onDelete: "cascade" }),
     currentEpisode: integer("current_episode").default(0).notNull(),
     rating: integer("rating"),
-    notes: text("notes"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -102,8 +96,12 @@ export const trendingAnime = pgTable(
   ]
 );
 
-
-// TODO: add relations for trending_anime table
+export const trendingAnimeRelations = relations(trendingAnime, ({ one }) => ({
+  anime: one(anime, {
+    fields: [trendingAnime.animeId],
+    references: [anime.id],
+  }),
+}));
 
 export const userListRelations = relations(userList, ({ one, many }) => ({
   user: one(user, {
