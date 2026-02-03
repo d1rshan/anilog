@@ -28,7 +28,7 @@ export async function createList(data: CreateListData) {
 }
 
 export async function updateList({ listId, name }: { listId: string; name: string }) {
-  const res = await api.lists[listId].put({ name });
+  const res = await api.lists({ id: listId }).put({ name });
 
   if (res.error) {
     throw res.error
@@ -38,7 +38,7 @@ export async function updateList({ listId, name }: { listId: string; name: strin
 }
 
 export async function deleteList(listId: string) {
-  const res = await api.lists[listId].delete();
+  const res = await api.lists({ id: listId }).delete();
 
   if (res.error) {
     throw res.error
@@ -48,7 +48,7 @@ export async function deleteList(listId: string) {
 }
 
 export async function addAnimeToList({ listId, animeId, currentEpisode, rating }: { listId: string; animeId: number; currentEpisode?: number; rating?: number }) {
-  const res = await api.lists[listId].anime.post({ animeId, currentEpisode, rating });
+  const res = await api.lists({ id: listId }).anime.post({ animeId, currentEpisode, rating });
 
   if (res.error) {
     throw res.error
@@ -58,7 +58,7 @@ export async function addAnimeToList({ listId, animeId, currentEpisode, rating }
 }
 
 export async function removeAnimeFromList(entryId: string) {
-  const res = await api.lists.entries[entryId].delete();
+  const res = await api.lists.entries({ entryId }).delete();
 
   if (res.error) {
     throw res.error

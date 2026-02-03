@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -22,7 +21,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUserLists, useAddAnimeToList } from "@/features/lists/lib/hooks";
-
 
 interface AddToListDialogProps {
   animeId: number;
@@ -37,7 +35,6 @@ export function AddToListDialog({ animeId, animeTitle, isOpen, onOpenChange }: A
   const [selectedListId, setSelectedListId] = useState<string>("");
   const [currentEpisode, setCurrentEpisode] = useState<number>(0);
   const [rating, setRating] = useState<number | undefined>();
-  const [notes, setNotes] = useState<string>("");
 
   const handleAddToList = () => {
     addAnimeToList.mutate(
@@ -46,7 +43,6 @@ export function AddToListDialog({ animeId, animeTitle, isOpen, onOpenChange }: A
         animeId,
         currentEpisode: currentEpisode > 0 ? currentEpisode : undefined,
         rating: rating && rating > 0 ? rating : undefined,
-        notes: notes.trim() || undefined,
       },
       {
         onSuccess: () => {
@@ -54,7 +50,6 @@ export function AddToListDialog({ animeId, animeTitle, isOpen, onOpenChange }: A
           setSelectedListId("");
           setCurrentEpisode(0);
           setRating(undefined);
-          setNotes("");
         },
       },
     );
@@ -77,7 +72,7 @@ export function AddToListDialog({ animeId, animeTitle, isOpen, onOpenChange }: A
                 <SelectValue placeholder="Choose a list..." />
               </SelectTrigger>
               <SelectContent>
-                {lists?.map((list) => (
+                {lists?.map((list: { id: string; name: string }) => (
                   <SelectItem key={list.id} value={list.id}>
                     {list.name}
                   </SelectItem>
@@ -112,18 +107,6 @@ export function AddToListDialog({ animeId, animeTitle, isOpen, onOpenChange }: A
                 <SelectItem value="5">5 - Excellent</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="notes">Notes (optional)</Label>
-            <Textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add any notes about this anime..."
-              className="resize-none"
-              rows={3}
-            />
           </div>
         </div>
         <DialogFooter>
