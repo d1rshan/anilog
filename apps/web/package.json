@@ -8,9 +8,10 @@
     "start": "next start"
   },
   "dependencies": {
+    "@anilog/api": "workspace:*",
     "@anilog/auth": "workspace:*",
     "@anilog/db": "workspace:*",
-    "@anilog/api": "workspace:*",
+    "@elysiajs/eden": "^1.4.6",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-select": "^2.2.6",
     "@tanstack/react-form": "^1.27.3",

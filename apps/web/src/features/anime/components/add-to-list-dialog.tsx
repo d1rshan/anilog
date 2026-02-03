@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -20,15 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
-import { authClient } from "@/lib/auth-client";
-
-interface UserList {
-  id: string;
-  name: string;
-  type: string;
-  description?: string;
-}
+import { useUserLists, useAddAnimeToList } from "@/features/lists/lib/hooks";
 
 interface AddToListDialogProps {
   animeId: number;
@@ -38,90 +30,29 @@ interface AddToListDialogProps {
 }
 
 export function AddToListDialog({ animeId, animeTitle, isOpen, onOpenChange }: AddToListDialogProps) {
-  const [lists, setLists] = useState<UserList[]>([]);
+  const { data: lists } = useUserLists();
+  const addAnimeToList = useAddAnimeToList();
   const [selectedListId, setSelectedListId] = useState<string>("");
   const [currentEpisode, setCurrentEpisode] = useState<number>(0);
   const [rating, setRating] = useState<number | undefined>();
-  const [notes, setNotes] = useState<string>("");
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchUserLists();
-    }
-  }, [isOpen]);
-
-  const fetchUserLists = async () => {
-    try {
-      const { data: session } = await authClient.getSession();
-      if (!session?.user?.id) {
-        toast.error("Please sign in to add anime to lists");
-        onOpenChange(false);
-        return;
-      }
-
-      const response = await fetch("http://localhost:3000/api/lists", {
-        credentials: "include"
-      });
-      const data = await response.json();
-
-      if (data.success) {
-        setLists(data.data.map((list: any) => ({
-          id: list.id,
-          name: list.name,
-          type: list.type,
-          description: list.description
-        })));
-      } else {
-        throw new Error(data.error || "Failed to fetch lists");
-      }
-    } catch (error) {
-      console.error("Error fetching lists:", error);
-      toast.error("Failed to load your lists");
-    }
-  };
-
-  const handleAddToList = async () => {
-    if (!selectedListId) {
-      toast.error("Please select a list");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch(`http://localhost:3000/api/lists/${selectedListId}/anime`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+  const handleAddToList = () => {
+    addAnimeToList.mutate(
+      {
+        listId: selectedListId,
+        animeId,
+        currentEpisode: currentEpisode > 0 ? currentEpisode : undefined,
+        rating: rating && rating > 0 ? rating : undefined,
+      },
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+          setSelectedListId("");
+          setCurrentEpisode(0);
+          setRating(undefined);
         },
-        credentials: "include",
-        body: JSON.stringify({
-          animeId,
-          currentEpisode: currentEpisode > 0 ? currentEpisode : undefined,
-          rating: rating && rating > 0 ? rating : undefined,
-          notes: notes.trim() || undefined,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        toast.success(`Added "${animeTitle}" to your list!`);
-        onOpenChange(false);
-        // Reset form
-        setSelectedListId("");
-        setCurrentEpisode(0);
-        setRating(undefined);
-        setNotes("");
-      } else {
-        throw new Error(data.error || "Failed to add anime to list");
-      }
-    } catch (error) {
-      console.error("Error adding to list:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to add anime to list");
-    } finally {
-      setLoading(false);
-    }
+      },
+    );
   };
 
   return (
@@ -141,7 +72,7 @@ export function AddToListDialog({ animeId, animeTitle, isOpen, onOpenChange }: A
                 <SelectValue placeholder="Choose a list..." />
               </SelectTrigger>
               <SelectContent>
-                {lists.map((list) => (
+                {lists?.map((list: { id: string; name: string }) => (
                   <SelectItem key={list.id} value={list.id}>
                     {list.name}
                   </SelectItem>
@@ -177,25 +108,13 @@ export function AddToListDialog({ animeId, animeTitle, isOpen, onOpenChange }: A
               </SelectContent>
             </Select>
           </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="notes">Notes (optional)</Label>
-            <Textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add any notes about this anime..."
-              className="resize-none"
-              rows={3}
-            />
-          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleAddToList} disabled={loading || !selectedListId}>
-            {loading ? "Adding..." : "Add to List"}
+          <Button onClick={handleAddToList} disabled={addAnimeToList.isPending || !selectedListId}>
+            {addAnimeToList.isPending ? "Adding..." : "Add to List"}
           </Button>
         </DialogFooter>
       </DialogContent>
