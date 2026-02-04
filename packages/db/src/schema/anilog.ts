@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, integer, index, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, integer, index, uuid, unique } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 
 export const userList = pgTable(
@@ -73,7 +73,8 @@ export const listEntry = pgTable(
   (table) => [
     index("list_entry_listId_idx").on(table.listId),
     index("list_entry_animeId_idx").on(table.animeId),
-    index("list_entry_unique_idx").on(table.listId, table.animeId),
+    unique("list_entry_unique_listId_animeId")
+      .on(table.listId, table.animeId),
   ],
 );
 
