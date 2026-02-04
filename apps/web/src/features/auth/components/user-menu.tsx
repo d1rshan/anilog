@@ -8,52 +8,46 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useSession } from "../lib/hooks";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+import { User } from "lucide-react";
 
 export default function UserMenu() {
   const router = useRouter();
-  const { data: session, isPending } = useSession();
-
-  if (isPending) {
-    return <Skeleton className="h-9 w-24" />;
-  }
+  const { data: session } = useSession();
 
   if (!session) {
-    return (
-      <Button variant="ghost" asChild>
-        <Link href="/login">Sign In</Link>
-      </Button>
-    );
+    return null;
   }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost">{session.user.name}</Button>
+        <Button variant="ghost" size="icon" className="rounded-full">
+          <User className="h-5 w-5" />
+        </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-card">
+      <DropdownMenuContent className="bg-card" align="start" side="bottom" sideOffset={8}>
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>{session.user.email}</DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Button
-            variant="destructive"
-            className="w-full"
-            onClick={() => {
-              authClient.signOut({
-                fetchOptions: {
-                  onSuccess: () => {
-                    router.push("/");
-                  },
+        <DropdownMenuItem className="flex flex-col items-start gap-1">
+          <span className="font-medium">{session.user.name}</span>
+          <span className="text-xs text-muted-foreground">{session.user.email}</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="text-destructive focus:text-destructive cursor-pointer"
+          onClick={() => {
+            authClient.signOut({
+              fetchOptions: {
+                onSuccess: () => {
+                  router.push("/");
                 },
-              });
-            }}
-          >
-            Sign Out
-          </Button>
+              },
+            });
+          }}
+        >
+          Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
