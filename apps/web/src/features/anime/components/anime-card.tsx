@@ -88,7 +88,6 @@ export function AnimeCard({ anime, onAddToList, onFavorite, isFavorited }: Anime
           size="sm"
           variant="outline"
           onClick={() => onFavorite?.(anime.id)}
-          disabled={isFavorited}
           className={cn(
             "transition-colors",
             isFavorited && "text-yellow-500 border-yellow-500 hover:text-yellow-500 hover:border-yellow-500"

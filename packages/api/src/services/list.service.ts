@@ -145,4 +145,31 @@ export class ListService {
 
     return newEntry as ListEntry;
   }
+
+  static async removeFromFavorites(userId: string, animeId: number): Promise<boolean> {
+    const favoritesList = await db.query.userList.findFirst({
+      where: (list, { and, eq }) => and(
+        eq(list.userId, userId),
+        eq(list.name, "Favorites")
+      )
+    });
+
+    if (!favoritesList) {
+      throw new Error("Favorites list not found");
+    }
+
+    const existingEntry = await db.query.listEntry.findFirst({
+      where: (entry, { and, eq }) => and(
+        eq(entry.listId, favoritesList.id),
+        eq(entry.animeId, animeId)
+      )
+    });
+
+    if (!existingEntry) {
+      throw new Error("Anime not in Favorites");
+    }
+
+    const result = await db.delete(listEntry).where(eq(listEntry.id, existingEntry.id)).returning();
+    return result.length > 0;
+  }
 }

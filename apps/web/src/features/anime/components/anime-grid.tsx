@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { type Anime } from "@anilog/db/schema/anilog";
 
 import { authClient } from "@/lib/auth-client";
-import { useAddToFavorites, useUserLists } from "@/features/lists/lib/hooks";
+import { useAddToFavorites, useRemoveFromFavorites, useUserLists } from "@/features/lists/lib/hooks";
 
 import { useTrendingAnime } from "../lib/hooks";
 import { AnimeCard } from "./anime-card";
@@ -15,6 +15,7 @@ export function AnimeGrid() {
   const { data: anime = [], isLoading, isError, error } = useTrendingAnime();
   const { data: lists } = useUserLists();
   const addToFavorites = useAddToFavorites();
+  const removeFromFavorites = useRemoveFromFavorites();
   const [addToListDialog, setAddToListDialog] = useState<{
     isOpen: boolean;
     animeId: number;
@@ -49,13 +50,17 @@ export function AnimeGrid() {
   const handleFavorite = async (animeId: number) => {
     const { data: session } = await authClient.getSession();
     if (!session?.user?.id) {
-      toast.error("Please sign in to add favorites", {
-        description: "You need to be logged in to add anime to favorites.",
+      toast.error("Please sign in to manage favorites", {
+        description: "You need to be logged in to add or remove anime from favorites.",
       });
       return;
     }
 
-    addToFavorites.mutate(animeId);
+    if (favoriteIds.has(animeId)) {
+      removeFromFavorites.mutate(animeId);
+    } else {
+      addToFavorites.mutate(animeId);
+    }
   };
 
   if (isLoading) {

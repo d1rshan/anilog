@@ -76,3 +76,13 @@ export async function addToFavorites(animeId: number) {
 
   return res.data;
 }
+
+export async function removeFromFavorites(animeId: number) {
+  const res = await api.lists.favorites.delete({ animeId });
+
+  if (res.error) {
+    throw res.error;
+  }
+
+  return res.data;
+}

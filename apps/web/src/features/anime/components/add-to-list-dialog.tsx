@@ -80,7 +80,7 @@ export function AddToListDialog({ animeId, animeTitle, isOpen, onOpenChange }: A
                 <SelectValue placeholder="Choose a list..." />
               </SelectTrigger>
               <SelectContent>
-                {lists?.map((list: { id: string; name: string }) => (
+                {lists?.filter((list: { id: string; name: string }) => list.name !== "Favorites").map((list: { id: string; name: string }) => (
                   <SelectItem key={list.id} value={list.id}>
                     {list.name}
                   </SelectItem>

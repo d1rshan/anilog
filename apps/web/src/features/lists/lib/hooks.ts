@@ -9,6 +9,7 @@ import {
   removeAnimeFromList,
   addAnimeToList,
   addToFavorites,
+  removeFromFavorites,
   type ListWithEntries,
 } from "./requests";
 
@@ -96,6 +97,20 @@ export const useAddToFavorites = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-lists"] });
       toast.success("Added to Favorites!");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+};
+
+export const useRemoveFromFavorites = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: removeFromFavorites,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-lists"] });
+      toast.success("Removed from Favorites!");
     },
     onError: (error) => {
       toast.error(error.message);
