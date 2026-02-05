@@ -61,7 +61,7 @@ export default function SignInForm({
   }
 
   return (
-    <Card className="w-full max-w-sm mx-auto mt-10">
+    <Card className="w-full max-w-sm">
       <CardHeader>
         <CardTitle>Sign in to your account</CardTitle>
         <CardDescription>

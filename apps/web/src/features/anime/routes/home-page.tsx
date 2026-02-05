@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import {
   HydrationBoundary,
   QueryClient,
@@ -5,8 +7,15 @@ import {
 } from "@tanstack/react-query";
 import { getTrendingAnime } from "../lib/requests";
 import { AnimeGrid } from "../components/anime-grid";
+import { getSession } from "@/features/auth/lib/server";
 
 export default async function HomePage() {
+  const session = await getSession(await headers());
+
+  if (!session?.user) {
+    redirect("/login");
+  }
+
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({

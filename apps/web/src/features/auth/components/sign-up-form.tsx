@@ -64,7 +64,7 @@ export default function SignUpForm({
   }
 
   return (
-    <Card className="w-full max-w-sm mx-auto mt-10">
+    <Card className="w-full max-w-sm">
       <CardHeader>
         <CardTitle>Create your account</CardTitle>
         <CardDescription>

@@ -13,22 +13,25 @@ export default function Navbar() {
   const pathname = usePathname();
   const { data: session } = useSession();
 
-  const baseLinks = [{ to: "/" as const, label: "Home" as const }];
-  const links = session
-    ? [...baseLinks, { to: "/profile" as const, label: "My Lists" as const }]
-    : baseLinks;
+  // Don't show navbar on login page
+  if (pathname === "/login") {
+    return null;
+  }
+
+  // Don't show navbar if user is not authenticated
+  if (!session) {
+    return null;
+  }
+
+  const links = [
+    { to: "/" as const, label: "Home" as const },
+    { to: "/profile" as const, label: "My Lists" as const },
+  ];
 
   return (
     <header className="fixed top-4 left-1/2 z-50 -translate-x-1/2">
       <div
-        className="
-          flex items-center justify-between gap-2
-          rounded-full border border-border
-        bg-card/70
-          px-4 py-2
-          backdrop-blur-lg
-          shadow-lg
-        "
+        className="flex items-center justify-between gap-2 rounded-full border border-border bg-card/70 px-4 py-2 backdrop-blur-lg shadow-lg"
       >
         <nav className="flex items-center gap-1">
           {links.map(({ to, label }) => {
@@ -40,8 +43,7 @@ export default function Navbar() {
                 href={to}
                 className={clsx(
                   "rounded-full px-4 py-1.5 text-sm font-medium transition",
-                  isActive &&
-                  "bg-foreground text-background"
+                  isActive && "bg-foreground text-background"
                 )}
               >
                 {label}
@@ -49,26 +51,13 @@ export default function Navbar() {
             );
           })}
 
-          {session ? <UserMenu /> : (
-            <Link
-              href="/login"
-              className={clsx(
-                "rounded-full px-4 py-1.5 text-sm font-medium transition",
-                pathname === "/login" &&
-                "bg-foreground text-background"
-              )}
-            >
-              Sign In
-            </Link>
-          )}
+          <UserMenu />
           <ModeToggle />
         </nav>
-
       </div>
     </header>
   );
 }
-
 
 function ModeToggle() {
   const { theme, setTheme } = useTheme();
