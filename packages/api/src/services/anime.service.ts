@@ -184,4 +184,51 @@ export class AnimeService {
       throw new Error(error instanceof Error ? error.message : "Failed to search anime");
     }
   }
+
+  static async upsertAnime(animeData: {
+    id: number;
+    title: string;
+    titleJapanese?: string | null;
+    description?: string | null;
+    episodes?: number | null;
+    status?: string | null;
+    genres?: string[] | null;
+    imageUrl: string;
+    year?: number | null;
+    rating?: number | null;
+  }) {
+    try {
+      await db.insert(anime).values({
+        id: animeData.id,
+        title: animeData.title,
+        titleJapanese: animeData.titleJapanese,
+        description: animeData.description,
+        episodes: animeData.episodes,
+        status: animeData.status,
+        genres: animeData.genres,
+        imageUrl: animeData.imageUrl,
+        year: animeData.year,
+        rating: animeData.rating,
+      }).onConflictDoUpdate({
+        target: anime.id,
+        set: {
+          title: animeData.title,
+          titleJapanese: animeData.titleJapanese,
+          description: animeData.description,
+          episodes: animeData.episodes,
+          status: animeData.status,
+          genres: animeData.genres,
+          imageUrl: animeData.imageUrl,
+          year: animeData.year,
+          rating: animeData.rating,
+          updatedAt: new Date()
+        }
+      });
+
+      return { id: animeData.id, success: true };
+    } catch (error) {
+      console.error("Error upserting anime:", error);
+      throw new Error("Failed to upsert anime");
+    }
+  }
 }

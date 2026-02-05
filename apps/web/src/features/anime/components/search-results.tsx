@@ -1,7 +1,15 @@
 "use client";
 
-import { useSearchAnime } from "../lib/hooks";
+import { useState } from "react";
+import { toast } from "sonner";
+import { type Anime } from "@anilog/db/schema/anilog";
+
+import { authClient } from "@/lib/auth-client";
+import { useAddToFavorites, useRemoveFromFavorites, useUserLists, useAddAnimeToList } from "@/features/lists/lib/hooks";
+
+import { useSearchAnime, useUpsertAnime } from "../lib/hooks";
 import { AnimeCard } from "./anime-card";
+import { AddToListDialog } from "./add-to-list-dialog";
 
 interface SearchResultsProps {
   query: string;
@@ -9,6 +17,74 @@ interface SearchResultsProps {
 
 export function SearchResults({ query }: SearchResultsProps) {
   const { data: anime, isLoading, isError, error } = useSearchAnime(query);
+  const { data: lists } = useUserLists();
+  const upsertAnime = useUpsertAnime();
+  const addToFavorites = useAddToFavorites();
+  const removeFromFavorites = useRemoveFromFavorites();
+  const addAnimeToList = useAddAnimeToList();
+  
+  const [addToListDialog, setAddToListDialog] = useState<{
+    isOpen: boolean;
+    animeId: number;
+    animeTitle: string;
+  }>({
+    isOpen: false,
+    animeId: 0,
+    animeTitle: "",
+  });
+
+  // Derive favorite anime IDs from user lists
+  const favoritesList = lists?.find(list => list.name === "Favorites");
+  const favoriteIds = new Set(favoritesList?.entries.map(entry => entry.animeId) || []);
+
+  const handleAddToList = async (animeId: number) => {
+    const { data: session } = await authClient.getSession();
+    if (!session?.user?.id) {
+      toast.error("Please sign in to add anime to lists", {
+        description: "You need to be logged in to create and manage lists.",
+      });
+      return;
+    }
+
+    const animeItem = anime?.find((a: Anime) => a.id === animeId);
+    if (!animeItem) return;
+
+    // First upsert the anime to ensure it exists in DB
+    upsertAnime.mutate(animeItem, {
+      onSuccess: () => {
+        setAddToListDialog({
+          isOpen: true,
+          animeId,
+          animeTitle: animeItem.title || "Unknown Anime",
+        });
+      },
+    });
+  };
+
+  const handleFavorite = async (animeId: number) => {
+    const { data: session } = await authClient.getSession();
+    if (!session?.user?.id) {
+      toast.error("Please sign in to manage favorites", {
+        description: "You need to be logged in to add or remove anime from favorites.",
+      });
+      return;
+    }
+
+    const animeItem = anime?.find((a: Anime) => a.id === animeId);
+    if (!animeItem) return;
+
+    if (favoriteIds.has(animeId)) {
+      // Remove from favorites - anime should already exist in DB
+      removeFromFavorites.mutate(animeId);
+    } else {
+      // Add to favorites - first upsert anime, then add to favorites
+      upsertAnime.mutate(animeItem, {
+        onSuccess: () => {
+          addToFavorites.mutate(animeId);
+        },
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -51,14 +127,26 @@ export function SearchResults({ query }: SearchResultsProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-      {anime.map((animeItem) => (
-        <AnimeCard
-          key={animeItem.id}
-          anime={animeItem}
-          disabled={true}
-        />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        {anime.map((animeItem: Anime) => (
+          <AnimeCard
+            key={animeItem.id}
+            anime={animeItem}
+            onAddToList={handleAddToList}
+            onFavorite={handleFavorite}
+            isFavorited={favoriteIds.has(animeItem.id)}
+          />
+        ))}
+      </div>
+      <AddToListDialog
+        animeId={addToListDialog.animeId}
+        animeTitle={addToListDialog.animeTitle}
+        isOpen={addToListDialog.isOpen}
+        onOpenChange={(open) =>
+          setAddToListDialog((prev) => ({ ...prev, isOpen: open }))
+        }
+      />
+    </>
   );
 }

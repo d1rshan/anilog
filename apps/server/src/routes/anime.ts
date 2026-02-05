@@ -11,4 +11,21 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
     return result;
   }, {
     params: t.Object({ query: t.String() })
+  })
+  .post("/upsert", async ({ body }) => {
+    const result = await AnimeService.upsertAnime(body);
+    return result;
+  }, {
+    body: t.Object({
+      id: t.Integer(),
+      title: t.String(),
+      titleJapanese: t.Optional(t.Nullable(t.String())),
+      description: t.Optional(t.Nullable(t.String())),
+      episodes: t.Optional(t.Nullable(t.Integer())),
+      status: t.Optional(t.Nullable(t.String())),
+      genres: t.Optional(t.Nullable(t.Array(t.String()))),
+      imageUrl: t.String(),
+      year: t.Optional(t.Nullable(t.Integer())),
+      rating: t.Optional(t.Nullable(t.Integer()))
+    })
   });
