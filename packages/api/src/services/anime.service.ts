@@ -111,7 +111,7 @@ export class AnimeService {
 
     // Clear and insert trending rankings
     await db.delete(trendingAnime);
-    
+
     const trendingInserts = json.data.Page.media.map((media, index) => ({
       animeId: media.id,
       rank: index + 1
@@ -125,18 +125,22 @@ export class AnimeService {
   static async searchAnime(userQuery: string) {
     const query = `
         query ($search: String!) {
-          Page(page: 1, perPage: 5) {
-            media(search: $search, type: ANIME) {
+          Page(page: 1, perPage: 20) {
+            media(search: $search, type: ANIME, isAdult: false) {
               id
               title {
                 english
                 native
               }
+              description
               episodes
+              status
+              genres
               coverImage {
                 large
-                color
               }
+              seasonYear
+              averageScore
             }
           }
         }
@@ -163,7 +167,19 @@ export class AnimeService {
         throw new Error(json.errors[0].message);
       }
 
-      return json.data.Page.media;
+      // Transform AniList response to match Anime type
+      return json.data.Page.media.map((media: any) => ({
+        id: media.id,
+        title: media.title.english ?? media.title.native ?? "Unknown",
+        titleJapanese: media.title.native,
+        description: media.description,
+        episodes: media.episodes,
+        status: media.status,
+        genres: media.genres,
+        imageUrl: media.coverImage?.large,
+        year: media.seasonYear,
+        rating: media.averageScore,
+      }));
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : "Failed to search anime");
     }
