@@ -59,4 +59,9 @@ export const listRoutes = new Elysia({ prefix: "/lists" })
     return await ListService.addToFavorites(userId, body.animeId);
   }, {
     body: t.Object({ animeId: t.Integer() })
+  })
+  .delete("/favorites", async ({ body, userId }) => {
+    return await ListService.removeFromFavorites(userId, body.animeId);
+  }, {
+    body: t.Object({ animeId: t.Integer() })
   });

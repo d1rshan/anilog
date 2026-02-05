@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { Star } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -44,14 +46,20 @@ export function AddToListDialog({ animeId, animeTitle, isOpen, onOpenChange }: A
         currentEpisode: currentEpisode > 0 ? currentEpisode : undefined,
         rating: rating && rating > 0 ? rating : undefined,
       },
-      {
-        onSuccess: () => {
-          onOpenChange(false);
-          setSelectedListId("");
-          setCurrentEpisode(0);
-          setRating(undefined);
-        },
+    {
+      onSuccess: () => {
+        onOpenChange(false);
+        setSelectedListId("");
+        setCurrentEpisode(0);
+        setRating(undefined);
       },
+      onError: () => {
+        onOpenChange(false);
+        setSelectedListId("");
+        setCurrentEpisode(0);
+        setRating(undefined);
+      },
+    },
     );
   };
 
@@ -68,11 +76,11 @@ export function AddToListDialog({ animeId, animeTitle, isOpen, onOpenChange }: A
           <div className="grid gap-2">
             <Label htmlFor="list">Select List</Label>
             <Select value={selectedListId} onValueChange={setSelectedListId}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Choose a list..." />
               </SelectTrigger>
               <SelectContent>
-                {lists?.map((list: { id: string; name: string }) => (
+                {lists?.filter((list: { id: string; name: string }) => list.name !== "Favorites").map((list: { id: string; name: string }) => (
                   <SelectItem key={list.id} value={list.id}>
                     {list.name}
                   </SelectItem>
@@ -82,11 +90,13 @@ export function AddToListDialog({ animeId, animeTitle, isOpen, onOpenChange }: A
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="episode">Current Episode (optional)</Label>
+            <Label htmlFor="episode">Current Episode</Label>
             <Input
               id="episode"
-              type="number"
-              min="0"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              className="w-full"
               value={currentEpisode}
               onChange={(e) => setCurrentEpisode(Number(e.target.value) || 0)}
               placeholder="0"
@@ -94,19 +104,26 @@ export function AddToListDialog({ animeId, animeTitle, isOpen, onOpenChange }: A
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="rating">Rating (optional)</Label>
-            <Select value={rating?.toString()} onValueChange={(value) => setRating(value ? Number(value) : undefined)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Rate this anime..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">1 - Poor</SelectItem>
-                <SelectItem value="2">2 - Fair</SelectItem>
-                <SelectItem value="3">3 - Good</SelectItem>
-                <SelectItem value="4">4 - Very Good</SelectItem>
-                <SelectItem value="5">5 - Excellent</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label>Rating</Label>
+            <div className="flex items-center gap-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(rating === star ? undefined : star)}
+                  className="p-1 transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                  aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                >
+                  <Star
+                    className={`size-6 transition-colors ${
+                      rating !== undefined && star <= rating
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-muted-foreground/50"
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
         <DialogFooter>

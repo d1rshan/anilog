@@ -6,15 +6,17 @@ import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import UserMenu from "@/features/auth/components/user-menu";
+import { useSession } from "@/features/auth/lib/hooks";
 import clsx from "clsx";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
 
-  const links = [
-    { to: "/", label: "Home" },
-    { to: "/profile", label: "My Lists" },
-  ] as const;
+  const baseLinks = [{ to: "/" as const, label: "Home" as const }];
+  const links = session
+    ? [...baseLinks, { to: "/profile" as const, label: "My Lists" as const }]
+    : baseLinks;
 
   return (
     <header className="fixed top-4 left-1/2 z-50 -translate-x-1/2">
@@ -46,12 +48,22 @@ export default function Navbar() {
               </Link>
             );
           })}
+
+          {session ? <UserMenu /> : (
+            <Link
+              href="/login"
+              className={clsx(
+                "rounded-full px-4 py-1.5 text-sm font-medium transition",
+                pathname === "/login" &&
+                "bg-foreground text-background"
+              )}
+            >
+              Sign In
+            </Link>
+          )}
+          <ModeToggle />
         </nav>
 
-        <div className="flex items-center gap-2">
-          <ModeToggle />
-          <UserMenu />
-        </div>
       </div>
     </header>
   );
@@ -70,7 +82,7 @@ function ModeToggle() {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className="relative"
+      className="relative rounded-full"
     >
       <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
       <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
