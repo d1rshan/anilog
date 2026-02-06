@@ -3,14 +3,34 @@
 import { ProfileHeader } from "@/features/users/components/profile-header";
 import { UserListsPublic } from "@/features/users/components/user-lists-public";
 import { EditableLists } from "@/features/lists/components/editable-lists";
-import type { UserWithProfile } from "@/features/users/lib/requests";
+import { useUserByUsername } from "@/features/users/lib/hooks";
+import { Loader2 } from "lucide-react";
 
 interface UnifiedProfileProps {
-  user: UserWithProfile;
+  username: string;
+  userId: string;
   isOwnProfile: boolean;
 }
 
-export function UnifiedProfile({ user, isOwnProfile }: UnifiedProfileProps) {
+export function UnifiedProfile({ username, userId, isOwnProfile }: UnifiedProfileProps) {
+  const { data: user, isLoading, error } = useUserByUsername(username);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Failed to load profile</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       <div className="max-w-3xl mx-auto px-4 py-8">
@@ -20,7 +40,7 @@ export function UnifiedProfile({ user, isOwnProfile }: UnifiedProfileProps) {
           {isOwnProfile ? (
             <EditableLists />
           ) : (
-            <UserListsPublic userId={user.id} />
+            <UserListsPublic userId={userId} />
           )}
         </div>
       </div>

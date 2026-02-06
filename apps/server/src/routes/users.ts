@@ -136,6 +136,10 @@ export const userRoutes = new Elysia({ prefix: "/users" })
         displayName: t.Optional(t.Nullable(t.String())),
         website: t.Optional(t.Nullable(t.String())),
         location: t.Optional(t.Nullable(t.String())),
+        twitterUrl: t.Optional(t.Nullable(t.String())),
+        discordUrl: t.Optional(t.Nullable(t.String())),
+        githubUrl: t.Optional(t.Nullable(t.String())),
+        instagramUrl: t.Optional(t.Nullable(t.String())),
         isPublic: t.Optional(t.Boolean()),
       }),
     }

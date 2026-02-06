@@ -109,7 +109,11 @@ export const useUpdateMyProfile = () => {
   return useMutation({
     mutationFn: (data: UpdateProfileData) => updateMyProfile(data),
     onSuccess: () => {
+      // Invalidate all profile-related queries
       queryClient.invalidateQueries({ queryKey: ["users", "me", "profile"] });
+      queryClient.invalidateQueries({ queryKey: ["users", "profile"] }); // catches all by userId
+      queryClient.invalidateQueries({ queryKey: ["users", "username"] }); // catches all by username
+      queryClient.invalidateQueries({ queryKey: ["users", "search"] }); // search results too
       toast.success("Profile updated successfully!");
     },
     onError: (error) => {

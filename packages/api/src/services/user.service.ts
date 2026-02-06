@@ -9,6 +9,10 @@ export type ProfileData = {
   displayName?: string | null;
   website?: string | null;
   location?: string | null;
+  twitterUrl?: string | null;
+  discordUrl?: string | null;
+  githubUrl?: string | null;
+  instagramUrl?: string | null;
   isPublic?: boolean;
 };
 

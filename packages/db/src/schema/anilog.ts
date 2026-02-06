@@ -160,6 +160,10 @@ export const userProfile = pgTable(
     displayName: text("display_name"),
     website: text("website"),
     location: text("location"),
+    twitterUrl: text("twitter_url"),
+    discordUrl: text("discord_url"),
+    githubUrl: text("github_url"),
+    instagramUrl: text("instagram_url"),
     isPublic: boolean("is_public").default(true).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
