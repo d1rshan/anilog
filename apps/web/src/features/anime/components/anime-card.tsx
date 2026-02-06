@@ -12,9 +12,10 @@ interface AnimeCardProps {
   onAddToList?: (animeId: number) => void;
   onFavorite?: (animeId: number) => void;
   isFavorited?: boolean;
+  disabled?: boolean;
 }
 
-export function AnimeCard({ anime, onAddToList, onFavorite, isFavorited }: AnimeCardProps) {
+export function AnimeCard({ anime, onAddToList, onFavorite, isFavorited, disabled }: AnimeCardProps) {
   const genres = anime.genres || [];
 
   return (
@@ -80,6 +81,7 @@ export function AnimeCard({ anime, onAddToList, onFavorite, isFavorited }: Anime
           size="sm"
           className="flex-1"
           onClick={() => onAddToList?.(anime.id)}
+          disabled={disabled}
         >
           <Plus className="mr-2 h-4 w-4" />
           Add to List
@@ -88,6 +90,7 @@ export function AnimeCard({ anime, onAddToList, onFavorite, isFavorited }: Anime
           size="sm"
           variant="outline"
           onClick={() => onFavorite?.(anime.id)}
+          disabled={disabled}
           className={cn(
             "transition-colors",
             isFavorited && "text-yellow-500 border-yellow-500 hover:text-yellow-500 hover:border-yellow-500"

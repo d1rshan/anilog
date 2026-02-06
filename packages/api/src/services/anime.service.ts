@@ -111,7 +111,7 @@ export class AnimeService {
 
     // Clear and insert trending rankings
     await db.delete(trendingAnime);
-    
+
     const trendingInserts = json.data.Page.media.map((media, index) => ({
       animeId: media.id,
       rank: index + 1
@@ -125,18 +125,22 @@ export class AnimeService {
   static async searchAnime(userQuery: string) {
     const query = `
         query ($search: String!) {
-          Page(page: 1, perPage: 5) {
-            media(search: $search, type: ANIME) {
+          Page(page: 1, perPage: 20) {
+            media(search: $search, type: ANIME, isAdult: false) {
               id
               title {
                 english
                 native
               }
+              description
               episodes
+              status
+              genres
               coverImage {
                 large
-                color
               }
+              seasonYear
+              averageScore
             }
           }
         }
@@ -163,9 +167,68 @@ export class AnimeService {
         throw new Error(json.errors[0].message);
       }
 
-      return json.data.Page.media;
+      // Transform AniList response to match Anime type
+      return json.data.Page.media.map((media: any) => ({
+        id: media.id,
+        title: media.title.english ?? media.title.native ?? "Unknown",
+        titleJapanese: media.title.native,
+        description: media.description,
+        episodes: media.episodes,
+        status: media.status,
+        genres: media.genres,
+        imageUrl: media.coverImage?.large,
+        year: media.seasonYear,
+        rating: media.averageScore,
+      }));
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : "Failed to search anime");
+    }
+  }
+
+  static async upsertAnime(animeData: {
+    id: number;
+    title: string;
+    titleJapanese?: string | null;
+    description?: string | null;
+    episodes?: number | null;
+    status?: string | null;
+    genres?: string[] | null;
+    imageUrl: string;
+    year?: number | null;
+    rating?: number | null;
+  }) {
+    try {
+      await db.insert(anime).values({
+        id: animeData.id,
+        title: animeData.title,
+        titleJapanese: animeData.titleJapanese,
+        description: animeData.description,
+        episodes: animeData.episodes,
+        status: animeData.status,
+        genres: animeData.genres,
+        imageUrl: animeData.imageUrl,
+        year: animeData.year,
+        rating: animeData.rating,
+      }).onConflictDoUpdate({
+        target: anime.id,
+        set: {
+          title: animeData.title,
+          titleJapanese: animeData.titleJapanese,
+          description: animeData.description,
+          episodes: animeData.episodes,
+          status: animeData.status,
+          genres: animeData.genres,
+          imageUrl: animeData.imageUrl,
+          year: animeData.year,
+          rating: animeData.rating,
+          updatedAt: new Date()
+        }
+      });
+
+      return { id: animeData.id, success: true };
+    } catch (error) {
+      console.error("Error upserting anime:", error);
+      throw new Error("Failed to upsert anime");
     }
   }
 }
