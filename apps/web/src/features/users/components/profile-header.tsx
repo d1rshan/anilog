@@ -4,40 +4,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FollowButton } from "./follow-button";
-import { useUserProfile } from "../lib/hooks";
-import { Calendar, Globe, MapPin, Loader2, User } from "lucide-react";
+import { Calendar, Globe, MapPin, User } from "lucide-react";
 import Link from "next/link";
+import type { UserWithProfile } from "../lib/requests";
 
 interface ProfileHeaderProps {
-  userId: string;
+  user: UserWithProfile;
   isOwnProfile: boolean;
 }
 
-export function ProfileHeader({ userId, isOwnProfile }: ProfileHeaderProps) {
-  const { data: user, isLoading, error } = useUserProfile(userId);
-
-  if (isLoading) {
-    return (
-      <Card className="p-8">
-        <div className="flex flex-col items-center">
-          <div className="w-24 h-24 rounded-full bg-muted animate-pulse mb-4" />
-          <div className="h-8 bg-muted rounded w-48 animate-pulse mb-2" />
-          <div className="h-4 bg-muted rounded w-32 animate-pulse" />
-        </div>
-      </Card>
-    );
-  }
-
-  if (error || !user) {
-    return (
-      <Card className="p-8 text-center">
-        <p className="text-muted-foreground">
-          404: User not found. Maybe they&apos;re in another dimension? 🌀
-        </p>
-      </Card>
-    );
-  }
-
+export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
   const displayName = user.profile?.displayName || user.name;
   const initials = displayName.slice(0, 2).toUpperCase();
   const memberSince = new Date(user.profile?.createdAt || Date.now()).toLocaleDateString("en-US", {
@@ -58,7 +34,7 @@ export function ProfileHeader({ userId, isOwnProfile }: ProfileHeaderProps) {
 
         {/* Name & Username */}
         <h1 className="text-2xl font-bold mb-1">{displayName}</h1>
-        <p className="text-muted-foreground mb-4">@{user.name}</p>
+        <p className="text-muted-foreground mb-4">@{user.username || user.name}</p>
 
         {/* Bio */}
         {user.profile?.bio ? (
@@ -98,14 +74,12 @@ export function ProfileHeader({ userId, isOwnProfile }: ProfileHeaderProps) {
 
         {/* Follow Button */}
         {!isOwnProfile ? (
-          <FollowButton userId={userId} size="default" />
+          <FollowButton userId={user.id} size="default" />
         ) : (
-          <Link href="/profile">
-            <Button variant="outline">
-              <User className="w-4 h-4 mr-2" />
-              Edit Profile
-            </Button>
-          </Link>
+          <Button variant="outline" onClick={() => {}}>
+            <User className="w-4 h-4 mr-2" />
+            Edit Profile
+          </Button>
         )}
 
         {/* Stats */}

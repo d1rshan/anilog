@@ -11,7 +11,6 @@ import clsx from "clsx";
 const links = [
   { to: "/", label: "Home" },
   { to: "/users", label: "Users" },
-  { to: "/profile", label: "My Lists" },
 ] as const;
 
 export default function Navbar() {

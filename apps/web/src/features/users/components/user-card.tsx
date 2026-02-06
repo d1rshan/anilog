@@ -5,7 +5,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FollowButton } from "./follow-button";
 import type { UserWithProfile } from "../lib/requests";
 import { useRouter } from "next/navigation";
-import type { Route } from "next";
 
 interface UserCardProps {
   user: UserWithProfile;
@@ -18,7 +17,9 @@ export function UserCard({ user }: UserCardProps) {
   const initials = displayName.slice(0, 2).toUpperCase();
 
   const handleNavigate = () => {
-    router.push(("/user/" + user.id) as Route);
+    if (user.username) {
+      router.push(`/${user.username}`);
+    }
   };
 
   return (
@@ -40,6 +41,7 @@ export function UserCard({ user }: UserCardProps) {
                 <button
                   onClick={handleNavigate}
                   className="font-semibold hover:underline truncate block text-left"
+                  disabled={!user.username}
                 >
                   {displayName}
                 </button>
