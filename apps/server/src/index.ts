@@ -4,6 +4,7 @@ import { cors } from "@elysiajs/cors";
 import { auth } from "@anilog/auth";
 import { animeRoutes } from "./routes/anime";
 import { listRoutes } from "./routes/lists";
+import { userRoutes } from "./routes/users";
 
 const app = new Elysia()
   .use(
@@ -25,6 +26,7 @@ const app = new Elysia()
     app
       .use(animeRoutes)
       .use(listRoutes)
+      .use(userRoutes)
   )
   .get("/", () => "OK")
   .listen(3000, () => {
