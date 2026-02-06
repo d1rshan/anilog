@@ -18,6 +18,7 @@
     "better-auth": "catalog:",
     "dotenv": "catalog:",
     "zod": "catalog:",
-    "@anilog/db": "workspace:*"
+    "@anilog/db": "workspace:*",
+    "@anilog/api": "workspace:*"
   }
 }

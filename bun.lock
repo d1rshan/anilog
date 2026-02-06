@@ -90,6 +90,7 @@
     "packages/auth": {
       "name": "@anilog/auth",
       "dependencies": {
+        "@anilog/api": "workspace:*",
         "@anilog/db": "workspace:*",
         "better-auth": "catalog:",
         "dotenv": "catalog:",

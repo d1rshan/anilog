@@ -8,6 +8,13 @@ import { Button } from "@/components/ui/button";
 import UserMenu from "@/features/auth/components/user-menu";
 import { useSession } from "@/features/auth/lib/hooks";
 import clsx from "clsx";
+import type { Route } from "next";
+
+const links: { to: Route; label: string }[] = [
+  { to: "/", label: "Home" },
+  { to: "/users", label: "Users" },
+  { to: "/profile", label: "My Lists" },
+];
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -22,11 +29,6 @@ export default function Navbar() {
   if (!session) {
     return null;
   }
-
-  const links = [
-    { to: "/" as const, label: "Home" as const },
-    { to: "/profile" as const, label: "My Lists" as const },
-  ];
 
   return (
     <header className="fixed top-4 left-1/2 z-50 -translate-x-1/2">
