@@ -13,6 +13,7 @@ interface UserCardProps {
 export function UserCard({ user }: UserCardProps) {
   const router = useRouter();
   const displayName = user.profile?.displayName || user.name;
+  const username = user.username || user.name;
   const bio = user.profile?.bio;
   const initials = displayName.slice(0, 2).toUpperCase();
 
@@ -23,33 +24,32 @@ export function UserCard({ user }: UserCardProps) {
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={handleNavigate}>
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
-          <div onClick={handleNavigate} className="cursor-pointer">
-            <Avatar className="h-12 w-12 hover:opacity-80 transition-opacity">
-              <AvatarImage src={user.image || undefined} alt={displayName} />
-              <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-          </div>
+          <Avatar className="h-12 w-12 flex-shrink-0">
+            <AvatarImage src={user.image || undefined} alt={displayName} />
+            <AvatarFallback className="bg-primary/10 text-primary font-medium">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <button
-                  onClick={handleNavigate}
-                  className="font-semibold hover:underline truncate block text-left"
-                  disabled={!user.username}
-                >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold truncate">
                   {displayName}
-                </button>
-                <p className="text-xs text-muted-foreground">
+                </h3>
+                <p className="text-sm text-muted-foreground truncate">
+                  @{username}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {user.followerCount} follower{user.followerCount !== 1 ? "s" : ""}
                 </p>
               </div>
-              <FollowButton userId={user.id} size="sm" />
+              <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                <FollowButton userId={user.id} size="sm" />
+              </div>
             </div>
 
             {bio && (

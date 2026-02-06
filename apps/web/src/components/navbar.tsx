@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -16,14 +17,24 @@ const links = [
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, isPending } = useSession();
+
+  // Generate profile link from session username
+  const profileLink = session?.user?.name ? `/${session.user.name}` : null;
+
+  // Redirect to login if not authenticated (and not already on login page)
+  useEffect(() => {
+    if (!isPending && !session && pathname !== "/login") {
+      router.push("/login");
+    }
+  }, [session, isPending, pathname, router]);
 
   // Don't show navbar on login page
   if (pathname === "/login") {
     return null;
   }
 
-  // Don't show navbar if user is not authenticated
+  // Don't show navbar if user is not authenticated (will redirect)
   if (!session) {
     return null;
   }
@@ -50,6 +61,18 @@ export default function Navbar() {
               </button>
             );
           })}
+
+          {profileLink && (
+            <button
+              onClick={() => router.push(profileLink as Parameters<typeof router.push>[0])}
+              className={clsx(
+                "rounded-full px-4 py-1.5 text-sm font-medium transition",
+                pathname === profileLink && "bg-foreground text-background"
+              )}
+            >
+              Profile
+            </button>
+          )}
 
           <UserMenu />
           <ModeToggle />

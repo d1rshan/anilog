@@ -53,8 +53,8 @@ export function UserSearch() {
       {showResults && (
         <>
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Array.from({ length: 6 }).map((_, i) => (
+            <div className="grid grid-cols-1 gap-4">
+              {Array.from({ length: 3 }).map((_, i) => (
                 <Skeleton key={i} className="h-32" />
               ))}
             </div>
@@ -67,7 +67,7 @@ export function UserSearch() {
               No users found matching &quot;{debouncedQuery}&quot;
             </p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               {users.map((user) => (
                 <UserCard key={user.id} user={user} />
               ))}

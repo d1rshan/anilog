@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { username } from "better-auth/plugins";
 import { db } from "@anilog/db";
 import * as schema from "@anilog/db/schema/auth";
 import { UserService } from "@anilog/api";
@@ -14,11 +15,12 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
 	},
-	usernameAndPassword: {
-		enabled: true,
-		minUsernameLength: 3,
-		maxUsernameLength: 20,
-	},
+	plugins: [
+		username({
+			minUsernameLength: 3,
+			maxUsernameLength: 20,
+		}),
+	],
 	advanced: {
 		defaultCookieAttributes: {
 			sameSite: "none",
