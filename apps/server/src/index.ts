@@ -15,7 +15,7 @@ const app = new Elysia()
       credentials: true,
     }),
   )
-  .all("/api/auth/*", async (context) => {
+  .all("/auth/*", async (context) => {
     const { request, status } = context;
     if (["POST", "GET"].includes(request.method)) {
       return auth.handler(request);

@@ -41,6 +41,21 @@ export const userRoutes = new Elysia({ prefix: "/users" })
     }
   )
   .get(
+    "/username/:username",
+    async ({ params }) => {
+      const user = await UserService.getUserByUsername(params.username);
+      if (!user) {
+        throw new Error("User not found");
+      }
+      return user;
+    },
+    {
+      params: t.Object({
+        username: t.String(),
+      }),
+    }
+  )
+  .get(
     "/:id/lists",
     async ({ params }) => {
       const lists = await UserService.getPublicUserLists(params.id);

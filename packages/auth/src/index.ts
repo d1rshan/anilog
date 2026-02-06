@@ -7,12 +7,17 @@ import { UserService } from "@anilog/api";
 export const auth = betterAuth({
 	database: drizzleAdapter(db, {
 		provider: "pg",
-
 		schema: schema,
 	}),
+	basePath: "/auth",
 	trustedOrigins: [process.env.CORS_ORIGIN || ""],
 	emailAndPassword: {
 		enabled: true,
+	},
+	usernameAndPassword: {
+		enabled: true,
+		minUsernameLength: 3,
+		maxUsernameLength: 20,
 	},
 	advanced: {
 		defaultCookieAttributes: {

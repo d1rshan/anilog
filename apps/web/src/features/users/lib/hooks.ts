@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import {
   searchUsers,
   getUserProfile,
+  getUserByUsername,
   getUserPublicLists,
   followUser,
   unfollowUser,
@@ -27,6 +28,14 @@ export const useUserProfile = (userId: string) => {
     queryKey: ["users", "profile", userId],
     queryFn: () => getUserProfile(userId),
     enabled: !!userId,
+  });
+};
+
+export const useUserByUsername = (username: string) => {
+  return useQuery<UserWithProfile>({
+    queryKey: ["users", "username", username],
+    queryFn: () => getUserByUsername(username),
+    enabled: !!username,
   });
 };
 

@@ -4,6 +4,7 @@ import type { UserProfile } from "@anilog/db/schema/anilog";
 export type UserWithProfile = {
   id: string;
   name: string;
+  username: string | null;
   email: string;
   image: string | null;
   profile: UserProfile | null;
@@ -42,6 +43,16 @@ export async function searchUsers(query: string): Promise<UserWithProfile[]> {
 
 export async function getUserProfile(userId: string): Promise<UserWithProfile> {
   const res = await api.users({ id: userId }).get();
+
+  if (res.error) {
+    throw res.error;
+  }
+
+  return res.data;
+}
+
+export async function getUserByUsername(username: string): Promise<UserWithProfile> {
+  const res = await api.users.username({ username }).get();
 
   if (res.error) {
     throw res.error;

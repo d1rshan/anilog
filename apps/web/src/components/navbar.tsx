@@ -1,23 +1,22 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import UserMenu from "@/features/auth/components/user-menu";
 import { useSession } from "@/features/auth/lib/hooks";
 import clsx from "clsx";
-import type { Route } from "next";
 
-const links: { to: Route; label: string }[] = [
+const links = [
   { to: "/", label: "Home" },
   { to: "/users", label: "Users" },
   { to: "/profile", label: "My Lists" },
-];
+] as const;
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session } = useSession();
 
   // Don't show navbar on login page
@@ -40,16 +39,16 @@ export default function Navbar() {
             const isActive = pathname === to;
 
             return (
-              <Link
+              <button
                 key={to}
-                href={to}
+                onClick={() => router.push(to as Parameters<typeof router.push>[0])}
                 className={clsx(
                   "rounded-full px-4 py-1.5 text-sm font-medium transition",
                   isActive && "bg-foreground text-background"
                 )}
               >
                 {label}
-              </Link>
+              </button>
             );
           })}
 

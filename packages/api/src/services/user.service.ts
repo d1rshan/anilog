@@ -15,6 +15,7 @@ export type ProfileData = {
 export type UserWithProfile = {
   id: string;
   name: string;
+  username: string | null;
   email: string;
   image: string | null;
   profile: UserProfile | null;
@@ -72,6 +73,7 @@ export class UserService {
       .select({
         id: user.id,
         name: user.name,
+        username: user.username,
         email: user.email,
         image: user.image,
         profile: getTableColumns(userProfile),
@@ -92,6 +94,42 @@ export class UserService {
     return {
       id: userData.id,
       name: userData.name,
+      username: userData.username,
+      email: userData.email,
+      image: userData.image,
+      profile: userData.profile,
+      followerCount,
+      followingCount,
+    };
+  }
+
+  static async getUserByUsername(username: string): Promise<UserWithProfile | null> {
+    const result = await db
+      .select({
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        image: user.image,
+        profile: getTableColumns(userProfile),
+      })
+      .from(user)
+      .leftJoin(userProfile, eq(user.id, userProfile.userId))
+      .where(eq(user.username, username))
+      .limit(1);
+
+    const userData = result[0];
+    if (!userData) {
+      return null;
+    }
+
+    const followerCount = await this.getFollowerCount(userData.id);
+    const followingCount = await this.getFollowingCount(userData.id);
+
+    return {
+      id: userData.id,
+      name: userData.name,
+      username: userData.username,
       email: userData.email,
       image: userData.image,
       profile: userData.profile,
@@ -191,6 +229,7 @@ export class UserService {
       .select({
         id: user.id,
         name: user.name,
+        username: user.username,
         email: user.email,
         image: user.image,
         profile: getTableColumns(userProfile),
@@ -204,6 +243,7 @@ export class UserService {
       followers.map(async (f) => ({
         id: f.id,
         name: f.name,
+        username: f.username,
         email: f.email,
         image: f.image,
         profile: f.profile,
@@ -218,6 +258,7 @@ export class UserService {
       .select({
         id: user.id,
         name: user.name,
+        username: user.username,
         email: user.email,
         image: user.image,
         profile: getTableColumns(userProfile),
@@ -231,6 +272,7 @@ export class UserService {
       following.map(async (f) => ({
         id: f.id,
         name: f.name,
+        username: f.username,
         email: f.email,
         image: f.image,
         profile: f.profile,
@@ -322,6 +364,7 @@ export class UserService {
       .select({
         id: user.id,
         name: user.name,
+        username: user.username,
         email: user.email,
         image: user.image,
         profile: getTableColumns(userProfile),
@@ -340,6 +383,7 @@ export class UserService {
       users.map(async (u) => ({
         id: u.id,
         name: u.name,
+        username: u.username,
         email: u.email,
         image: u.image,
         profile: u.profile,
