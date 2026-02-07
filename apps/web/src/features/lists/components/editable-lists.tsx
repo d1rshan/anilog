@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,8 +14,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Plus, Edit, Trash2, Star, Calendar } from "lucide-react";
-import { useSession } from "@/features/auth/lib/hooks";
-import { useRouter } from "next/navigation";
 import {
   useUserLists,
   useCreateList,
@@ -25,16 +23,7 @@ import {
 } from "../lib/hooks";
 import { type CreateListData } from "../lib/requests";
 
-export function UserProfile() {
-  const router = useRouter();
-  const { data: session, isPending: isAuthPending } = useSession();
-
-  useEffect(() => {
-    if (!isAuthPending && !session) {
-      router.push("/login");
-    }
-  }, [isAuthPending, session, router]);
-
+export function EditableLists() {
   const { data: lists, isLoading: isListsLoading } = useUserLists();
   const createList = useCreateList();
   const updateList = useUpdateList();
@@ -83,38 +72,27 @@ export function UserProfile() {
     removeAnimeFromList.mutate(entryId);
   };
 
-  if (isAuthPending) {
+  if (isListsLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <div className="h-8 bg-muted rounded w-64 animate-pulse mb-2" />
-          <div className="h-5 bg-muted rounded w-96 animate-pulse" />
-        </div>
-        <div className="grid gap-6">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i}>
-              <CardHeader>
-                <div className="h-6 bg-muted rounded w-48 animate-pulse" />
-              </CardHeader>
-              <CardContent>
-                <div className="h-20 bg-muted rounded animate-pulse" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+      <div className="space-y-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Card key={i}>
+            <CardHeader>
+              <div className="h-6 bg-muted rounded w-48 animate-pulse" />
+            </CardHeader>
+            <CardContent>
+              <div className="h-20 bg-muted rounded animate-pulse" />
+            </CardContent>
+          </Card>
+        ))}
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold mb-2">My Lists</h1>
-          <p className="text-lg text-muted-foreground">
-            Manage your anime lists and track your progress
-          </p>
-        </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">My Lists</h2>
         <Button onClick={() => setCreateListDialog(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Create List
@@ -209,6 +187,7 @@ export function UserProfile() {
         ))}
       </div>
 
+      {/* Create List Dialog */}
       <Dialog open={createListDialog} onOpenChange={setCreateListDialog}>
         <DialogContent>
           <DialogHeader>
@@ -239,6 +218,7 @@ export function UserProfile() {
         </DialogContent>
       </Dialog>
 
+      {/* Edit List Dialog */}
       <Dialog open={editListDialog.isOpen} onOpenChange={(open) => setEditListDialog(prev => ({ ...prev, isOpen: open }))}>
         <DialogContent>
           <DialogHeader>

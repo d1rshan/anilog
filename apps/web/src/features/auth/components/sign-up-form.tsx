@@ -30,15 +30,16 @@ export default function SignUpForm({
     defaultValues: {
       email: "",
       password: "",
-      name: "",
+      username: "",
     },
     onSubmit: async ({ value }) => {
       await authClient.signUp.email(
         {
           email: value.email,
           password: value.password,
-          name: value.name,
-        },
+          name: value.username, // Use username as name
+          username: value.username,
+        } as any,
         {
           onSuccess: () => {
             router.push("/");
@@ -52,7 +53,7 @@ export default function SignUpForm({
     },
     validators: {
       onSubmit: z.object({
-        name: z.string().min(2, "Name must be at least 2 characters"),
+        username: z.string().min(3, "Username must be at least 3 characters").max(20, "Username must be at most 20 characters").regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
         email: z.email("Invalid email address"),
         password: z.string().min(8, "Password must be at least 8 characters"),
       }),
@@ -85,18 +86,21 @@ export default function SignUpForm({
           }}
         >
           <div className="flex flex-col gap-6">
-            <form.Field name="name">
+            <form.Field name="username">
               {(field) => (
                 <div className="grid gap-2">
-                  <Label htmlFor={field.name}>Name</Label>
+                  <Label htmlFor={field.name}>Username</Label>
                   <Input
                     id={field.name}
                     name={field.name}
-                    placeholder="John Doe"
+                    placeholder="johndoe"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    3-20 characters, letters, numbers, and underscores only
+                  </p>
                   {field.state.meta.errors.map((error) => (
                     <p key={error?.message} className="text-sm text-red-500">
                       {error?.message}

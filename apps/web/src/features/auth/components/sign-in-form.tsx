@@ -32,26 +32,48 @@ export default function SignInForm({
       password: "",
     },
     onSubmit: async ({ value }) => {
-      await authClient.signIn.email(
-        {
-          email: value.email,
-          password: value.password,
-        },
-        {
-          onSuccess: () => {
-            router.push("/");
-            toast.success("Sign in successful");
+      const isEmail = value.email.includes("@");
+
+      if (isEmail) {
+        // Sign in with email
+        await authClient.signIn.email(
+          {
+            email: value.email,
+            password: value.password,
           },
-          onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
+          {
+            onSuccess: () => {
+              router.push("/");
+              toast.success("Sign in successful");
+            },
+            onError: (error: { error: { message: string; statusText: string } }) => {
+              toast.error(error.error.message || error.error.statusText);
+            },
           },
-        },
-      );
+        );
+      } else {
+        // Sign in with username
+        await authClient.signIn.username(
+          {
+            username: value.email,
+            password: value.password,
+          },
+          {
+            onSuccess: () => {
+              router.push("/");
+              toast.success("Sign in successful");
+            },
+            onError: (error: { error: { message: string; statusText: string } }) => {
+              toast.error(error.error.message || error.error.statusText);
+            },
+          },
+        );
+      }
     },
     validators: {
       onSubmit: z.object({
-        email: z.email("Invalid email address"),
-        password: z.string().min(8, "Password must be at least 8 characters"),
+        email: z.string().min(1, "Email or username is required"),
+        password: z.string().min(1, "Password is required"),
       }),
     },
   });
@@ -85,12 +107,11 @@ export default function SignInForm({
             <form.Field name="email">
               {(field) => (
                 <div className="grid gap-2">
-                  <Label htmlFor={field.name}>Email</Label>
+                  <Label htmlFor={field.name}>Email or Username</Label>
                   <Input
                     id={field.name}
                     name={field.name}
-                    type="email"
-                    placeholder="m@example.com"
+                    placeholder="johndoe or johndoe@example.com"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}

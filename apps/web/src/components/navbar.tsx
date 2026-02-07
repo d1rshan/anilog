@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -9,24 +9,35 @@ import UserMenu from "@/features/auth/components/user-menu";
 import { useSession } from "@/features/auth/lib/hooks";
 import clsx from "clsx";
 
+const links = [
+  { to: "/", label: "Home" },
+  { to: "/users", label: "Users" },
+] as const;
+
 export default function Navbar() {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const router = useRouter();
+  const { data: session, isPending } = useSession();
+
+  // Generate profile link from session username
+  const profileLink = session?.user?.name ? `/${session.user.name}` : null;
+
+  // Redirect to login if not authenticated (and not already on login page)
+  useEffect(() => {
+    if (!isPending && !session && pathname !== "/login") {
+      router.push("/login");
+    }
+  }, [session, isPending, pathname, router]);
 
   // Don't show navbar on login page
   if (pathname === "/login") {
     return null;
   }
 
-  // Don't show navbar if user is not authenticated
+  // Don't show navbar if user is not authenticated (will redirect)
   if (!session) {
     return null;
   }
-
-  const links = [
-    { to: "/" as const, label: "Home" as const },
-    { to: "/profile" as const, label: "My Lists" as const },
-  ];
 
   return (
     <header className="fixed top-4 left-1/2 z-50 -translate-x-1/2">
@@ -38,18 +49,30 @@ export default function Navbar() {
             const isActive = pathname === to;
 
             return (
-              <Link
+              <button
                 key={to}
-                href={to}
+                onClick={() => router.push(to as Parameters<typeof router.push>[0])}
                 className={clsx(
                   "rounded-full px-4 py-1.5 text-sm font-medium transition",
                   isActive && "bg-foreground text-background"
                 )}
               >
                 {label}
-              </Link>
+              </button>
             );
           })}
+
+          {profileLink && (
+            <button
+              onClick={() => router.push(profileLink as Parameters<typeof router.push>[0])}
+              className={clsx(
+                "rounded-full px-4 py-1.5 text-sm font-medium transition",
+                pathname === profileLink && "bg-foreground text-background"
+              )}
+            >
+              Profile
+            </button>
+          )}
 
           <UserMenu />
           <ModeToggle />
