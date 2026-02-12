@@ -27,6 +27,7 @@ export type PublicUserLists = {
       imageUrl: string;
       year: number | null;
       episodes: number | null;
+      status?: string | null;
     };
   }[];
 }[];

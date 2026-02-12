@@ -2,15 +2,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSession } from "../lib/hooks";
-import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { User } from "lucide-react";
+import { User, LogOut, Shield, Settings } from "lucide-react";
 
 export default function UserMenu() {
   const router = useRouter();
@@ -23,32 +21,60 @@ export default function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <User className="h-5 w-5" />
-        </Button>
+        <button className="h-8 w-8 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition-all active:scale-95 focus:outline-none cursor-pointer">
+          <User className="h-4 w-4 text-muted-foreground" />
+        </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-card" align="start" side="bottom" sideOffset={8}>
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="flex flex-col items-start gap-1">
-          <span className="font-medium">{session.user.name}</span>
-          <span className="text-xs text-muted-foreground">{session.user.email}</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          className="text-destructive focus:text-destructive cursor-pointer"
-          onClick={() => {
-            authClient.signOut({
-              fetchOptions: {
-                onSuccess: () => {
-                  router.push("/login");
+      <DropdownMenuContent 
+        className="w-64 border border-white/10 bg-black/80 backdrop-blur-2xl p-2 shadow-2xl rounded-2xl" 
+        align="end" 
+        sideOffset={16}
+      >
+        <div className="px-3 py-4">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 shrink-0">
+              <User className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <p className="truncate text-[10px] font-black uppercase tracking-tight">{session.user.name}</p>
+              <p className="truncate text-[10px] font-bold text-muted-foreground/60">{session.user.email}</p>
+            </div>
+          </div>
+        </div>
+        <DropdownMenuSeparator className="bg-white/5 mx-2" />
+        <div className="p-1">
+          <DropdownMenuItem
+            className="cursor-pointer rounded-xl py-2 px-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground focus:bg-white/5 focus:text-foreground transition-colors"
+            onClick={() => router.push(`/${session.user.name}`)}
+          >
+            <Shield className="mr-2 h-3.5 w-3.5" />
+            Profile Archive
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="cursor-pointer rounded-xl py-2 px-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground focus:bg-white/5 focus:text-foreground transition-colors"
+          >
+            <Settings className="mr-2 h-3.5 w-3.5" />
+            Settings
+          </DropdownMenuItem>
+        </div>
+        <DropdownMenuSeparator className="bg-white/5 mx-2" />
+        <div className="p-1">
+          <DropdownMenuItem
+            className="cursor-pointer rounded-xl py-2 px-3 text-[10px] font-black uppercase tracking-widest text-destructive focus:bg-destructive/10 focus:text-destructive transition-colors"
+            onClick={() => {
+              authClient.signOut({
+                fetchOptions: {
+                  onSuccess: () => {
+                    router.push("/login");
+                  },
                 },
-              },
-            });
-          }}
-        >
-          Sign Out
-        </DropdownMenuItem>
+              });
+            }}
+          >
+            <LogOut className="mr-2 h-3.5 w-3.5" />
+            Sign Out
+          </DropdownMenuItem>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

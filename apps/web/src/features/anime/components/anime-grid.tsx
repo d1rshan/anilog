@@ -65,14 +65,13 @@ export function AnimeGrid() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        {Array.from({ length: 15 }).map((_, i) => (
+      <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        {Array.from({ length: 12 }).map((_, i) => (
           <div key={i} className="space-y-3">
-            <div className="aspect-[3/4] rounded-lg bg-muted animate-pulse" />
+            <div className="aspect-[2/3] rounded-md bg-muted animate-pulse" />
             <div className="space-y-2">
-              <div className="h-4 bg-muted rounded animate-pulse" />
-              <div className="h-3 bg-muted rounded w-3/4 animate-pulse" />
-              <div className="h-3 bg-muted rounded w-1/2 animate-pulse" />
+              <div className="h-3 bg-muted rounded w-full animate-pulse" />
+              <div className="h-2 bg-muted rounded w-2/3 animate-pulse" />
             </div>
           </div>
         ))}
@@ -82,12 +81,12 @@ export function AnimeGrid() {
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <p className="text-lg text-muted-foreground mb-4">
-          Failed to load anime
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <p className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-2">
+          ERROR
         </p>
-        <p className="text-sm text-muted-foreground mb-4">
-          {error instanceof Error ? error.message : "Unknown error"}
+        <p className="text-xl font-bold">
+          {error instanceof Error ? error.message : "Failed to load anime"}
         </p>
       </div>
     );
@@ -95,7 +94,7 @@ export function AnimeGrid() {
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
         {anime?.map((animeItem: Anime) => (
           <AnimeCard
             key={animeItem.id}

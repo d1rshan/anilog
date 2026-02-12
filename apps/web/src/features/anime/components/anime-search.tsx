@@ -83,14 +83,14 @@ export function AnimeSearch() {
 
   return (
     <div className="relative w-full max-w-md">
-      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         ref={inputRef}
         type="text"
-        placeholder="Search anime..."
+        placeholder="SEARCH ANIME..."
         value={inputValue}
         onChange={handleInputChange}
-        className="pl-10"
+        className="h-12 border-none bg-muted pl-12 text-sm font-black uppercase tracking-widest focus-visible:ring-1 focus-visible:ring-foreground"
       />
     </div>
   );

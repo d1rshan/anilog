@@ -4,7 +4,7 @@ import type { UserList, ListEntry, Anime } from "@anilog/db/schema/anilog";
 export type CreateListData = { name: string };
 
 export type ListWithEntries = UserList & {
-  entries: (ListEntry & { anime: Pick<Anime, "id" | "title" | "titleJapanese" | "imageUrl" | "year" | "episodes"> })[];
+  entries: (ListEntry & { anime: Pick<Anime, "id" | "title" | "titleJapanese" | "imageUrl" | "year" | "episodes"> & { status?: string | null } })[];
 };
 
 export async function getUserLists(): Promise<ListWithEntries[]> {

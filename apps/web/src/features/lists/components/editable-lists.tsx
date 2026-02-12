@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2, Star, Calendar } from "lucide-react";
+import { Plus, Edit, Trash2 } from "lucide-react";
 import {
   useUserLists,
   useCreateList,
@@ -22,6 +21,7 @@ import {
   useRemoveAnimeFromList,
 } from "../lib/hooks";
 import { type CreateListData } from "../lib/requests";
+import { AnimeCard } from "@/features/anime/components/anime-card";
 
 export function EditableLists() {
   const { data: lists, isLoading: isListsLoading } = useUserLists();
@@ -74,144 +74,104 @@ export function EditableLists() {
 
   if (isListsLoading) {
     return (
-      <div className="space-y-4">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Card key={i}>
-            <CardHeader>
-              <div className="h-6 bg-muted rounded w-48 animate-pulse" />
-            </CardHeader>
-            <CardContent>
-              <div className="h-20 bg-muted rounded animate-pulse" />
-            </CardContent>
-          </Card>
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div key={i} className="aspect-[2/3] animate-pulse rounded-md bg-muted" />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">My Lists</h2>
-        <Button onClick={() => setCreateListDialog(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Create List
+    <div className="space-y-16 py-10">
+      <div className="flex items-center justify-between border-b pb-4">
+        <h2 className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground">
+          My Lists
+        </h2>
+        <Button onClick={() => setCreateListDialog(true)} size="sm" className="h-8 font-black uppercase tracking-widest text-[10px]">
+          <Plus className="mr-1.5 h-3 w-3" />
+          Create New List
         </Button>
       </div>
 
-      <div className="grid gap-6">
+      <div className="space-y-20">
         {lists?.map((list) => (
-          <Card key={list.id}>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>{list.name}</CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {list.entries.length} anime{list.entries.length !== 1 ? "s" : ""}
+          <div key={list.id} className="space-y-8">
+            <div className="flex items-end justify-between border-b border-white/10 pb-4">
+              <div className="space-y-1">
+                <h3 className="font-display text-5xl font-bold uppercase tracking-tight leading-[0.9]">
+                  {list.name}
+                </h3>
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">
+                  {list.entries.length} TITLES
                 </p>
               </div>
               <div className="flex gap-2">
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
+                  className="h-8 w-8 p-0"
                   onClick={() => setEditListDialog({ isOpen: true, listId: list.id, name: list.name })}
                 >
-                  <Edit className="w-4 h-4" />
+                  <Edit className="h-3 w-3" />
                 </Button>
                 <Button
-                  variant="destructive"
+                  variant="ghost"
                   size="sm"
+                  className="h-8 w-8 p-0 hover:text-destructive"
                   onClick={() => handleDeleteList(list.id, list.name)}
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="h-3 w-3" />
                 </Button>
               </div>
-            </CardHeader>
-            <CardContent>
-              {list.entries.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">
-                  No anime in this list yet. Start adding some from the home page!
+            </div>
+
+            {list.entries.length === 0 ? (
+              <div className="flex h-40 flex-col items-center justify-center rounded-md border border-dashed border-border text-center">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  This list is empty
                 </p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {list.entries.map((entry) => (
-                    <Card key={entry.id} className="relative">
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2 h-6 w-6 p-0"
-                        onClick={() => handleRemoveFromList(entry.id)}
-                      >
-                        ×
-                      </Button>
-                      <CardContent className="p-4">
-                        <div className="flex gap-3">
-                          <img
-                            src={entry.anime.imageUrl}
-                            alt={entry.anime.title}
-                            className="w-16 h-20 object-cover rounded"
-                            onError={(e) => {
-                              const img = e.target as HTMLImageElement;
-                              img.src = `https://via.placeholder.com/64x80?text=${encodeURIComponent(entry.anime.title)}`;
-                            }}
-                          />
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium line-clamp-2 text-sm">{entry.anime.title}</h4>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                              <span>{entry.anime.year}</span>
-                              <span>•</span>
-                              <span>{entry.anime.episodes} ep</span>
-                            </div>
-                            <div className="mt-2 space-y-1">
-                              {entry.currentEpisode > 0 && (
-                                <div className="flex items-center gap-1 text-xs">
-                                  <Calendar className="w-3 h-3" />
-                                  Episode {entry.currentEpisode}
-                                </div>
-                              )}
-                              {entry.rating && (
-                                <div className="flex items-center gap-1 text-xs">
-                                  <Star className="w-3 h-3 fill-current" />
-                                  {entry.rating}/5
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                {list.entries.map((entry) => (
+                  <AnimeCard
+                    key={entry.id}
+                    anime={entry.anime}
+                    rating={entry.rating}
+                    currentEpisode={entry.currentEpisode}
+                    onRemove={() => handleRemoveFromList(entry.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         ))}
       </div>
 
       {/* Create List Dialog */}
       <Dialog open={createListDialog} onOpenChange={setCreateListDialog}>
-        <DialogContent>
+        <DialogContent className="border-none shadow-2xl">
           <DialogHeader>
-            <DialogTitle>Create New List</DialogTitle>
-            <DialogDescription>
-              Create a new list to organize your anime collection
+            <DialogTitle className="text-xl font-black uppercase tracking-tight">Create New List</DialogTitle>
+            <DialogDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Organize your anime collection
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <div className="py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">List Name</Label>
+              <Label htmlFor="name" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">List Name</Label>
               <Input
                 id="name"
                 value={newList.name}
                 onChange={(e) => setNewList({ name: e.target.value })}
-                placeholder="My List"
+                placeholder="e.g. Summer 2024"
+                className="h-12 border-none bg-muted font-bold focus-visible:ring-1 focus-visible:ring-foreground"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateListDialog(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleCreateList} disabled={createList.isPending}>
+            <Button onClick={handleCreateList} disabled={createList.isPending} className="h-12 w-full font-black uppercase tracking-widest">
               {createList.isPending ? "Creating..." : "Create List"}
             </Button>
           </DialogFooter>
@@ -220,30 +180,24 @@ export function EditableLists() {
 
       {/* Edit List Dialog */}
       <Dialog open={editListDialog.isOpen} onOpenChange={(open) => setEditListDialog(prev => ({ ...prev, isOpen: open }))}>
-        <DialogContent>
+        <DialogContent className="border-none shadow-2xl">
           <DialogHeader>
-            <DialogTitle>Edit List</DialogTitle>
-            <DialogDescription>
-              Update your list name
-            </DialogDescription>
+            <DialogTitle className="text-xl font-black uppercase tracking-tight">Edit List</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <div className="py-4">
             <div className="grid gap-2">
-              <Label htmlFor="edit-name">List Name</Label>
+              <Label htmlFor="edit-name" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">List Name</Label>
               <Input
                 id="edit-name"
                 value={editListDialog.name}
                 onChange={(e) => setEditListDialog(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="My List"
+                className="h-12 border-none bg-muted font-bold focus-visible:ring-1 focus-visible:ring-foreground"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditListDialog({ isOpen: false, listId: "", name: "" })}>
-              Cancel
-            </Button>
-            <Button onClick={handleEditList} disabled={updateList.isPending}>
-              {updateList.isPending ? "Updating..." : "Update List"}
+            <Button onClick={handleEditList} disabled={updateList.isPending} className="h-12 w-full font-black uppercase tracking-widest">
+              {updateList.isPending ? "Updating..." : "Save Changes"}
             </Button>
           </DialogFooter>
         </DialogContent>

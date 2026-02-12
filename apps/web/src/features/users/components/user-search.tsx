@@ -32,48 +32,48 @@ export function UserSearch() {
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="Search users by name..."
+          placeholder="SEARCH USERS..."
           value={searchQuery}
           onChange={handleSearchChange}
-          className="pl-10 h-12 text-lg"
+          className="h-14 border-none bg-muted pl-12 text-sm font-black uppercase tracking-widest focus-visible:ring-1 focus-visible:ring-foreground"
         />
         {isLoading && (
-          <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+          <Loader2 className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
         )}
       </div>
 
       {!showResults && searchQuery.length > 0 && (
-        <p className="text-center text-muted-foreground">
-          Type at least 3 characters to search...
+        <p className="text-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Type at least 3 characters...
         </p>
       )}
 
       {showResults && (
-        <>
+        <div className="space-y-4">
           {isLoading ? (
-            <div className="grid grid-cols-1 gap-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-32" />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-24 w-full" />
               ))}
             </div>
           ) : isError ? (
-            <p className="text-center text-destructive">
-              Error searching users. Please try again.
+            <p className="text-center text-xs font-bold uppercase text-destructive">
+              Error searching users.
             </p>
           ) : !hasResults ? (
-            <p className="text-center text-muted-foreground py-8">
-              No users found matching &quot;{debouncedQuery}&quot;
+            <p className="py-12 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              No results for &quot;{debouncedQuery}&quot;
             </p>
           ) : (
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {users.map((user) => (
                 <UserCard key={user.id} user={user} />
               ))}
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

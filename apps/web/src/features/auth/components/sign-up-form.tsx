@@ -65,110 +65,119 @@ export default function SignUpForm({
   }
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle>Create your account</CardTitle>
-        <CardDescription>
-          Enter your details below to create an account
-        </CardDescription>
-        <CardAction>
-          <Button variant="link" onClick={onSwitchToSignIn}>
-            Sign In
-          </Button>
-        </CardAction>
-      </CardHeader>
-      <CardContent>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            form.handleSubmit();
-          }}
-        >
-          <div className="flex flex-col gap-6">
-            <form.Field name="username">
-              {(field) => (
-                <div className="grid gap-2">
-                  <Label htmlFor={field.name}>Username</Label>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    placeholder="johndoe"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    3-20 characters, letters, numbers, and underscores only
+    <div className="w-full max-w-sm space-y-8">
+      <div className="space-y-2 text-center">
+        <h1 className="text-4xl font-black uppercase tracking-tighter">Sign Up</h1>
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+          Join the community and start logging
+        </p>
+      </div>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          form.handleSubmit();
+        }}
+        className="space-y-6"
+      >
+        <div className="space-y-4">
+          <form.Field name="username">
+            {(field) => (
+              <div className="grid gap-1.5">
+                <Label htmlFor={field.name} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                  Username
+                </Label>
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  placeholder="johndoe"
+                  className="h-12 border-none bg-muted px-4 font-bold focus-visible:ring-1 focus-visible:ring-foreground"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                />
+                {field.state.meta.errors.map((error) => (
+                  <p key={error?.message} className="text-[10px] font-bold uppercase text-destructive">
+                    {error?.message}
                   </p>
-                  {field.state.meta.errors.map((error) => (
-                    <p key={error?.message} className="text-sm text-red-500">
-                      {error?.message}
-                    </p>
-                  ))}
-                </div>
-              )}
-            </form.Field>
+                ))}
+              </div>
+            )}
+          </form.Field>
 
-            <form.Field name="email">
-              {(field) => (
-                <div className="grid gap-2">
-                  <Label htmlFor={field.name}>Email</Label>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    type="email"
-                    placeholder="m@example.com"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                  />
-                  {field.state.meta.errors.map((error) => (
-                    <p key={error?.message} className="text-sm text-red-500">
-                      {error?.message}
-                    </p>
-                  ))}
-                </div>
-              )}
-            </form.Field>
+          <form.Field name="email">
+            {(field) => (
+              <div className="grid gap-1.5">
+                <Label htmlFor={field.name} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                  Email
+                </Label>
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  type="email"
+                  placeholder="m@example.com"
+                  className="h-12 border-none bg-muted px-4 font-bold focus-visible:ring-1 focus-visible:ring-foreground"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                />
+                {field.state.meta.errors.map((error) => (
+                  <p key={error?.message} className="text-[10px] font-bold uppercase text-destructive">
+                    {error?.message}
+                  </p>
+                ))}
+              </div>
+            )}
+          </form.Field>
 
-            <form.Field name="password">
-              {(field) => (
-                <div className="grid gap-2">
-                  <Label htmlFor={field.name}>Password</Label>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    type="password"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                  />
-                  {field.state.meta.errors.map((error) => (
-                    <p key={error?.message} className="text-sm text-red-500">
-                      {error?.message}
-                    </p>
-                  ))}
-                </div>
-              )}
-            </form.Field>
-          </div>
-        </form>
-      </CardContent>
-      <CardFooter className="flex-col gap-2">
+          <form.Field name="password">
+            {(field) => (
+              <div className="grid gap-1.5">
+                <Label htmlFor={field.name} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                  Password
+                </Label>
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  type="password"
+                  className="h-12 border-none bg-muted px-4 font-bold focus-visible:ring-1 focus-visible:ring-foreground"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                />
+                {field.state.meta.errors.map((error) => (
+                  <p key={error?.message} className="text-[10px] font-bold uppercase text-destructive">
+                    {error?.message}
+                  </p>
+                ))}
+              </div>
+            )}
+          </form.Field>
+        </div>
+
         <form.Subscribe>
           {(state) => (
             <Button
-              type="button"
-              className="w-full"
+              type="submit"
+              className="h-12 w-full text-xs font-black uppercase tracking-widest"
               disabled={!state.canSubmit || state.isSubmitting}
-              onClick={() => form.handleSubmit()}
             >
-              {state.isSubmitting ? "Creating account..." : "Sign Up"}
+              {state.isSubmitting ? "Creating..." : "Create Account"}
             </Button>
           )}
         </form.Subscribe>
-      </CardFooter>
-    </Card>
+
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={onSwitchToSignIn}
+            className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground hover:underline"
+          >
+            Already have an account? Sign In
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
