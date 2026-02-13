@@ -81,9 +81,6 @@ export function AnimeCard({
   const circumference = 2 * Math.PI * radius;
   const statusBadgeDashOffset = circumference - (statusBadgeProgressPercent / 100) * circumference;
 
-  const normalizedRating = typeof rating === "number" ? Math.min(5, Math.max(0, rating)) : null;
-  const ratingLabel =
-    normalizedRating !== null ? (Number.isInteger(normalizedRating) ? `${normalizedRating}` : normalizedRating.toFixed(1)) : null;
   const canShowWatchlistButton = !loggedStatus;
 
   return (
@@ -133,26 +130,8 @@ export function AnimeCard({
       </div>
 
       <div className="absolute right-3 top-3 flex flex-col items-end gap-1.5">
-        {(normalizedRating !== null || showLibraryStatusBadge) && (
+        {showLibraryStatusBadge && (
           <div className="flex items-center justify-end gap-1.5">
-            {normalizedRating !== null && (
-              <div
-                className="relative h-8.5 w-8.5 shrink-0 flex items-center justify-center"
-                aria-label={`Rating ${normalizedRating} out of 5`}
-                title={`Rating ${normalizedRating}/5`}
-              >
-                <div
-                  className="absolute inset-0 bg-black/60 backdrop-blur-md"
-                  style={{
-                    clipPath: "polygon(50% 8.3%, 63% 34.5%, 92% 39%, 71% 59%, 76% 88%, 50% 74%, 24% 88%, 29% 59%, 8% 39%, 37% 34.5%)"
-                  }}
-                />
-                <Star className="absolute inset-0 h-full w-full text-white/20" strokeWidth={1} />
-                <span className="relative z-10 pt-0.5 text-[10px] font-black leading-none text-white">
-                  {ratingLabel}
-                </span>
-              </div>
-            )}
             {showLibraryStatusBadge && (
               <div
                 className="relative h-8.5 w-8.5 shrink-0 rounded-full bg-black/60 backdrop-blur-md ring-1 ring-white/25"

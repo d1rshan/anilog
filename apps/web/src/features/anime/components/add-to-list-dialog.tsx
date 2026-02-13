@@ -138,7 +138,7 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
               {title}
             </DialogTitle>
           </DialogHeader>
-          {entry && (
+          {entry && !isPlanned && (
             <button
               onClick={handleRemove}
               className="absolute right-8 top-1/2 -translate-y-1/2 rounded-full border border-rose-500/20 bg-rose-500/10 p-2.5 text-rose-500 transition-all hover:bg-rose-500 hover:text-white"
@@ -271,20 +271,14 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
               </Button>
             </>
           ) : (
-            <div className="flex flex-col gap-4">
-              <div className="rounded-xl border border-blue-500/10 bg-blue-500/5 p-6 text-center">
-                <p className="text-[10px] font-black uppercase tracking-widest text-blue-400">Watchlist Status</p>
-                <p className="mt-1 text-sm font-medium text-muted-foreground">This title is currently in your planned list.</p>
-              </div>
-              <Button
-                variant="outline"
-                size="lg"
-                className="h-16 w-full rounded-full border-rose-500/20 text-[10px] font-black uppercase tracking-[0.2em] text-rose-500 transition-all hover:bg-rose-500 hover:text-white"
-                onClick={handleRemove}
-              >
-                Remove from Planned
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-16 w-full rounded-full border-rose-500/10 bg-rose-500/5 text-[10px] font-black uppercase tracking-[0.3em] text-rose-500 transition-all hover:border-rose-500 hover:bg-rose-500 hover:text-white"
+              onClick={handleRemove}
+            >
+              Remove from Watchlist
+            </Button>
           )}
         </div>
       </DialogContent>

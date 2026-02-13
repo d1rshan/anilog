@@ -1,13 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronUp, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnimeCard } from "@/features/anime/components/anime-card";
+import { AddToListDialog } from "@/features/anime/components/add-to-list-dialog";
 import { AnimeStackPreview } from "./anime-stack-preview";
-import { useMyLibrary, useRemoveFromLibrary, groupLibraryByStatus } from "../lib/hooks";
-import { LIBRARY_STATUSES } from "../lib/requests";
-import type { LibraryStatus } from "@anilog/db/schema/anilog";
+import {
+  useMyLibrary,
+  useRemoveFromLibrary,
+  useUpdateLibraryProgress,
+  useUpdateLibraryStatus,
+  groupLibraryByStatus,
+} from "../lib/hooks";
+import { LIBRARY_STATUSES, type LibraryEntryWithAnime } from "../lib/requests";
+import type { LibraryStatus, Anime } from "@anilog/db/schema/anilog";
 
 const STATUS_LABELS: Record<LibraryStatus, string> = {
   watching: "Watching",
@@ -16,9 +23,19 @@ const STATUS_LABELS: Record<LibraryStatus, string> = {
   dropped: "Dropped",
 };
 
+type DialogState = {
+  isOpen: boolean;
+  anime: Anime | null;
+  initialStatus?: LibraryStatus;
+  entry?: LibraryEntryWithAnime | null;
+};
+
 export function EditableLists() {
   const { data: library, isLoading } = useMyLibrary();
   const removeFromLibrary = useRemoveFromLibrary();
+  const updateProgress = useUpdateLibraryProgress();
+  const updateStatus = useUpdateLibraryStatus();
+  
   const grouped = groupLibraryByStatus(library);
   const [expandedStatuses, setExpandedStatuses] = useState<Record<LibraryStatus, boolean>>({
     watching: false,
@@ -27,11 +44,22 @@ export function EditableLists() {
     dropped: false,
   });
 
+  const [dialog, setDialog] = useState<DialogState>({ isOpen: false, anime: null });
+
   const toggleExpanded = (status: LibraryStatus) => {
     setExpandedStatuses((prev) => ({
       ...prev,
       [status]: !prev[status],
     }));
+  };
+
+  const openEditor = (entry: LibraryEntryWithAnime) => {
+    setDialog({
+      isOpen: true,
+      anime: entry.anime as unknown as Anime,
+      entry: entry,
+      initialStatus: entry.status,
+    });
   };
 
   if (isLoading) {
@@ -100,7 +128,8 @@ export function EditableLists() {
                       rating={entry.rating}
                       currentEpisode={entry.currentEpisode}
                       loggedStatus={entry.status}
-                      onRemove={() => removeFromLibrary.mutate(entry.animeId)}
+                      actionMode="discovery"
+                      onQuickAdd={() => openEditor(entry)}
                     />
                   </div>
                 ))}
@@ -109,6 +138,14 @@ export function EditableLists() {
           </section>
         );
       })}
+
+      <AddToListDialog
+        anime={dialog.anime}
+        entry={dialog.entry}
+        initialStatus={dialog.initialStatus}
+        isOpen={dialog.isOpen}
+        onOpenChange={(open) => setDialog((prev) => ({ ...prev, isOpen: open }))}
+      />
     </div>
   );
 }
