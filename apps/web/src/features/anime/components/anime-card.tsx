@@ -1,4 +1,4 @@
-import { Check, ListTodo, Pencil, Plus, Play, X } from "lucide-react";
+import { Check, ListTodo, Pencil, Plus, Play, Star, X } from "lucide-react";
 import { type Anime, type LibraryStatus } from "@anilog/db/schema/anilog";
 
 import { cn } from "@/lib/utils";
@@ -10,6 +10,10 @@ interface AnimeCardProps {
   rating?: number | null;
   currentEpisode?: number;
   showActions?: boolean;
+  actionMode?: "default" | "discovery";
+  showLoggedStatusBadge?: boolean;
+  onAddToWatchlist?: (animeId: number) => void;
+  onQuickAdd?: (animeId: number) => void;
   onRemove?: () => void;
   loggedStatus?: LibraryStatus;
   onPlan?: (animeId: number) => void;
@@ -19,19 +23,16 @@ interface AnimeCardProps {
   onComplete?: (animeId: number) => void;
 }
 
-const STATUS_LABELS: Record<LibraryStatus, string> = {
-  watching: "Watching",
-  completed: "Completed",
-  planned: "Planned",
-  dropped: "Dropped",
-};
-
 export function AnimeCard({
   anime,
   disabled,
   rating,
   currentEpisode,
   showActions = true,
+  actionMode = "default",
+  showLoggedStatusBadge = true,
+  onAddToWatchlist,
+  onQuickAdd,
   onRemove,
   loggedStatus,
   onPlan,
@@ -40,10 +41,50 @@ export function AnimeCard({
   onOpenEditor,
   onComplete,
 }: AnimeCardProps) {
-  const progressPercent =
+  const normalizedAnimeStatus = anime.status?.toLowerCase().replaceAll("_", " ");
+  const isReleasing = normalizedAnimeStatus === "releasing";
+  const isFinished = normalizedAnimeStatus === "finished";
+  const showBroadcastStatusPill = isReleasing || isFinished;
+
+  const watchingProgressPercent =
     loggedStatus === "watching" && anime.episodes && anime.episodes > 0
       ? Math.min(100, Math.round(((currentEpisode ?? 0) / anime.episodes) * 100))
       : null;
+  const droppedProgressPercent =
+    loggedStatus === "dropped" && anime.episodes && anime.episodes > 0
+      ? Math.min(100, Math.round(((currentEpisode ?? 0) / anime.episodes) * 100))
+      : 0;
+  const statusBadgeProgressPercent = (() => {
+    if (!loggedStatus) {
+      return 0;
+    }
+
+    if (loggedStatus === "watching") {
+      return watchingProgressPercent ?? 0;
+    }
+
+    if (loggedStatus === "completed") {
+      return 100;
+    }
+
+    if (loggedStatus === "dropped") {
+      return droppedProgressPercent;
+    }
+
+    return 0;
+  })();
+  const showLibraryStatusBadge = showLoggedStatusBadge && !!loggedStatus;
+
+  const circleSize = 34;
+  const strokeWidth = 3.25;
+  const radius = (circleSize - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const statusBadgeDashOffset = circumference - (statusBadgeProgressPercent / 100) * circumference;
+
+  const normalizedRating = typeof rating === "number" ? Math.min(5, Math.max(0, rating)) : null;
+  const ratingLabel =
+    normalizedRating !== null ? (Number.isInteger(normalizedRating) ? `${normalizedRating}` : normalizedRating.toFixed(1)) : null;
+  const canShowWatchlistButton = !loggedStatus;
 
   return (
     <div className="group relative aspect-[3/4.2] overflow-hidden rounded-lg bg-muted shadow-lg transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl">
@@ -61,29 +102,146 @@ export function AnimeCard({
 
       <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
         {anime.status && (
-          <div className="rounded-full bg-white/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white backdrop-blur-md ring-1 ring-white/20">
-            {anime.status}
-          </div>
+          <>
+            {showBroadcastStatusPill ? (
+              <div
+                className={cn(
+                  "flex h-6 w-6 items-center justify-center rounded-full text-white backdrop-blur-md ring-1",
+                  isReleasing ? "bg-white/12 ring-white/30" : "bg-white/8 ring-white/20 text-white/85",
+                )}
+                title={isReleasing ? "Currently releasing" : "Release finished"}
+                aria-label={isReleasing ? "Currently releasing" : "Release finished"}
+              >
+                {isReleasing ? (
+                  <span className="relative inline-flex h-2.5 w-2.5 items-center justify-center">
+                    <span className="absolute inline-flex h-2.5 w-2.5 animate-ping rounded-full bg-white/65" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+                  </span>
+                ) : (
+                  <span className="relative inline-flex h-2.5 w-2.5 items-center justify-center">
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white/75" />
+                  </span>
+                )}
+              </div>
+            ) : (
+              <div className="rounded-full bg-white/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white backdrop-blur-md ring-1 ring-white/20">
+                {anime.status}
+              </div>
+            )}
+          </>
         )}
-        {loggedStatus && (
-          <div className="rounded-full bg-foreground px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-background backdrop-blur-md">
-            {STATUS_LABELS[loggedStatus]}
-          </div>
-        )}
-        {currentEpisode !== undefined && currentEpisode > 0 && (
-          <div className="rounded-full bg-white px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-black backdrop-blur-md">
-            EP {currentEpisode}
+      </div>
+
+      <div className="absolute right-3 top-3 flex flex-col items-end gap-1.5">
+        {(normalizedRating !== null || showLibraryStatusBadge) && (
+          <div className="flex items-center justify-end gap-1.5">
+            {normalizedRating !== null && (
+              <div
+                className="relative h-8.5 w-8.5 shrink-0 rounded-full bg-black/60 backdrop-blur-md ring-1 ring-white/25"
+                aria-label={`Rating ${normalizedRating} out of 5`}
+                title={`Rating ${normalizedRating}/5`}
+              >
+                <Star className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 fill-white/15 text-white/45" />
+                <div className="relative flex h-full w-full items-center justify-center text-white">
+                  <span className="text-[8.5px] font-black leading-none">{ratingLabel}</span>
+                </div>
+              </div>
+            )}
+            {showLibraryStatusBadge && (
+              <div
+                className="relative h-8.5 w-8.5 shrink-0 rounded-full bg-black/60 backdrop-blur-md ring-1 ring-white/25"
+                aria-label={
+                  loggedStatus === "watching"
+                    ? `Episode ${currentEpisode ?? 0}, ${statusBadgeProgressPercent}% complete`
+                    : loggedStatus === "completed"
+                      ? "Completed"
+                      : loggedStatus === "dropped"
+                        ? `${statusBadgeProgressPercent}% watched before dropping`
+                        : "Planned"
+                }
+                title={
+                  loggedStatus === "watching"
+                    ? `${statusBadgeProgressPercent}% complete`
+                    : loggedStatus === "completed"
+                      ? "Completed"
+                      : loggedStatus === "dropped"
+                        ? `${statusBadgeProgressPercent}% watched`
+                        : "Planned"
+                }
+              >
+                <svg className="absolute inset-0 h-full w-full -rotate-90" viewBox={`0 0 ${circleSize} ${circleSize}`} aria-hidden="true">
+                  <circle
+                    cx={circleSize / 2}
+                    cy={circleSize / 2}
+                    r={radius}
+                    fill="none"
+                    stroke="rgba(255,255,255,0.22)"
+                    strokeWidth={strokeWidth}
+                  />
+                  <circle
+                    cx={circleSize / 2}
+                    cy={circleSize / 2}
+                    r={radius}
+                    fill="none"
+                    stroke="white"
+                    strokeLinecap="round"
+                    strokeWidth={strokeWidth}
+                    strokeDasharray={circumference}
+                    strokeDashoffset={statusBadgeDashOffset}
+                  />
+                </svg>
+                {loggedStatus === "watching" ? (
+                  <div className="relative flex h-full w-full flex-col items-center justify-center text-white">
+                    <span className="text-[9px] font-black leading-none">{currentEpisode ?? 0}</span>
+                    <span className="text-[6px] font-bold uppercase tracking-wide text-white/75">EP</span>
+                  </div>
+                ) : (
+                  <div className="relative flex h-full w-full items-center justify-center text-white">
+                    {loggedStatus === "planned" && <ListTodo className="h-3.5 w-3.5" />}
+                    {loggedStatus === "completed" && <Check className="h-3.5 w-3.5" />}
+                    {loggedStatus === "dropped" && <X className="h-3.5 w-3.5" />}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {rating && (
-        <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[9px] font-black text-black shadow-lg">
-          <span>{rating}/5</span>
+      {showActions && actionMode === "discovery" && (
+        <div className="absolute right-3 top-1/2 flex -translate-y-1/2 translate-x-4 flex-col gap-2 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+          {canShowWatchlistButton && (
+            <Button
+              size="icon"
+              variant="secondary"
+              className="h-10 w-10 rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-xl hover:bg-white hover:text-black"
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddToWatchlist?.(anime.id);
+              }}
+              disabled={disabled}
+              title="Add to Watchlist"
+            >
+              <ListTodo className="h-5 w-5" />
+            </Button>
+          )}
+          <Button
+            size="icon"
+            variant="secondary"
+            className="h-10 w-10 rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-xl hover:bg-white hover:text-black"
+            onClick={(e) => {
+              e.stopPropagation();
+              onQuickAdd?.(anime.id);
+            }}
+            disabled={disabled}
+            title="Open Quick Add"
+          >
+            <Plus className="h-5 w-5" />
+          </Button>
         </div>
       )}
 
-      {showActions && (
+      {showActions && actionMode === "default" && (
         <div className="absolute right-3 top-1/2 flex -translate-y-1/2 translate-x-4 flex-col gap-2 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
           {onPlan && !loggedStatus && (
             <Button
@@ -193,14 +351,6 @@ export function AnimeCard({
           <span>•</span>
           <span>{anime.episodes} Episodes</span>
         </div>
-        {progressPercent !== null && (
-          <div className="space-y-1">
-            <div className="h-1.5 overflow-hidden rounded-full bg-white/20">
-              <div className="h-full bg-white" style={{ width: `${progressPercent}%` }} />
-            </div>
-            <p className="text-[9px] font-bold uppercase tracking-widest text-white/70">{progressPercent}% complete</p>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -49,6 +49,12 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
 
   const title = useMemo(() => anime?.title ?? "Unknown Anime", [anime]);
   const allowedStatuses = useMemo(() => allowedStatusesForAnime(anime?.status), [anime?.status]);
+  const isEpisodeRequired = status === "watching" || status === "completed";
+  const maxEpisodes = anime?.episodes && anime.episodes > 0 ? anime.episodes : null;
+  const minEpisode = isEpisodeRequired ? 1 : 0;
+  const isEpisodeWithinBounds =
+    !isEpisodeRequired ||
+    (currentEpisode >= minEpisode && (maxEpisodes === null || currentEpisode <= maxEpisodes));
 
   useEffect(() => {
     if (!isOpen) {
@@ -63,8 +69,7 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
     setRating(entry?.rating ?? null);
   }, [isOpen, initialStatus, entry, allowedStatuses]);
 
-  const isEpisodeRequired = status === "watching" || status === "completed";
-  const canSubmit = !!anime && (!isEpisodeRequired || currentEpisode >= 1);
+  const canSubmit = !!anime && isEpisodeWithinBounds;
 
   const helperText = useMemo(() => {
     if (status === "watching") {
@@ -75,8 +80,12 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
       return "Completed requires final watched episode.";
     }
 
+    if (maxEpisodes !== null) {
+      return `Max ${maxEpisodes} episodes.`;
+    }
+
     return "";
-  }, [status]);
+  }, [status, maxEpisodes]);
 
   const handleSubmit = () => {
     if (!anime) {
@@ -86,7 +95,10 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
     const resolvedEpisode =
       status === "completed" && anime.episodes && anime.episodes > 0
         ? anime.episodes
-        : Math.max(0, currentEpisode || 0);
+        : Math.max(
+            minEpisode,
+            Math.min(maxEpisodes ?? Number.POSITIVE_INFINITY, Math.trunc(currentEpisode || 0)),
+          );
 
     logAnime.mutate(
       {
@@ -148,9 +160,20 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
                   id="episode"
                   type="number"
                   min={isEpisodeRequired ? "1" : "0"}
+                  max={maxEpisodes !== null ? String(maxEpisodes) : undefined}
                   className="h-12 border-none bg-muted text-lg font-bold focus-visible:ring-1 focus-visible:ring-foreground"
                   value={currentEpisode}
-                  onChange={(e) => setCurrentEpisode(Number(e.target.value) || 0)}
+                  onChange={(e) => {
+                    const nextValue = Number(e.target.value);
+                    if (!Number.isFinite(nextValue)) {
+                      setCurrentEpisode(minEpisode);
+                      return;
+                    }
+
+                    const floored = Math.trunc(nextValue);
+                    const clamped = Math.max(minEpisode, Math.min(maxEpisodes ?? Number.POSITIVE_INFINITY, floored));
+                    setCurrentEpisode(clamped);
+                  }}
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-muted-foreground">EP</span>
               </div>

@@ -8,8 +8,6 @@ import { useSession } from "@/features/auth/lib/hooks";
 import {
   useLogAnime,
   useMyLibrary,
-  useUpdateLibraryProgress,
-  useUpdateLibraryStatus,
 } from "@/features/lists/lib/hooks";
 import { type LibraryEntryWithAnime } from "@/features/lists/lib/requests";
 import { useTrendingAnime } from "../lib/hooks";
@@ -28,8 +26,6 @@ export function AnimeGrid() {
   const { data: session } = useSession();
   const { data: library } = useMyLibrary();
   const logAnime = useLogAnime();
-  const updateStatus = useUpdateLibraryStatus();
-  const updateProgress = useUpdateLibraryProgress();
   const [dialog, setDialog] = useState<DialogState>({ isOpen: false, anime: null });
 
   const entryByAnimeId = useMemo(
@@ -66,7 +62,7 @@ export function AnimeGrid() {
     });
   };
 
-  const handlePlan = (animeId: number) => {
+  const handleAddToWatchlist = (animeId: number) => {
     if (!ensureAuth()) {
       return;
     }
@@ -76,23 +72,11 @@ export function AnimeGrid() {
       return;
     }
 
+    if (entryByAnimeId.has(animeId)) {
+      return;
+    }
+
     logAnime.mutate({ anime: selectedAnime, status: "planned", currentEpisode: 0, rating: null });
-  };
-
-  const handleIncrementEpisode = (animeId: number) => {
-    if (!ensureAuth()) {
-      return;
-    }
-
-    updateProgress.mutate({ animeId, delta: 1 });
-  };
-
-  const handleComplete = (animeId: number) => {
-    if (!ensureAuth()) {
-      return;
-    }
-
-    updateStatus.mutate({ animeId, status: "completed" });
   };
 
   if (isLoading) {
@@ -133,11 +117,9 @@ export function AnimeGrid() {
                 rating={entry?.rating}
                 currentEpisode={entry?.currentEpisode}
                 loggedStatus={entry?.status}
-                onPlan={handlePlan}
-                onStartWatching={(id) => openEditor(id, "watching")}
-                onIncrementEpisode={handleIncrementEpisode}
-                onComplete={handleComplete}
-                onOpenEditor={(id) => openEditor(id)}
+                actionMode="discovery"
+                onAddToWatchlist={handleAddToWatchlist}
+                onQuickAdd={(id) => openEditor(id)}
               />
             </div>
           );

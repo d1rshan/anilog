@@ -8,8 +8,6 @@ import { useSession } from "@/features/auth/lib/hooks";
 import {
   useLogAnime,
   useMyLibrary,
-  useUpdateLibraryProgress,
-  useUpdateLibraryStatus,
 } from "@/features/lists/lib/hooks";
 import { type LibraryEntryWithAnime } from "@/features/lists/lib/requests";
 
@@ -33,8 +31,6 @@ export function SearchResults({ query }: SearchResultsProps) {
   const { data: session } = useSession();
   const { data: library } = useMyLibrary();
   const logAnime = useLogAnime();
-  const updateStatus = useUpdateLibraryStatus();
-  const updateProgress = useUpdateLibraryProgress();
   const [dialog, setDialog] = useState<DialogState>({ isOpen: false, anime: null });
 
   const entryByAnimeId = useMemo(
@@ -71,7 +67,7 @@ export function SearchResults({ query }: SearchResultsProps) {
     });
   };
 
-  const handlePlan = (animeId: number) => {
+  const handleAddToWatchlist = (animeId: number) => {
     if (!ensureAuth()) {
       return;
     }
@@ -81,23 +77,11 @@ export function SearchResults({ query }: SearchResultsProps) {
       return;
     }
 
+    if (entryByAnimeId.has(animeId)) {
+      return;
+    }
+
     logAnime.mutate({ anime: selectedAnime, status: "planned", currentEpisode: 0, rating: null });
-  };
-
-  const handleIncrementEpisode = (animeId: number) => {
-    if (!ensureAuth()) {
-      return;
-    }
-
-    updateProgress.mutate({ animeId, delta: 1 });
-  };
-
-  const handleComplete = (animeId: number) => {
-    if (!ensureAuth()) {
-      return;
-    }
-
-    updateStatus.mutate({ animeId, status: "completed" });
   };
 
   if (isLoading) {
@@ -147,11 +131,9 @@ export function SearchResults({ query }: SearchResultsProps) {
                 rating={entry?.rating}
                 currentEpisode={entry?.currentEpisode}
                 loggedStatus={entry?.status}
-                onPlan={handlePlan}
-                onStartWatching={(id) => openEditor(id, "watching")}
-                onIncrementEpisode={handleIncrementEpisode}
-                onComplete={handleComplete}
-                onOpenEditor={(id) => openEditor(id)}
+                actionMode="discovery"
+                onAddToWatchlist={handleAddToWatchlist}
+                onQuickAdd={(id) => openEditor(id)}
               />
             </div>
           );

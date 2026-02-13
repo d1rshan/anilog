@@ -4,6 +4,7 @@ import { AnimeCard } from "@/features/anime/components/anime-card";
 
 type StackEntry = {
   id: string;
+  status: "watching" | "completed" | "planned" | "dropped";
   currentEpisode?: number | null;
   rating?: number | null;
   anime: {
@@ -46,6 +47,7 @@ export function AnimeStackPreview({
                 anime={entry.anime}
                 rating={entry.rating}
                 currentEpisode={entry.currentEpisode ?? undefined}
+                loggedStatus={entry.status}
                 showActions={false}
               />
             </div>

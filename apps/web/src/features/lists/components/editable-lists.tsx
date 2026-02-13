@@ -5,7 +5,7 @@ import { ChevronUp, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnimeCard } from "@/features/anime/components/anime-card";
 import { AnimeStackPreview } from "./anime-stack-preview";
-import { useMyLibrary, useRemoveFromLibrary, useUpdateLibraryProgress, groupLibraryByStatus } from "../lib/hooks";
+import { useMyLibrary, useRemoveFromLibrary, groupLibraryByStatus } from "../lib/hooks";
 import { LIBRARY_STATUSES } from "../lib/requests";
 import type { LibraryStatus } from "@anilog/db/schema/anilog";
 
@@ -19,7 +19,6 @@ const STATUS_LABELS: Record<LibraryStatus, string> = {
 export function EditableLists() {
   const { data: library, isLoading } = useMyLibrary();
   const removeFromLibrary = useRemoveFromLibrary();
-  const updateProgress = useUpdateLibraryProgress();
   const grouped = groupLibraryByStatus(library);
   const [expandedStatuses, setExpandedStatuses] = useState<Record<LibraryStatus, boolean>>({
     watching: false,
@@ -103,31 +102,6 @@ export function EditableLists() {
                       loggedStatus={entry.status}
                       onRemove={() => removeFromLibrary.mutate(entry.animeId)}
                     />
-                    {status === "watching" && (
-                      <div className="mt-2 flex items-center justify-between gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest"
-                          onClick={() =>
-                            updateProgress.mutate({
-                              animeId: entry.animeId,
-                              currentEpisode: Math.max(1, entry.currentEpisode - 1),
-                            })
-                          }
-                        >
-                          -1 Ep
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest"
-                          onClick={() => updateProgress.mutate({ animeId: entry.animeId, delta: 1 })}
-                        >
-                          +1 Ep
-                        </Button>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
