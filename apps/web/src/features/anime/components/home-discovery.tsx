@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus, Pencil } from "lucide-react";
 import { type Anime, type LibraryStatus } from "@anilog/db/schema/anilog";
 import { useTrendingAnime } from "../lib/hooks";
-import { useMyLibrary } from "@/features/lists/lib/hooks";
+import { useMyLibrary, useLogAnime } from "@/features/lists/lib/hooks";
 import { AnimeCard } from "./anime-card";
 import { AddToListDialog } from "./add-to-list-dialog";
 import { type LibraryEntryWithAnime } from "@/features/lists/lib/requests";
@@ -102,6 +102,7 @@ export function HomeDiscovery() {
   const { data: anime = [], isLoading: isTrendingLoading } = useTrendingAnime();
   const { data: library = [], isLoading: isLibraryLoading } = useMyLibrary();
   const { data: session } = useSession();
+  const logAnime = useLogAnime();
 
   const [dialog, setDialog] = useState<DialogState>({ isOpen: false, anime: null });
 
@@ -117,6 +118,20 @@ export function HomeDiscovery() {
     () => new Map((library ?? []).map((entry) => [entry.animeId, entry])),
     [library]
   );
+
+  const handleAddToWatchlist = (animeItem: Anime) => {
+    if (!session?.user?.id) {
+      toast.error("Please sign in to log anime");
+      return;
+    }
+
+    if (entryByAnimeId.has(animeItem.id)) {
+      return;
+    }
+
+    logAnime.mutate({ anime: animeItem, status: "planned", currentEpisode: 0, rating: null });
+    toast.success(`${animeItem.title} added to planned`);
+  };
 
   const openEditor = (animeItem: any) => {
     if (!session?.user?.id) {
@@ -162,6 +177,7 @@ export function HomeDiscovery() {
                 loggedStatus={entry.status}
                 actionMode="discovery"
                 onQuickAdd={() => openEditor(entry.anime)}
+                onAddToWatchlist={() => handleAddToWatchlist(entry.anime as any)}
               />
             </div>
           ))}
@@ -188,6 +204,7 @@ export function HomeDiscovery() {
                   currentEpisode={entry?.currentEpisode}
                   actionMode="discovery"
                   onQuickAdd={() => openEditor(animeItem)}
+                  onAddToWatchlist={() => handleAddToWatchlist(animeItem)}
                 />
               </div>
             </div>
@@ -218,6 +235,7 @@ export function HomeDiscovery() {
                   currentEpisode={entry?.currentEpisode}
                   actionMode="discovery"
                   onQuickAdd={() => openEditor(animeItem)}
+                  onAddToWatchlist={() => handleAddToWatchlist(animeItem)}
                 />
               </div>
             );
