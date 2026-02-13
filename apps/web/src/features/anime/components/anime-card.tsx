@@ -1,4 +1,4 @@
-import { Check, ListTodo, Pencil, Plus, Play, Star, X } from "lucide-react";
+import { Check, ListTodo, Pencil, Plus, Play, Star, X, Ban } from "lucide-react";
 import { type Anime, type LibraryStatus } from "@anilog/db/schema/anilog";
 
 import { cn } from "@/lib/utils";
@@ -184,7 +184,7 @@ export function AnimeCard({
                   <div className="relative flex h-full w-full items-center justify-center text-white">
                     {loggedStatus === "planned" && <ListTodo className="h-3.5 w-3.5" />}
                     {loggedStatus === "completed" && <Check className="h-3.5 w-3.5" />}
-                    {loggedStatus === "dropped" && <X className="h-3.5 w-3.5" />}
+                    {loggedStatus === "dropped" && <Ban className="h-3.5 w-3.5" />}
                   </div>
                 )}
               </div>

@@ -6,7 +6,8 @@ import {
   dehydrate,
 } from "@tanstack/react-query";
 import { getTrendingAnime, searchAnime } from "../lib/requests";
-import { AnimeGrid } from "../components/anime-grid";
+import { getMyLibrary } from "@/features/lists/lib/requests";
+import { HomeDiscovery } from "../components/home-discovery";
 import { AnimeSearch } from "../components/anime-search";
 import { SearchResults } from "../components/search-results";
 import { getSession } from "@/features/auth/lib/server";
@@ -34,10 +35,17 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       queryFn: () => searchAnime(searchQuery),
     });
   } else {
-    await queryClient.prefetchQuery({
-      queryKey: ["trending-anime"],
-      queryFn: getTrendingAnime,
-    });
+    // Prefetch both trending and user library for instant loading of HomeDiscovery
+    await Promise.all([
+      queryClient.prefetchQuery({
+        queryKey: ["trending-anime"],
+        queryFn: getTrendingAnime,
+      }),
+      queryClient.prefetchQuery({
+        queryKey: ["library", "me"],
+        queryFn: getMyLibrary,
+      }),
+    ]);
   }
 
   return (
@@ -58,10 +66,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <div className="flex flex-col gap-8 border-t border-white/10 pt-8 md:flex-row md:items-start md:justify-between">
           <div className="space-y-2">
             <h2 className="font-display text-4xl font-bold uppercase leading-none tracking-tight md:text-6xl">
-              {isSearching ? `"${searchQuery}"` : "Trending Now"}
+              {isSearching ? `"${searchQuery}"` : "Discovery"}
             </h2>
             <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
-              {isSearching ? "Search Results" : "Global Top 50"}
+              {isSearching ? "Search Results" : "Curated for you"}
             </p>
           </div>
           <div className="w-full md:w-auto">
@@ -73,7 +81,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           {isSearching ? (
             <SearchResults query={searchQuery} />
           ) : (
-            <AnimeGrid />
+            <HomeDiscovery />
           )}
         </HydrationBoundary>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ChevronRight, Star, Plus, Minus, Trash2, Check, Play, ListTodo, X } from "lucide-react";
+import { ChevronRight, Star, Plus, Minus, Check, Play, ListTodo, X, Trash2, Ban } from "lucide-react";
 import type { Anime, LibraryStatus } from "@anilog/db/schema/anilog";
 
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ const STATUS_CONFIG: Record<LibraryStatus, { label: string; icon: any; color: st
   watching: { label: "Watching", icon: Play, color: "bg-white text-black" },
   completed: { label: "Completed", icon: Check, color: "bg-emerald-500 text-white" },
   planned: { label: "Planned", icon: ListTodo, color: "bg-blue-500 text-white" },
-  dropped: { label: "Dropped", icon: X, color: "bg-rose-500 text-white" },
+  dropped: { label: "Dropped", icon: Ban, color: "bg-rose-500 text-white" },
 };
 
 function allowedStatusesForAnime(animeStatus?: string | null): LibraryStatus[] {
@@ -138,15 +138,7 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
               {title}
             </DialogTitle>
           </DialogHeader>
-          {entry && !isPlanned && (
-            <button
-              onClick={handleRemove}
-              className="absolute right-8 top-1/2 -translate-y-1/2 rounded-full border border-rose-500/20 bg-rose-500/10 p-2.5 text-rose-500 transition-all hover:bg-rose-500 hover:text-white"
-              title="Remove from Library"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          )}
+
         </div>
 
         <div className="flex flex-col gap-10 p-8">
@@ -270,15 +262,18 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </>
-          ) : (
-            <Button
-              variant="outline"
-              size="lg"
-              className="h-16 w-full rounded-full border-rose-500/10 bg-rose-500/5 text-[10px] font-black uppercase tracking-[0.3em] text-rose-500 transition-all hover:border-rose-500 hover:bg-rose-500 hover:text-white"
-              onClick={handleRemove}
-            >
-              Remove from Watchlist
-            </Button>
+          ) : null}
+
+          {entry && (
+            <div className="flex justify-end">
+              <button
+                onClick={handleRemove}
+                className="group flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 transition-all hover:text-rose-500"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>Remove</span>
+              </button>
+            </div>
           )}
         </div>
       </DialogContent>
