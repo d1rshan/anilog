@@ -137,14 +137,20 @@ export function AnimeCard({
           <div className="flex items-center justify-end gap-1.5">
             {normalizedRating !== null && (
               <div
-                className="relative h-8.5 w-8.5 shrink-0 rounded-full bg-black/60 backdrop-blur-md ring-1 ring-white/25"
+                className="relative h-8.5 w-8.5 shrink-0 flex items-center justify-center"
                 aria-label={`Rating ${normalizedRating} out of 5`}
                 title={`Rating ${normalizedRating}/5`}
               >
-                <Star className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 fill-white/15 text-white/45" />
-                <div className="relative flex h-full w-full items-center justify-center text-white">
-                  <span className="text-[8.5px] font-black leading-none">{ratingLabel}</span>
-                </div>
+                <div
+                  className="absolute inset-0 bg-black/60 backdrop-blur-md"
+                  style={{
+                    clipPath: "polygon(50% 8.3%, 63% 34.5%, 92% 39%, 71% 59%, 76% 88%, 50% 74%, 24% 88%, 29% 59%, 8% 39%, 37% 34.5%)"
+                  }}
+                />
+                <Star className="absolute inset-0 h-full w-full text-white/20" strokeWidth={1} />
+                <span className="relative z-10 pt-0.5 text-[10px] font-black leading-none text-white">
+                  {ratingLabel}
+                </span>
               </div>
             )}
             {showLibraryStatusBadge && (
@@ -228,15 +234,18 @@ export function AnimeCard({
           <Button
             size="icon"
             variant="secondary"
-            className="h-10 w-10 rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-xl hover:bg-white hover:text-black"
+            className={cn(
+              "h-10 w-10 rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-xl hover:bg-white hover:text-black",
+              loggedStatus && "bg-white text-black",
+            )}
             onClick={(e) => {
               e.stopPropagation();
               onQuickAdd?.(anime.id);
             }}
             disabled={disabled}
-            title="Open Quick Add"
+            title={loggedStatus ? "Edit Log" : "Open Quick Add"}
           >
-            <Plus className="h-5 w-5" />
+            {loggedStatus ? <Pencil className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
           </Button>
         </div>
       )}

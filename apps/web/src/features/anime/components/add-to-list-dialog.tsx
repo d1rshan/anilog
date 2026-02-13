@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ChevronRight, Star } from "lucide-react";
+import { ChevronRight, Star, Plus, Minus, Trash2, Check, Play, ListTodo, X } from "lucide-react";
 import type { Anime, LibraryStatus } from "@anilog/db/schema/anilog";
 
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { LIBRARY_STATUSES, type LibraryEntryWithAnime } from "@/features/lists/lib/requests";
-import { useLogAnime } from "@/features/lists/lib/hooks";
+import { useLogAnime, useRemoveFromLibrary } from "@/features/lists/lib/hooks";
 
 interface AddToListDialogProps {
   anime: Anime | null;
@@ -20,11 +20,11 @@ interface AddToListDialogProps {
   initialStatus?: LibraryStatus;
 }
 
-const STATUS_LABELS: Record<LibraryStatus, string> = {
-  watching: "Watching",
-  completed: "Completed",
-  planned: "Planned",
-  dropped: "Dropped",
+const STATUS_CONFIG: Record<LibraryStatus, { label: string; icon: any; color: string }> = {
+  watching: { label: "Watching", icon: Play, color: "bg-white text-black" },
+  completed: { label: "Completed", icon: Check, color: "bg-emerald-500 text-white" },
+  planned: { label: "Planned", icon: ListTodo, color: "bg-blue-500 text-white" },
+  dropped: { label: "Dropped", icon: X, color: "bg-rose-500 text-white" },
 };
 
 function allowedStatusesForAnime(animeStatus?: string | null): LibraryStatus[] {
@@ -43,6 +43,7 @@ function allowedStatusesForAnime(animeStatus?: string | null): LibraryStatus[] {
 
 export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialStatus }: AddToListDialogProps) {
   const logAnime = useLogAnime();
+  const removeAnime = useRemoveFromLibrary();
   const [status, setStatus] = useState<LibraryStatus>(initialStatus ?? "watching");
   const [currentEpisode, setCurrentEpisode] = useState<number>(entry?.currentEpisode ?? 0);
   const [rating, setRating] = useState<number | null>(entry?.rating ?? null);
@@ -52,9 +53,6 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
   const isEpisodeRequired = status === "watching" || status === "completed";
   const maxEpisodes = anime?.episodes && anime.episodes > 0 ? anime.episodes : null;
   const minEpisode = isEpisodeRequired ? 1 : 0;
-  const isEpisodeWithinBounds =
-    !isEpisodeRequired ||
-    (currentEpisode >= minEpisode && (maxEpisodes === null || currentEpisode <= maxEpisodes));
 
   useEffect(() => {
     if (!isOpen) {
@@ -68,24 +66,6 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
     setCurrentEpisode(entry?.currentEpisode ?? (resolvedStatus === "watching" ? 1 : 0));
     setRating(entry?.rating ?? null);
   }, [isOpen, initialStatus, entry, allowedStatuses]);
-
-  const canSubmit = !!anime && isEpisodeWithinBounds;
-
-  const helperText = useMemo(() => {
-    if (status === "watching") {
-      return "Episode is required for Watching.";
-    }
-
-    if (status === "completed") {
-      return "Completed requires final watched episode.";
-    }
-
-    if (maxEpisodes !== null) {
-      return `Max ${maxEpisodes} episodes.`;
-    }
-
-    return "";
-  }, [status, maxEpisodes]);
 
   const handleSubmit = () => {
     if (!anime) {
@@ -115,104 +95,197 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
     );
   };
 
+  const handleRemove = () => {
+    if (!anime) return;
+    removeAnime.mutate(anime.id, {
+      onSuccess: () => {
+        onOpenChange(false);
+      },
+    });
+  };
+
+  const handleStatusChange = (newStatus: LibraryStatus) => {
+    setStatus(newStatus);
+    if (newStatus === "completed" && maxEpisodes) {
+      setCurrentEpisode(maxEpisodes);
+    }
+  };
+
+  const updateEpisode = (val: number) => {
+    if (status === "completed" && maxEpisodes) return;
+
+    const next = Math.max(minEpisode, Math.min(maxEpisodes ?? Number.POSITIVE_INFINITY, val));
+    setCurrentEpisode(next);
+
+    // Auto-complete logic: If series is finished and max episodes reached, switch to completed
+    const isFinished = anime?.status?.toUpperCase() === "FINISHED";
+    if (isFinished && maxEpisodes && next === maxEpisodes && status !== "completed") {
+      setStatus("completed");
+    }
+  };
+
+  const isPlanned = status === "planned";
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md overflow-hidden border-none p-0 shadow-2xl">
-        <DialogHeader className="p-6 pb-0">
-          <DialogTitle className="text-xl font-black uppercase tracking-tight">Log Anime</DialogTitle>
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">{title}</p>
-        </DialogHeader>
+      <DialogContent className="max-w-lg overflow-hidden border-white/5 bg-[#0a0a0a] p-0 shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)]">
+        <div className="relative border-b border-white/5 p-8">
+          <DialogHeader className="space-y-1">
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">
+              {isPlanned ? "Watchlist" : "Manage Log"}
+            </p>
+            <DialogTitle className="font-display text-4xl font-bold uppercase leading-none tracking-tight">
+              {title}
+            </DialogTitle>
+          </DialogHeader>
+          {entry && (
+            <button
+              onClick={handleRemove}
+              className="absolute right-8 top-1/2 -translate-y-1/2 rounded-full border border-rose-500/20 bg-rose-500/10 p-2.5 text-rose-500 transition-all hover:bg-rose-500 hover:text-white"
+              title="Remove from Library"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+        </div>
 
-        <div className="flex flex-col gap-6 p-6">
-          <div className="grid grid-cols-1 gap-2">
-            <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Status</Label>
-            <div className="flex flex-wrap gap-2">
-              {LIBRARY_STATUSES.map((item) => {
-                const selected = status === item;
-                const disabled = !allowedStatuses.includes(item);
+        <div className="flex flex-col gap-10 p-8">
+          {/* STATUS SELECTOR */}
+          <div className="space-y-4">
+            <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
+              {isPlanned ? "Start Tracking" : "Log Status"}
+            </Label>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {allowedStatuses
+                .filter((s) => s !== "planned" || allowedStatuses.length === 1)
+                .map((item) => {
+                  const selected = status === item;
+                  const config = STATUS_CONFIG[item];
+                  const Icon = config.icon;
 
-                return (
-                  <button
-                    key={item}
-                    type="button"
-                    disabled={disabled}
-                    onClick={() => setStatus(item)}
-                    className={cn(
-                      "rounded-full border px-4 py-2 text-xs font-bold transition-all",
-                      selected ? "border-foreground bg-foreground text-background" : "bg-background hover:border-foreground",
-                      disabled && "cursor-not-allowed opacity-40",
-                    )}
-                  >
-                    {STATUS_LABELS[item]}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="episode" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Current Episode
-              </Label>
-              <div className="relative">
-                <Input
-                  id="episode"
-                  type="number"
-                  min={isEpisodeRequired ? "1" : "0"}
-                  max={maxEpisodes !== null ? String(maxEpisodes) : undefined}
-                  className="h-12 border-none bg-muted text-lg font-bold focus-visible:ring-1 focus-visible:ring-foreground"
-                  value={currentEpisode}
-                  onChange={(e) => {
-                    const nextValue = Number(e.target.value);
-                    if (!Number.isFinite(nextValue)) {
-                      setCurrentEpisode(minEpisode);
-                      return;
-                    }
-
-                    const floored = Math.trunc(nextValue);
-                    const clamped = Math.max(minEpisode, Math.min(maxEpisodes ?? Number.POSITIVE_INFINITY, floored));
-                    setCurrentEpisode(clamped);
-                  }}
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-muted-foreground">EP</span>
-              </div>
-              {helperText ? <p className="text-[10px] font-medium text-muted-foreground">{helperText}</p> : null}
-            </div>
-
-            <div className="grid gap-2">
-              <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Your Rating</Label>
-              <div className="flex h-12 items-center justify-center gap-1 rounded-md bg-muted px-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setRating((prev) => (prev === star ? null : star))}
-                    className="group transition-transform hover:scale-110 active:scale-95"
-                  >
-                    <Star
+                  return (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => handleStatusChange(item)}
                       className={cn(
-                        "size-5 transition-colors",
-                        rating !== null && star <= rating
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-muted-foreground/30 hover:text-muted-foreground",
+                        "group flex flex-col items-center gap-3 rounded-xl border border-white/5 bg-white/5 py-4 transition-all duration-300",
+                        selected ? "border-white bg-white text-black" : "hover:border-white/20 hover:bg-white/10",
                       )}
-                    />
-                  </button>
-                ))}
-              </div>
+                    >
+                      <Icon
+                        className={cn("h-5 w-5", selected ? "text-black" : "text-muted-foreground group-hover:text-white")}
+                      />
+                      <span className="text-[10px] font-black uppercase tracking-widest">{config.label}</span>
+                    </button>
+                  );
+                })}
             </div>
           </div>
 
-          <Button
-            size="lg"
-            className="h-14 w-full text-sm font-black uppercase tracking-widest transition-all hover:scale-[1.02]"
-            onClick={handleSubmit}
-            disabled={logAnime.isPending || !canSubmit}
-          >
-            {logAnime.isPending ? "Logging..." : "Save Log"}
-            <ChevronRight className="ml-2 h-4 w-4" />
-          </Button>
+          {!isPlanned ? (
+            <>
+              <div className="grid grid-cols-1 gap-10 sm:grid-cols-2">
+                {/* EPISODE CONTROLS */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
+                      Progress
+                    </Label>
+                    {maxEpisodes && (
+                      <span className="text-[10px] font-bold text-muted-foreground/40">OF {maxEpisodes}</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => updateEpisode(currentEpisode - 1)}
+                      disabled={status === "completed" && !!maxEpisodes}
+                      className={cn(
+                        "flex h-12 w-12 items-center justify-center rounded-xl border border-white/5 bg-white/5 transition-all",
+                        status === "completed" && maxEpisodes ? "cursor-not-allowed opacity-30" : "hover:bg-white/10 active:scale-95",
+                      )}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </button>
+                    <div className="relative flex-1">
+                      <Input
+                        type="number"
+                        value={currentEpisode}
+                        disabled={status === "completed" && !!maxEpisodes}
+                        onChange={(e) => updateEpisode(Number.parseInt(e.target.value) || 0)}
+                        className={cn(
+                          "h-12 border-none bg-white/5 text-center text-xl font-black focus-visible:ring-1 focus-visible:ring-white/20",
+                          status === "completed" && maxEpisodes && "opacity-50",
+                        )}
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] font-black uppercase text-muted-foreground/40">
+                        EP
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => updateEpisode(currentEpisode + 1)}
+                      disabled={status === "completed" && !!maxEpisodes}
+                      className={cn(
+                        "flex h-12 w-12 items-center justify-center rounded-xl border border-white/5 bg-white/5 transition-all",
+                        status === "completed" && maxEpisodes ? "cursor-not-allowed opacity-30" : "hover:bg-white/10 active:scale-95",
+                      )}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* RATING CONTROLS */}
+                <div className="space-y-4">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Rating</Label>
+                  <div className="flex h-12 items-center justify-between gap-1 rounded-xl bg-white/5 px-4">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setRating((prev) => (prev === star ? null : star))}
+                        className="group relative h-8 w-8 transition-transform hover:scale-110 active:scale-95"
+                      >
+                        <Star
+                          className={cn(
+                            "h-6 w-6 transition-all duration-300",
+                            rating !== null && star <= rating
+                              ? "fill-white text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]"
+                              : "text-white/10 group-hover:text-white/30",
+                          )}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                size="lg"
+                className="h-16 w-full rounded-full bg-white text-sm font-black uppercase tracking-[0.2em] text-black transition-all hover:scale-[1.02] hover:bg-white active:scale-95"
+                onClick={handleSubmit}
+                disabled={logAnime.isPending}
+              >
+                {logAnime.isPending ? "Syncing..." : "Update Archive"}
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </>
+          ) : (
+            <div className="flex flex-col gap-4">
+              <div className="rounded-xl border border-blue-500/10 bg-blue-500/5 p-6 text-center">
+                <p className="text-[10px] font-black uppercase tracking-widest text-blue-400">Watchlist Status</p>
+                <p className="mt-1 text-sm font-medium text-muted-foreground">This title is currently in your planned list.</p>
+              </div>
+              <Button
+                variant="outline"
+                size="lg"
+                className="h-16 w-full rounded-full border-rose-500/20 text-[10px] font-black uppercase tracking-[0.2em] text-rose-500 transition-all hover:bg-rose-500 hover:text-white"
+                onClick={handleRemove}
+              >
+                Remove from Planned
+              </Button>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
