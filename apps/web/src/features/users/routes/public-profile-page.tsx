@@ -33,10 +33,10 @@ export function PublicProfilePage({ userId }: PublicProfilePageProps) {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-24">
         <ProfileHeader user={user} isOwnProfile={isOwnProfile} />
         
-        <div className="mt-8">
+        <div className="mt-20">
           <UserListsPublic userId={userId} />
         </div>
       </div>

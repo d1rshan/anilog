@@ -41,20 +41,32 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Anilog</h1>
-        <p className="text-lg text-muted-foreground">
-          Discover, track, and rate your favorite anime
+    <div className="container mx-auto px-4 py-32">
+      <div className="mb-32 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+        <div className="relative z-10">
+          <h1 className="font-display text-[12vw] font-extrabold uppercase leading-[0.8] tracking-tighter text-foreground mix-blend-difference md:text-[14vw]">
+            Anilog
+          </h1>
+          <div className="mt-4 h-2 w-24 bg-foreground" />
+        </div>
+        <p className="max-w-md text-right text-sm font-medium leading-relaxed text-muted-foreground md:text-base">
+          A curatorial platform for the modern otaku. Track, rate, and discover anime with uncompromising aesthetic precision.
         </p>
       </div>
 
-      <div className="mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <h2 className="text-2xl font-semibold">
-            {isSearching ? `Search Results for "${searchQuery}"` : "Popular Anime"}
-          </h2>
-          <AnimeSearch />
+      <div className="space-y-16">
+        <div className="flex flex-col gap-8 border-t border-white/10 pt-8 md:flex-row md:items-start md:justify-between">
+          <div className="space-y-2">
+            <h2 className="font-display text-4xl font-bold uppercase leading-none tracking-tight md:text-6xl">
+              {isSearching ? `"${searchQuery}"` : "Trending Now"}
+            </h2>
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
+              {isSearching ? "Search Results" : "Global Top 50"}
+            </p>
+          </div>
+          <div className="w-full md:w-auto">
+            <AnimeSearch />
+          </div>
         </div>
 
         <HydrationBoundary state={dehydrate(queryClient)}>

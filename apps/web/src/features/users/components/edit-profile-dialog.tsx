@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { useUpdateMyProfile } from "@/features/users/lib/hooks";
 import type { UserWithProfile } from "@/features/users/lib/requests";
 import { z } from "zod";
+import { cn } from "@/lib/utils";
 
 interface EditProfileDialogProps {
   user: UserWithProfile;
@@ -66,7 +67,6 @@ export function EditProfileDialog({ user, isOpen, onOpenChange, onSuccess }: Edi
 
   const handleInputChange = (field: keyof FormData, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -94,7 +94,6 @@ export function EditProfileDialog({ user, isOpen, onOpenChange, onSuccess }: Edi
   const handleSubmit = () => {
     if (!validateForm()) return;
 
-    // Convert empty strings to null
     const dataToSubmit = {
       displayName: formData.displayName || null,
       bio: formData.bio || null,
@@ -116,7 +115,6 @@ export function EditProfileDialog({ user, isOpen, onOpenChange, onSuccess }: Edi
   };
 
   const handleCancel = () => {
-    // Reset form to initial values
     setFormData({
       displayName: user.profile?.displayName || user.name || "",
       bio: user.profile?.bio || "",
@@ -141,97 +139,87 @@ export function EditProfileDialog({ user, isOpen, onOpenChange, onSuccess }: Edi
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit Profile</DialogTitle>
-          <DialogDescription>
-            Make changes to your profile here. Click save when you&apos;re done.
+      <DialogContent className="max-w-xl border-none p-0 overflow-hidden shadow-2xl">
+        <DialogHeader className="p-8 pb-0">
+          <DialogTitle className="text-2xl font-black uppercase tracking-tight">Edit Profile</DialogTitle>
+          <DialogDescription className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+            Customize your identity on Anilog
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-5 py-4">
-          {/* Display Name */}
-          <div className="grid gap-2">
-            <Label htmlFor="displayName" className="flex items-center gap-2">
-              <User className="w-4 h-4" />
-              Display Name
-            </Label>
-            <Input
-              id="displayName"
-              value={formData.displayName}
-              onChange={(e) => handleInputChange("displayName", e.target.value)}
-              placeholder="Your display name"
-              className={errors.displayName ? "border-red-500" : ""}
-            />
-            {errors.displayName && (
-              <p className="text-sm text-red-500">{errors.displayName}</p>
-            )}
-          </div>
-
-          {/* Bio */}
-          <div className="grid gap-2">
-            <Label htmlFor="bio">Bio</Label>
-            <Textarea
-              id="bio"
-              value={formData.bio || ""}
-              onChange={(e) => handleInputChange("bio", e.target.value)}
-              placeholder="Tell us about yourself..."
-              rows={3}
-              className={errors.bio ? "border-red-500" : ""}
-            />
-            <div className="flex justify-between items-center">
-              {errors.bio ? (
-                <p className="text-sm text-red-500">{errors.bio}</p>
-              ) : (
-                <span />
+        <div className="flex flex-col gap-8 p-8 max-h-[70vh] overflow-y-auto">
+          <div className="grid gap-6">
+            {/* Display Name */}
+            <div className="grid gap-2">
+              <Label htmlFor="displayName" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                Display Name
+              </Label>
+              <Input
+                id="displayName"
+                value={formData.displayName}
+                onChange={(e) => handleInputChange("displayName", e.target.value)}
+                placeholder="Your name"
+                className="h-12 border-none bg-muted px-4 font-bold focus-visible:ring-1 focus-visible:ring-foreground"
+              />
+              {errors.displayName && (
+                <p className="text-[10px] font-bold uppercase text-destructive">{errors.displayName}</p>
               )}
-              <p className={`text-xs ${bioCharCount > 500 ? "text-red-500" : "text-muted-foreground"}`}>
-                {bioCharCount}/500
-              </p>
+            </div>
+
+            {/* Bio */}
+            <div className="grid gap-2">
+              <Label htmlFor="bio" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Bio</Label>
+              <Textarea
+                id="bio"
+                value={formData.bio || ""}
+                onChange={(e) => handleInputChange("bio", e.target.value)}
+                placeholder="Tell us about yourself..."
+                className="min-h-[120px] border-none bg-muted px-4 py-3 font-medium focus-visible:ring-1 focus-visible:ring-foreground"
+              />
+              <div className="flex justify-between items-center">
+                <p className="text-[10px] font-bold uppercase text-destructive">{errors.bio}</p>
+                <p className={cn("text-[10px] font-black uppercase tracking-widest", bioCharCount > 500 ? "text-destructive" : "text-muted-foreground")}>
+                  {bioCharCount}/500
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Location */}
+              <div className="grid gap-2">
+                <Label htmlFor="location" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                  Location
+                </Label>
+                <Input
+                  id="location"
+                  value={formData.location || ""}
+                  onChange={(e) => handleInputChange("location", e.target.value)}
+                  placeholder="City, Country"
+                  className="h-12 border-none bg-muted px-4 font-bold focus-visible:ring-1 focus-visible:ring-foreground"
+                />
+              </div>
+
+              {/* Website */}
+              <div className="grid gap-2">
+                <Label htmlFor="website" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                  Website
+                </Label>
+                <Input
+                  id="website"
+                  type="url"
+                  value={formData.website || ""}
+                  onChange={(e) => handleInputChange("website", e.target.value)}
+                  placeholder="https://yourwebsite.com"
+                  className="h-12 border-none bg-muted px-4 font-bold focus-visible:ring-1 focus-visible:ring-foreground"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Location */}
-          <div className="grid gap-2">
-            <Label htmlFor="location" className="flex items-center gap-2">
-              <MapPin className="w-4 h-4" />
-              Location
-            </Label>
-            <Input
-              id="location"
-              value={formData.location || ""}
-              onChange={(e) => handleInputChange("location", e.target.value)}
-              placeholder="City, Country"
-              className={errors.location ? "border-red-500" : ""}
-            />
-            {errors.location && (
-              <p className="text-sm text-red-500">{errors.location}</p>
-            )}
-          </div>
-
-          {/* Website */}
-          <div className="grid gap-2">
-            <Label htmlFor="website" className="flex items-center gap-2">
-              <Globe className="w-4 h-4" />
-              Website
-            </Label>
-            <Input
-              id="website"
-              type="url"
-              value={formData.website || ""}
-              onChange={(e) => handleInputChange("website", e.target.value)}
-              placeholder="https://yourwebsite.com"
-              className={errors.website ? "border-red-500" : ""}
-            />
-            {errors.website && (
-              <p className="text-sm text-red-500">{errors.website}</p>
-            )}
-          </div>
-
-          {/* Social Links */}
-          <div className="grid gap-2">
-            <Label>Social Links</Label>
-            <div className="flex gap-3">
+          {/* Social Links Section */}
+          <div className="space-y-4">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Social Links</h3>
+            <div className="flex flex-wrap gap-4">
               {socialPlatforms.map((platform) => {
                 const Icon = platform.icon;
                 const hasValue = !!(formData[platform.key as keyof FormData] as string);
@@ -242,63 +230,51 @@ export function EditProfileDialog({ user, isOpen, onOpenChange, onSuccess }: Edi
                     key={platform.key}
                     type="button"
                     onClick={() => toggleSocialInput(platform.key)}
-                    className={`
-                      w-10 h-10 rounded-full flex items-center justify-center transition-all
-                      ${platform.color}
-                      ${hasValue ? "ring-2 ring-offset-2 ring-current" : ""}
-                      ${isActive ? "scale-110" : ""}
-                    `}
-                    aria-label={platform.label}
+                    className={cn(
+                      "flex h-12 items-center gap-3 rounded-md px-4 transition-all border",
+                      hasValue || isActive ? "border-foreground bg-muted shadow-sm" : "border-transparent bg-muted/50 hover:bg-muted"
+                    )}
                   >
-                    <Icon className="w-5 h-5" />
+                    <Icon className="h-4 w-4" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">
+                      {platform.label.split('/')[0]}
+                    </span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Active Social Input */}
             {activeSocialInput && (
-              <div className="mt-2">
-                {socialPlatforms.map((platform) => {
-                  if (platform.key !== activeSocialInput) return null;
-                  const hasError = !!errors[platform.key];
-
-                  return (
-                    <div key={platform.key} className="grid gap-2">
-                      <Label htmlFor={platform.key} className="text-sm font-medium">
-                        {platform.label} URL
-                      </Label>
-                      <Input
-                        id={platform.key}
-                        type="url"
-                        value={(formData[platform.key as keyof FormData] as string) || ""}
-                        onChange={(e) => handleInputChange(platform.key as keyof FormData, e.target.value)}
-                        placeholder={platform.placeholder}
-                        className={hasError ? "border-red-500" : ""}
-                        autoFocus
-                      />
-                      {hasError && (
-                        <p className="text-sm text-red-500">{errors[platform.key]}</p>
-                      )}
-                    </div>
-                  );
-                })}
+              <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                {socialPlatforms.map((p) => p.key === activeSocialInput && (
+                  <div key={p.key} className="grid gap-2">
+                    <Input
+                      id={p.key}
+                      type="url"
+                      value={(formData[p.key as keyof FormData] as string) || ""}
+                      onChange={(e) => handleInputChange(p.key as keyof FormData, e.target.value)}
+                      placeholder={p.placeholder}
+                      className="h-12 border-none bg-muted px-4 font-bold focus-visible:ring-1 focus-visible:ring-foreground"
+                      autoFocus
+                    />
+                    {errors[p.key] && (
+                      <p className="text-[10px] font-bold uppercase text-destructive">{errors[p.key]}</p>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </div>
 
-          {/* Profile Visibility */}
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="flex items-center gap-3">
-              <Lock className="w-4 h-4 text-muted-foreground" />
-              <div className="space-y-0.5">
-                <Label htmlFor="isPublic" className="text-sm font-medium">
-                  Public Profile
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  Allow others to find and view your profile
-                </p>
-              </div>
+          {/* Visibility Switch */}
+          <div className="flex items-center justify-between rounded-md bg-muted p-6">
+            <div className="space-y-1">
+              <Label htmlFor="isPublic" className="text-xs font-black uppercase tracking-widest">
+                Public Profile
+              </Label>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Visible to everyone in the community
+              </p>
             </div>
             <Switch
               id="isPublic"
@@ -308,12 +284,12 @@ export function EditProfileDialog({ user, isOpen, onOpenChange, onSuccess }: Edi
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={handleCancel} disabled={updateProfile.isPending}>
+        <DialogFooter className="bg-muted/50 p-8 pt-6">
+          <Button variant="ghost" onClick={handleCancel} className="text-xs font-black uppercase tracking-widest">
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={updateProfile.isPending}>
-            {updateProfile.isPending ? "Saving..." : "Save Changes"}
+          <Button onClick={handleSubmit} disabled={updateProfile.isPending} className="h-12 px-8 text-xs font-black uppercase tracking-widest">
+            {updateProfile.isPending ? "Saving..." : "Save Profile"}
           </Button>
         </DialogFooter>
       </DialogContent>

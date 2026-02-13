@@ -1,104 +1,134 @@
-import { Plus, Star } from "lucide-react";
+import { Plus, Star, Check, Info } from "lucide-react";
 import { type Anime } from "@anilog/db/schema/anilog";
 
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-import { cn } from "@/lib/utils";
-
 interface AnimeCardProps {
-  anime: Anime;
+  anime: Pick<Anime, "id" | "title" | "imageUrl" | "year" | "episodes"> & { status?: string | null };
   onAddToList?: (animeId: number) => void;
   onFavorite?: (animeId: number) => void;
   isFavorited?: boolean;
   disabled?: boolean;
+  rating?: number | null;
+  currentEpisode?: number;
+  showActions?: boolean;
+  onRemove?: () => void;
 }
 
-export function AnimeCard({ anime, onAddToList, onFavorite, isFavorited, disabled }: AnimeCardProps) {
-  const genres = anime.genres || [];
-
+export function AnimeCard({
+  anime,
+  onAddToList,
+  onFavorite,
+  isFavorited,
+  disabled,
+  rating,
+  currentEpisode,
+  showActions = true,
+  onRemove,
+}: AnimeCardProps) {
   return (
-    <Card>
-      {/* IMAGE */}
-      <CardHeader>
-        <div className="aspect-3/4 overflow-hidden rounded-lg">
-          <img
-            src={anime.imageUrl}
-            alt={anime.title}
-            className="h-full w-full object-cover"
-            onError={(e) => {
-              const img = e.target as HTMLImageElement;
-              img.src = `https://via.placeholder.com/300x400?text=${encodeURIComponent(
-                anime.title
-              )}`;
-            }}
-          />
+    <div className="group relative aspect-[3/4.2] overflow-hidden rounded-lg bg-muted shadow-lg transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl">
+      {/* POSTER IMAGE */}
+      <img
+        src={anime.imageUrl}
+        alt={anime.title}
+        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+        onError={(e) => {
+          const img = e.target as HTMLImageElement;
+          img.src = `https://via.placeholder.com/300x450?text=${encodeURIComponent(
+            anime.title
+          )}`;
+        }}
+      />
+
+      {/* GRADIENT OVERLAY (Always visible but intensifies on hover) */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-100" />
+
+      {/* TOP BADGES: STATUS & EPISODES */}
+      <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+        {anime.status && (
+          <div className="rounded-full bg-white/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white backdrop-blur-md ring-1 ring-white/20">
+            {anime.status}
+          </div>
+        )}
+        {currentEpisode !== undefined && currentEpisode > 0 && (
+          <div className="rounded-full bg-foreground px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-background backdrop-blur-md">
+            EP {currentEpisode}
+          </div>
+        )}
+      </div>
+
+      {/* RATING BADGE */}
+      {rating && (
+        <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[9px] font-black text-black shadow-lg">
+          <Star className="h-3 w-3 fill-current" />
+          {rating}
         </div>
-        <CardTitle className="line-clamp-2 text-lg">
+      )}
+
+      {/* QUICK ICON ACTIONS (Right Side) */}
+      {showActions && (
+        <div className="absolute right-3 top-1/2 flex -translate-y-1/2 flex-col gap-2 opacity-0 transition-all duration-300 translate-x-4 group-hover:translate-x-0 group-hover:opacity-100">
+          {onAddToList && (
+            <Button
+              size="icon"
+              variant="secondary"
+              className="h-10 w-10 rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-xl hover:bg-white hover:text-black"
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddToList(anime.id);
+              }}
+              disabled={disabled}
+            >
+              <Plus className="h-5 w-5" />
+            </Button>
+          )}
+          {onFavorite && (
+            <Button
+              size="icon"
+              variant="secondary"
+              className={cn(
+                "h-10 w-10 rounded-full border border-white/10 bg-black/40 backdrop-blur-xl transition-colors",
+                isFavorited ? "bg-white text-black hover:bg-white/90" : "text-white hover:bg-white hover:text-black"
+              )}
+              onClick={(e) => {
+                e.stopPropagation();
+                onFavorite(anime.id);
+              }}
+              disabled={disabled}
+            >
+              <Star className={cn("h-5 w-5", isFavorited && "fill-current")} />
+            </Button>
+          )}
+          {onRemove && (
+            <Button
+              size="icon"
+              variant="secondary"
+              className="h-10 w-10 rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-xl hover:bg-white hover:text-black"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove();
+              }}
+              disabled={disabled}
+            >
+              <Plus className="h-5 w-5 rotate-45" />
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* METADATA (Bottom) */}
+      <div className="absolute bottom-0 left-0 right-0 p-5 space-y-1 transform transition-transform duration-500 translate-y-2 group-hover:translate-y-0">
+        <h3 className="font-display line-clamp-2 text-xl font-bold uppercase leading-none tracking-tight text-white">
           {anime.title}
-        </CardTitle>
-      </CardHeader>
-
-      {/* CONTENT */}
-      <CardContent className="flex flex-1 flex-col gap-2">
-
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        </h3>
+        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/60">
           <span>{anime.year}</span>
           <span>•</span>
-          <span>
-            {anime.episodes} ep{anime.episodes !== 1 ? "s" : ""}
-          </span>
-          <span>•</span>
-          <Badge className="text-xs">
-            {anime.status}
-          </Badge>
+          <span>{anime.episodes} EPISODES</span>
         </div>
-
-        {anime.description && (
-          <p className="line-clamp-3 text-sm text-muted-foreground">
-            {anime.description}
-          </p>
-        )}
-
-        <div className="flex flex-wrap gap-1">
-          {genres.slice(0, 3).map((genre: string, index: number) => (
-            <Badge key={index} variant="secondary" className="text-xs">
-              {genre}
-            </Badge>
-          ))}
-          {genres.length > 3 && (
-            <Badge variant="secondary" className="text-xs">
-              +{genres.length - 3}
-            </Badge>
-          )}
-        </div>
-      </CardContent>
-
-      {/* FOOTER (ALWAYS BOTTOM) */}
-      <CardFooter className="mt-auto flex gap-2">
-        <Button
-          size="sm"
-          className="flex-1"
-          onClick={() => onAddToList?.(anime.id)}
-          disabled={disabled}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add to List
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => onFavorite?.(anime.id)}
-          disabled={disabled}
-          className={cn(
-            "transition-colors",
-            isFavorited && "text-yellow-500 border-yellow-500 hover:text-yellow-500 hover:border-yellow-500"
-          )}
-        >
-          <Star className={cn("h-4 w-4", isFavorited && "fill-current")} />
-        </Button>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }

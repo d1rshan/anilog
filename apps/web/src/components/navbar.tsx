@@ -4,100 +4,74 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
-import UserMenu from "@/features/auth/components/user-menu";
 import { useSession } from "@/features/auth/lib/hooks";
-import clsx from "clsx";
-
-const links = [
-  { to: "/", label: "Home" },
-  { to: "/users", label: "Users" },
-] as const;
+import UserMenu from "@/features/auth/components/user-menu";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, isPending } = useSession();
+  const { theme, setTheme } = useTheme();
 
-  // Generate profile link from session username
-  const profileLink = session?.user?.name ? `/${session.user.name}` : null;
-
-  // Redirect to login if not authenticated (and not already on login page)
   useEffect(() => {
     if (!isPending && !session && pathname !== "/login") {
       router.push("/login");
     }
   }, [session, isPending, pathname, router]);
 
-  // Don't show navbar on login page
-  if (pathname === "/login") {
-    return null;
-  }
+  if (pathname === "/login") return null;
+  if (!session) return null;
 
-  // Don't show navbar if user is not authenticated (will redirect)
-  if (!session) {
-    return null;
-  }
+  const links = [
+    { href: "/", label: "Discovery" },
+    { href: "/users", label: "Community" },
+    { href: `/${session.user.name}`, label: "Archive" },
+  ];
 
   return (
-    <header className="fixed top-4 left-1/2 z-50 -translate-x-1/2">
-      <div
-        className="flex items-center justify-between gap-2 rounded-full border border-border bg-card/70 px-4 py-2 backdrop-blur-lg shadow-lg"
-      >
-        <nav className="flex items-center gap-1">
-          {links.map(({ to, label }) => {
-            const isActive = pathname === to;
-
-            return (
-              <button
-                key={to}
-                onClick={() => router.push(to as Parameters<typeof router.push>[0])}
-                className={clsx(
-                  "rounded-full px-4 py-1.5 text-sm font-medium transition",
-                  isActive && "bg-foreground text-background"
+    <nav className="fixed top-0 left-0 right-0 z-50 flex justify-center p-6 pointer-events-none">
+      <div className="flex items-center justify-between w-full max-w-5xl h-14 px-6 rounded-lg border border-white/10 bg-black/40 backdrop-blur-2xl pointer-events-auto shadow-2xl">
+        <div className="flex items-center gap-10">
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="h-1.5 w-1.5 rounded-full bg-foreground transition-all duration-300 group-hover:scale-[2]" />
+            <span className="font-display text-lg font-black uppercase tracking-tighter">
+              Anilog
+            </span>
+          </Link>
+          
+          <div className="hidden md:flex items-center gap-8">
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-300 hover:text-foreground relative group/link",
+                  pathname === link.href ? "text-foreground" : "text-muted-foreground"
                 )}
               >
-                {label}
-              </button>
-            );
-          })}
+                {link.label}
+                <span className={cn(
+                  "absolute -bottom-1 left-0 h-px bg-foreground transition-all duration-300",
+                  pathname === link.href ? "w-full" : "w-0 group-hover/link:w-full"
+                )} />
+              </Link>
+            ))}
+          </div>
+        </div>
 
-          {profileLink && (
-            <button
-              onClick={() => router.push(profileLink as Parameters<typeof router.push>[0])}
-              className={clsx(
-                "rounded-full px-4 py-1.5 text-sm font-medium transition",
-                pathname === profileLink && "bg-foreground text-background"
-              )}
-            >
-              Profile
-            </button>
-          )}
-
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="p-2 text-muted-foreground hover:text-foreground transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer"
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+          <div className="h-4 w-[1px] bg-white/10" />
           <UserMenu />
-          <ModeToggle />
-        </nav>
+        </div>
       </div>
-    </header>
-  );
-}
-
-function ModeToggle() {
-  const { theme, setTheme } = useTheme();
-
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
-
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={toggleTheme}
-      className="relative rounded-full"
-    >
-      <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-    </Button>
+    </nav>
   );
 }

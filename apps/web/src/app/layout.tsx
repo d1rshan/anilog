@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Syne, Manrope } from "next/font/google";
 import "../index.css";
 import Providers from "@/components/providers";
 import Navbar from "@/components/navbar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const syne = Syne({
+  variable: "--font-syne",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -27,12 +29,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${syne.variable} ${manrope.variable} font-sans antialiased bg-[#050505] text-[#ededed] selection:bg-[#ededed] selection:text-[#050505]`}
       >
         <Providers>
           <Navbar />
 
-          <main className="pt-18">
+          <main className="pt-24 min-h-screen">
             {children}
           </main>
         </Providers>

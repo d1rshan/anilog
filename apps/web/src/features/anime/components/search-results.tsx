@@ -88,14 +88,13 @@ export function SearchResults({ query }: SearchResultsProps) {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="space-y-3">
-            <div className="aspect-[3/4] rounded-lg bg-muted animate-pulse" />
+      <div className="grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="w-full space-y-3">
+            <div className="aspect-[2/3] rounded-md bg-muted animate-pulse" />
             <div className="space-y-2">
-              <div className="h-4 bg-muted rounded animate-pulse" />
-              <div className="h-3 bg-muted rounded w-3/4 animate-pulse" />
-              <div className="h-3 bg-muted rounded w-1/2 animate-pulse" />
+              <div className="h-3 bg-muted rounded w-full animate-pulse" />
+              <div className="h-2 bg-muted rounded w-2/3 animate-pulse" />
             </div>
           </div>
         ))}
@@ -105,12 +104,12 @@ export function SearchResults({ query }: SearchResultsProps) {
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <p className="text-lg text-muted-foreground mb-4">
-          Failed to search anime
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <p className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-2">
+          SEARCH ERROR
         </p>
-        <p className="text-sm text-muted-foreground mb-4">
-          {error instanceof Error ? error.message : "Unknown error"}
+        <p className="text-xl font-bold">
+          {error instanceof Error ? error.message : "Failed to search anime"}
         </p>
       </div>
     );
@@ -118,9 +117,12 @@ export function SearchResults({ query }: SearchResultsProps) {
 
   if (!anime || anime.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <p className="text-lg text-muted-foreground">
-          No anime found for &quot;{query}&quot;
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <p className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-2">
+          NO RESULTS
+        </p>
+        <p className="text-xl font-bold">
+          Nothing found for &quot;{query}&quot;
         </p>
       </div>
     );
@@ -128,15 +130,16 @@ export function SearchResults({ query }: SearchResultsProps) {
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
         {anime.map((animeItem: Anime) => (
-          <AnimeCard
-            key={animeItem.id}
-            anime={animeItem}
-            onAddToList={handleAddToList}
-            onFavorite={handleFavorite}
-            isFavorited={favoriteIds.has(animeItem.id)}
-          />
+          <div key={animeItem.id} className="w-full">
+            <AnimeCard
+              anime={animeItem}
+              onAddToList={handleAddToList}
+              onFavorite={handleFavorite}
+              isFavorited={favoriteIds.has(animeItem.id)}
+            />
+          </div>
         ))}
       </div>
       <AddToListDialog
