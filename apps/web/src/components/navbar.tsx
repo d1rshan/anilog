@@ -7,6 +7,8 @@ import { useTheme } from "next-themes";
 import { useSession } from "@/features/auth/lib/hooks";
 import UserMenu from "@/features/auth/components/user-menu";
 import Link from "next/link";
+import type { Route } from "next";
+import type { UrlObject } from "url";
 import { cn } from "@/lib/utils";
 
 export default function Navbar() {
@@ -24,10 +26,20 @@ export default function Navbar() {
   if (pathname === "/login") return null;
   if (!session) return null;
 
-  const links = [
-    { href: "/", label: "Discovery" },
-    { href: "/users", label: "Community" },
-    { href: `/${session.user.name}`, label: "Archive" },
+  type NavLink = {
+    href: Route | UrlObject;
+    label: string;
+    activePath: string;
+  };
+
+  const links: NavLink[] = [
+    { href: "/" as Route, label: "Discovery", activePath: "/" },
+    { href: "/users" as Route, label: "Community", activePath: "/users" },
+    {
+      href: { pathname: "/[username]", query: { username: session.user.name } },
+      label: "Archive",
+      activePath: `/${session.user.name}`,
+    },
   ];
 
   return (
@@ -44,17 +56,17 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-8">
             {links.map((link) => (
               <Link
-                key={link.href}
+                key={link.label}
                 href={link.href}
                 className={cn(
                   "text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-300 hover:text-foreground relative group/link",
-                  pathname === link.href ? "text-foreground" : "text-muted-foreground"
+                  pathname === link.activePath ? "text-foreground" : "text-muted-foreground"
                 )}
               >
                 {link.label}
                 <span className={cn(
                   "absolute -bottom-1 left-0 h-px bg-foreground transition-all duration-300",
-                  pathname === link.href ? "w-full" : "w-0 group-hover/link:w-full"
+                  pathname === link.activePath ? "w-full" : "w-0 group-hover/link:w-full"
                 )} />
               </Link>
             ))}
