@@ -15,7 +15,7 @@
 
 :root {
 
-  --radius: 0rem;
+  --radius: 1rem;
 
   --background: oklch(0.98 0 0);
 
@@ -140,46 +140,21 @@
 }
 
 
-
 @layer utilities {
-
-
-
   @keyframes marquee {
-
-
-
-    from { transform: translateX(0); }
-
-
-
-    to { transform: translateX(-50%); }
-
-
-
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
   }
-
-
 
   .animate-marquee {
-
-
-
     animation: marquee 20s linear infinite;
-
-
-
   }
 
-
-
 }
-
-
-
-
-
-
 
 html {
 
@@ -201,10 +176,10 @@ html {
 
 }
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: var(--radius);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

@@ -88,9 +88,9 @@ export function SearchResults({ query }: SearchResultsProps) {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="space-y-3">
+          <div key={i} className="w-full space-y-3">
             <div className="aspect-[2/3] rounded-md bg-muted animate-pulse" />
             <div className="space-y-2">
               <div className="h-3 bg-muted rounded w-full animate-pulse" />
@@ -130,15 +130,16 @@ export function SearchResults({ query }: SearchResultsProps) {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
         {anime.map((animeItem: Anime) => (
-          <AnimeCard
-            key={animeItem.id}
-            anime={animeItem}
-            onAddToList={handleAddToList}
-            onFavorite={handleFavorite}
-            isFavorited={favoriteIds.has(animeItem.id)}
-          />
+          <div key={animeItem.id} className="w-full">
+            <AnimeCard
+              anime={animeItem}
+              onAddToList={handleAddToList}
+              onFavorite={handleFavorite}
+              isFavorited={favoriteIds.has(animeItem.id)}
+            />
+          </div>
         ))}
       </div>
       <AddToListDialog

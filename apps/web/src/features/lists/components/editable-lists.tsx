@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, ChevronUp } from "lucide-react";
 import {
   useUserLists,
   useCreateList,
@@ -22,6 +22,7 @@ import {
 } from "../lib/hooks";
 import { type CreateListData } from "../lib/requests";
 import { AnimeCard } from "@/features/anime/components/anime-card";
+import { AnimeStackPreview } from "./anime-stack-preview";
 
 export function EditableLists() {
   const { data: lists, isLoading: isListsLoading } = useUserLists();
@@ -41,6 +42,9 @@ export function EditableLists() {
     name: "",
   });
   const [newList, setNewList] = useState<CreateListData>({ name: "" });
+  const [expandedLists, setExpandedLists] = useState<Record<string, boolean>>(
+    {},
+  );
 
   const handleCreateList = () => {
     createList.mutate(newList, {
@@ -72,11 +76,18 @@ export function EditableLists() {
     removeAnimeFromList.mutate(entryId);
   };
 
+  const toggleExpanded = (listId: string) => {
+    setExpandedLists((prev) => ({
+      ...prev,
+      [listId]: !prev[listId],
+    }));
+  };
+
   if (isListsLoading) {
     return (
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
         {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="aspect-[2/3] animate-pulse rounded-md bg-muted" />
+          <div key={i} className="w-full aspect-[2/3] animate-pulse rounded-md bg-muted" />
         ))}
       </div>
     );
@@ -107,6 +118,17 @@ export function EditableLists() {
                 </p>
               </div>
               <div className="flex gap-2">
+                {expandedLists[list.id] && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-[10px] font-bold uppercase tracking-widest"
+                    onClick={() => toggleExpanded(list.id)}
+                  >
+                    Collapse
+                    <ChevronUp className="ml-1.5 h-3.5 w-3.5" />
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -132,16 +154,26 @@ export function EditableLists() {
                   This list is empty
                 </p>
               </div>
+            ) : !expandedLists[list.id] ? (
+              <button
+                type="button"
+                onClick={() => toggleExpanded(list.id)}
+                className="w-full text-left"
+                aria-label={`Expand ${list.name} list`}
+              >
+                <AnimeStackPreview entries={list.entries} />
+              </button>
             ) : (
-              <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                 {list.entries.map((entry) => (
-                  <AnimeCard
-                    key={entry.id}
-                    anime={entry.anime}
-                    rating={entry.rating}
-                    currentEpisode={entry.currentEpisode}
-                    onRemove={() => handleRemoveFromList(entry.id)}
-                  />
+                  <div key={entry.id} className="w-full">
+                    <AnimeCard
+                      anime={entry.anime}
+                      rating={entry.rating}
+                      currentEpisode={entry.currentEpisode}
+                      onRemove={() => handleRemoveFromList(entry.id)}
+                    />
+                  </div>
                 ))}
               </div>
             )}

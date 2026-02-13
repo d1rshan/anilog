@@ -32,7 +32,7 @@ export default function Navbar() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex justify-center p-6 pointer-events-none">
-      <div className="flex items-center justify-between w-full max-w-5xl h-14 px-6 rounded-full border border-white/10 bg-black/40 backdrop-blur-2xl pointer-events-auto shadow-2xl">
+      <div className="flex items-center justify-between w-full max-w-5xl h-14 px-6 rounded-lg border border-white/10 bg-black/40 backdrop-blur-2xl pointer-events-auto shadow-2xl">
         <div className="flex items-center gap-10">
           <Link href="/" className="flex items-center gap-2 group">
             <div className="h-1.5 w-1.5 rounded-full bg-foreground transition-all duration-300 group-hover:scale-[2]" />

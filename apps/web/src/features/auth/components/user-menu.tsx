@@ -26,7 +26,7 @@ export default function UserMenu() {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
-        className="w-64 border border-white/10 bg-black/80 backdrop-blur-2xl p-2 shadow-2xl rounded-2xl" 
+        className="w-64 border border-white/10 bg-black/80 backdrop-blur-2xl p-2 shadow-2xl rounded-lg" 
         align="end" 
         sideOffset={16}
       >

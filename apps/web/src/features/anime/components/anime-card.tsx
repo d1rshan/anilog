@@ -28,7 +28,7 @@ export function AnimeCard({
   onRemove,
 }: AnimeCardProps) {
   return (
-    <div className="group relative aspect-[3/4.2] overflow-hidden rounded-2xl bg-muted shadow-lg transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl">
+    <div className="group relative aspect-[3/4.2] overflow-hidden rounded-lg bg-muted shadow-lg transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl">
       {/* POSTER IMAGE */}
       <img
         src={anime.imageUrl}

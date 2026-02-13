@@ -86,7 +86,7 @@ export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
             )}
           </div>
 
-          <div className="flex flex-row justify-between gap-8 md:flex-col md:justify-start">
+          <div className="flex flex-row gap-10">
             <div className="space-y-1">
               <p className="font-display text-4xl font-bold tracking-tight md:text-6xl leading-[0.9]">
                 {user.followerCount}
