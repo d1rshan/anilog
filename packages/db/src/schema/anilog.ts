@@ -23,6 +23,7 @@ export const anime = pgTable(
     status: text("status"),
     genres: text("genres").array(),
     imageUrl: text("image_url").notNull(),
+    bannerImage: text("banner_image"),
     year: integer("year"),
     rating: integer("rating"),
     createdAt: timestamp("created_at").defaultNow().notNull(),

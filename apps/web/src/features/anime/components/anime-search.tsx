@@ -4,8 +4,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function AnimeSearch() {
+interface AnimeSearchProps {
+  variant?: "default" | "hero";
+}
+
+export function AnimeSearch({ variant = "default" }: AnimeSearchProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -81,16 +86,23 @@ export function AnimeSearch() {
     };
   }, []);
 
+  const isHero = variant === "hero";
+
   return (
-    <div className="relative w-full max-w-md">
-      <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+    <div className={cn("relative w-full", isHero ? "max-w-2xl" : "max-w-md")}>
+      <Search className={cn("absolute top-1/2 -translate-y-1/2 text-muted-foreground", isHero ? "left-6 h-6 w-6" : "left-4 h-4 w-4")} />
       <Input
         ref={inputRef}
         type="text"
         placeholder="SEARCH ANIME..."
         value={inputValue}
         onChange={handleInputChange}
-        className="h-12 border-none bg-muted pl-12 text-sm font-black uppercase tracking-widest focus-visible:ring-1 focus-visible:ring-foreground"
+        className={cn(
+          "border-none font-black uppercase tracking-[0.2em] focus-visible:ring-1 focus-visible:ring-foreground",
+          isHero 
+            ? "h-20 bg-white/5 pl-16 text-xl backdrop-blur-xl transition-all hover:bg-white/10" 
+            : "h-12 bg-muted pl-12 text-sm tracking-widest"
+        )}
       />
     </div>
   );

@@ -8,9 +8,10 @@ import {
 import { getTrendingAnime, searchAnime } from "../lib/requests";
 import { getMyLibrary } from "@/features/lists/lib/requests";
 import { HomeDiscovery } from "../components/home-discovery";
-import { AnimeSearch } from "../components/anime-search";
+import { HomeHero } from "../components/home-hero";
 import { SearchResults } from "../components/search-results";
 import { getSession } from "@/features/auth/lib/server";
+import { cn } from "@/lib/utils";
 
 interface HomePageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -49,33 +50,20 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-32">
-      <div className="mb-32 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-        <div className="relative z-10">
-          <h1 className="font-display text-[12vw] font-extrabold uppercase leading-[0.8] tracking-tighter text-foreground mix-blend-difference md:text-[14vw]">
-            Anilog
-          </h1>
-          <div className="mt-4 h-2 w-24 bg-foreground" />
-        </div>
-        <p className="max-w-md text-right text-sm font-medium leading-relaxed text-muted-foreground md:text-base">
-          A curatorial platform for the modern otaku. Track, rate, and discover anime with uncompromising aesthetic precision.
-        </p>
-      </div>
+    <div className="flex min-h-screen flex-col">
+      {!isSearching && <HomeHero />}
 
-      <div className="space-y-16">
-        <div className="flex flex-col gap-8 border-t border-white/10 pt-8 md:flex-row md:items-start md:justify-between">
-          <div className="space-y-2">
-            <h2 className="font-display text-4xl font-bold uppercase leading-none tracking-tight md:text-6xl">
-              {isSearching ? `"${searchQuery}"` : "Discovery"}
-            </h2>
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">
-              {isSearching ? "Search Results" : "Curated for you"}
+      <div className={cn("container mx-auto px-4", isSearching ? "py-32" : "py-24 md:py-48")}>
+        {isSearching && (
+          <div className="mb-16 space-y-4">
+            <h1 className="font-display text-5xl font-black uppercase tracking-tighter md:text-7xl">
+              Results for &quot;{searchQuery}&quot;
+            </h1>
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/60">
+              Found across the archive
             </p>
           </div>
-          <div className="w-full md:w-auto">
-            <AnimeSearch />
-          </div>
-        </div>
+        )}
 
         <HydrationBoundary state={dehydrate(queryClient)}>
           {isSearching ? (

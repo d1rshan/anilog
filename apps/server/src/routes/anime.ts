@@ -6,6 +6,10 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
     const anime = await AnimeService.getTrendingAnime();
     return anime;
   })
+  .get("/sync", async () => {
+    const result = await AnimeService.syncTrendingAnime();
+    return result;
+  })
   .get("/search/:query", async ({ params }) => {
     const result = await AnimeService.searchAnime(params.query);
     return result;

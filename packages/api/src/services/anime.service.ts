@@ -39,6 +39,7 @@ export class AnimeService {
             coverImage {
               large
             }
+            bannerImage
             seasonYear
             averageScore
           }
@@ -70,6 +71,7 @@ export class AnimeService {
             status: string | null;
             genres: string[];
             coverImage: { large: string; };
+            bannerImage: string | null;
             seasonYear: number | null;
             averageScore: number | null;
           }>;
@@ -88,6 +90,7 @@ export class AnimeService {
       status: media.status,
       genres: media.genres,
       imageUrl: media.coverImage?.large,
+      bannerImage: media.bannerImage,
       year: media.seasonYear,
       rating: media.averageScore,
     }));
@@ -103,6 +106,7 @@ export class AnimeService {
         status: anime.status,
         genres: anime.genres,
         imageUrl: anime.imageUrl,
+        bannerImage: anime.bannerImage,
         year: anime.year,
         rating: anime.rating,
         updatedAt: new Date()
@@ -139,6 +143,7 @@ export class AnimeService {
               coverImage {
                 large
               }
+              bannerImage
               seasonYear
               averageScore
             }
@@ -177,6 +182,7 @@ export class AnimeService {
         status: media.status,
         genres: media.genres,
         imageUrl: media.coverImage?.large,
+        bannerImage: media.bannerImage,
         year: media.seasonYear,
         rating: media.averageScore,
       }));
@@ -194,6 +200,7 @@ export class AnimeService {
     status?: string | null;
     genres?: string[] | null;
     imageUrl: string;
+    bannerImage?: string | null;
     year?: number | null;
     rating?: number | null;
   }) {
@@ -207,6 +214,7 @@ export class AnimeService {
         status: animeData.status,
         genres: animeData.genres,
         imageUrl: animeData.imageUrl,
+        bannerImage: animeData.bannerImage,
         year: animeData.year,
         rating: animeData.rating,
       }).onConflictDoUpdate({
@@ -219,6 +227,7 @@ export class AnimeService {
           status: animeData.status,
           genres: animeData.genres,
           imageUrl: animeData.imageUrl,
+          bannerImage: animeData.bannerImage,
           year: animeData.year,
           rating: animeData.rating,
           updatedAt: new Date()

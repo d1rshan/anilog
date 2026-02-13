@@ -49,13 +49,13 @@ function ScrollRow({ title, subtitle, children, gap = "gap-6", padding = "px-4" 
   };
 
   return (
-    <section className="group/row relative space-y-10">
-      <div className="flex items-end justify-between border-b border-white/5 pb-6">
-        <div className="space-y-1">
-          <h2 className="font-display text-5xl font-black uppercase leading-none tracking-tighter">
+    <section className="group/row relative animate-in fade-in slide-in-from-bottom-8 duration-1000">
+      <div className="mb-12 flex items-end justify-between border-b border-white/5 pb-8">
+        <div className="space-y-2">
+          <h2 className="font-display text-6xl font-black uppercase leading-none tracking-tighter md:text-8xl">
             {title}
           </h2>
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40">
+          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/40">
             {subtitle}
           </p>
         </div>
@@ -76,7 +76,7 @@ function ScrollRow({ title, subtitle, children, gap = "gap-6", padding = "px-4" 
           ref={scrollRef}
           onScroll={handleScroll}
           className={cn(
-            "no-scrollbar -mx-4 flex overflow-x-hidden overflow-y-hidden pb-4 scroll-smooth",
+            "no-scrollbar -mx-4 flex overflow-x-hidden overflow-y-hidden pb-8 scroll-smooth",
             gap,
             padding
           )}
@@ -134,13 +134,13 @@ export function HomeDiscovery() {
 
   if (isTrendingLoading || isLibraryLoading) {
     return (
-      <div className="space-y-16">
+      <div className="space-y-32">
         {[1, 2].map((i) => (
-          <div key={i} className="space-y-8">
-            <div className="h-10 w-48 animate-pulse rounded bg-white/5" />
-            <div className="flex gap-6 overflow-hidden">
+          <div key={i} className="space-y-12">
+            <div className="h-16 w-64 animate-pulse rounded bg-white/5" />
+            <div className="flex gap-8 overflow-hidden">
               {[1, 2, 3, 4, 5, 6].map((j) => (
-                <div key={j} className="aspect-[3/4.2] w-[200px] shrink-0 animate-pulse rounded-lg bg-white/5" />
+                <div key={j} className="aspect-[3/4.2] w-[240px] shrink-0 animate-pulse rounded-lg bg-white/5" />
               ))}
             </div>
           </div>
@@ -150,12 +150,12 @@ export function HomeDiscovery() {
   }
 
   return (
-    <div className="space-y-32 pb-32">
+    <div className="space-y-48 pb-48">
       {/* ACTIVE ARCHIVE */}
       {watchingEntries.length > 0 && (
-        <ScrollRow title="Active Archive" subtitle="In-Progress Logs">
+        <ScrollRow title="Active Archive" subtitle="Currently Logging">
           {watchingEntries.map((entry) => (
-            <div key={entry.id} className="w-[180px] shrink-0 sm:w-[220px]">
+            <div key={entry.id} className="w-[200px] shrink-0 transition-transform duration-500 hover:z-10 sm:w-[260px]">
               <AnimeCard
                 anime={entry.anime as any}
                 currentEpisode={entry.currentEpisode}
@@ -169,19 +169,19 @@ export function HomeDiscovery() {
       )}
 
       {/* TOP 10 RANKING */}
-      <ScrollRow title="The Canon" subtitle="Global Top 10" gap="gap-24" padding="px-20">
+      <ScrollRow title="The Canon" subtitle="Global Trending Rankings" gap="gap-32" padding="px-24">
         {topTen.map((animeItem, index) => {
           const entry = entryByAnimeId.get(animeItem.id);
           return (
-                            <div key={animeItem.id} className="relative flex shrink-0 items-end transition-all duration-500 hover:z-20">
-                              <span 
-                                className="pointer-events-none absolute -left-16 bottom-0 z-0 select-none font-display text-[220px] font-black leading-[0.65] text-transparent transition-colors md:text-[280px]"
-                                style={{ WebkitTextStroke: "2px rgba(255,255,255,0.15)" }}
-                              >
-                                {index + 1}
-                              </span>
+            <div key={animeItem.id} className="relative flex shrink-0 items-end transition-all duration-500 hover:z-20">
+              <span 
+                className="pointer-events-none absolute -left-20 bottom-0 z-0 select-none font-display text-[260px] font-black leading-[0.6] text-transparent transition-colors md:text-[320px]"
+                style={{ WebkitTextStroke: "2px rgba(255,255,255,0.1)" }}
+              >
+                {index + 1}
+              </span>
             
-              <div className="relative z-10 w-[180px] sm:w-[220px]">
+              <div className="relative z-10 w-[200px] sm:w-[260px]">
                 <AnimeCard
                   anime={animeItem}
                   loggedStatus={entry?.status}
@@ -196,22 +196,22 @@ export function HomeDiscovery() {
       </ScrollRow>
 
       {/* COLLECTION GRID */}
-      <section className="space-y-16">
-        <div className="flex items-end justify-between border-b border-white/5 pb-6">
-          <div className="space-y-1">
-            <h2 className="font-display text-5xl font-black uppercase leading-none tracking-tighter">
+      <section className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        <div className="mb-16 flex items-end justify-between border-b border-white/5 pb-8">
+          <div className="space-y-2">
+            <h2 className="font-display text-6xl font-black uppercase leading-none tracking-tighter md:text-8xl">
               Collection
             </h2>
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/50">
-              Trending Discovery
+            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/40">
+              Curated Discovery
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-x-6 gap-y-16 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-24 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
           {restOfTrending.map((animeItem) => {
             const entry = entryByAnimeId.get(animeItem.id);
             return (
-              <div key={animeItem.id} className="transition-transform duration-500 hover:z-10">
+              <div key={animeItem.id} className="transition-transform duration-500 hover:z-10 hover:-translate-y-2">
                 <AnimeCard
                   anime={animeItem}
                   loggedStatus={entry?.status}
