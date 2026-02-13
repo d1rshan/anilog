@@ -4,7 +4,7 @@ import {
   searchUsers,
   getUserProfile,
   getUserByUsername,
-  getUserPublicLists,
+  getUserPublicLibrary,
   followUser,
   unfollowUser,
   checkIsFollowing,
@@ -41,8 +41,8 @@ export const useUserByUsername = (username: string) => {
 
 export const useUserLists = (userId: string) => {
   return useQuery({
-    queryKey: ["users", "lists", userId],
-    queryFn: () => getUserPublicLists(userId),
+    queryKey: ["users", "library", userId],
+    queryFn: () => getUserPublicLibrary(userId),
     enabled: !!userId,
   });
 };

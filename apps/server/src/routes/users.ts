@@ -56,9 +56,9 @@ export const userRoutes = new Elysia({ prefix: "/users" })
     }
   )
   .get(
-    "/:id/lists",
+    "/:id/library",
     async ({ params }) => {
-      const lists = await UserService.getPublicUserLists(params.id);
+      const lists = await UserService.getPublicUserLibrary(params.id);
       return lists;
     },
     {

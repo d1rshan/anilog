@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import type { UserProfile } from "@anilog/db/schema/anilog";
+import type { UserProfile, LibraryStatus } from "@anilog/db/schema/anilog";
 
 export type UserWithProfile = {
   id: string;
@@ -12,24 +12,22 @@ export type UserWithProfile = {
   followingCount: number;
 };
 
-export type PublicUserLists = {
+export type PublicUserLibrary = {
   id: string;
-  name: string;
+  animeId: number;
+  status: LibraryStatus;
   createdAt: Date;
-  entries: {
-    id: string;
-    currentEpisode: number;
-    rating: number | null;
-    anime: {
-      id: number;
-      title: string;
-      titleJapanese: string | null;
-      imageUrl: string;
-      year: number | null;
-      episodes: number | null;
-      status?: string | null;
-    };
-  }[];
+  currentEpisode: number;
+  rating: number | null;
+  anime: {
+    id: number;
+    title: string;
+    titleJapanese: string | null;
+    imageUrl: string;
+    year: number | null;
+    episodes: number | null;
+    status?: string | null;
+  };
 }[];
 
 export async function searchUsers(query: string): Promise<UserWithProfile[]> {
@@ -62,8 +60,8 @@ export async function getUserByUsername(username: string): Promise<UserWithProfi
   return res.data;
 }
 
-export async function getUserPublicLists(userId: string): Promise<PublicUserLists> {
-  const res = await api.users({ id: userId }).lists.get();
+export async function getUserPublicLibrary(userId: string): Promise<PublicUserLibrary> {
+  const res = await api.users({ id: userId }).library.get();
 
   if (res.error) {
     throw res.error;

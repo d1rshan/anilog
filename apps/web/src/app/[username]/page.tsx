@@ -37,13 +37,13 @@ export default async function UserProfilePage({ params }: PageProps) {
     notFound();
   }
 
-  // Prefetch lists
+  // Prefetch library
   await queryClient.prefetchQuery({
-    queryKey: ["users", "lists", user.id],
+    queryKey: ["users", "library", user.id],
     queryFn: async () => {
-      const listsRes = await api.users({ id: user.id }).lists.get();
-      if (listsRes.error) throw listsRes.error;
-      return listsRes.data;
+      const libraryRes = await api.users({ id: user.id }).library.get();
+      if (libraryRes.error) throw libraryRes.error;
+      return libraryRes.data;
     },
   });
 
