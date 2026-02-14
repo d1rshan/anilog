@@ -1,6 +1,8 @@
 import { Elysia, t } from "elysia";
 import { AnimeService } from "@anilog/api";
 
+type UpsertAnimeInput = Parameters<typeof AnimeService.upsertAnime>[0];
+
 export const animeRoutes = new Elysia({ prefix: "/anime" })
   .get("/trending", async () => {
     const anime = await AnimeService.getTrendingAnime();
@@ -21,7 +23,7 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
     params: t.Object({ query: t.String() })
   })
   .post("/upsert", async ({ body }) => {
-    const result = await AnimeService.upsertAnime(body);
+    const result = await AnimeService.upsertAnime(body as UpsertAnimeInput);
     return result;
   }, {
     body: t.Object({

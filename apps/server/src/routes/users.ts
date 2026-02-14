@@ -2,6 +2,8 @@ import { Elysia, t } from "elysia";
 import { UserService } from "@anilog/api";
 import { auth } from "@anilog/auth";
 
+type UpdateUserProfileInput = Parameters<typeof UserService.updateUserProfile>[1];
+
 const authMiddleware = (app: Elysia) =>
   app.derive(async ({ request }) => {
     const session = await auth.api.getSession({ headers: request.headers });
@@ -127,7 +129,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .put(
     "/me/profile",
     async ({ body, userId }) => {
-      const profile = await UserService.updateUserProfile(userId, body);
+      const profile = await UserService.updateUserProfile(userId, body as UpdateUserProfileInput);
       return profile;
     },
     {

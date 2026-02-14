@@ -5,6 +5,27 @@ import { eq, getTableColumns } from "drizzle-orm"
 
 const ANILIST_API = "https://graphql.anilist.co";
 
+type AniListMedia = {
+  id: number;
+  title: { english: string | null; native: string | null; };
+  description: string | null;
+  episodes: number | null;
+  status: string | null;
+  genres: string[];
+  coverImage: { extraLarge: string; large: string; };
+  bannerImage: string | null;
+  seasonYear: number | null;
+  averageScore: number | null;
+};
+
+type AniListPageResponse = {
+  data?: {
+    Page?: {
+      media?: AniListMedia[];
+    };
+  };
+};
+
 export class AnimeService {
   static async getTrendingAnime() {
     try {
@@ -56,12 +77,12 @@ export class AnimeService {
 
       if (!res.ok) continue;
 
-      const json = await res.json();
+      const json = (await res.json()) as AniListPageResponse;
       const mediaList = json.data?.Page?.media;
 
       if (!mediaList) continue;
 
-      const animeInserts = mediaList.map((media: any) => ({
+      const animeInserts = mediaList.map((media) => ({
         id: media.id,
         title: media.title.english ?? media.title.native ?? "UNKNOWN",
         titleJapanese: media.title.native,

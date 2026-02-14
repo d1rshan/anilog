@@ -2,6 +2,16 @@ import { Elysia, t } from "elysia";
 import { LibraryService } from "@anilog/api";
 import { auth } from "@anilog/auth";
 
+type LogAnimeInput = Parameters<typeof LibraryService.logAnime>[1];
+type UpdateStatusInput = {
+  status: Parameters<typeof LibraryService.updateStatus>[2];
+  currentEpisode?: Parameters<typeof LibraryService.updateStatus>[3];
+};
+type UpdateProgressInput = Parameters<typeof LibraryService.updateProgress>[2];
+type UpdateRatingInput = {
+  rating: Parameters<typeof LibraryService.updateRating>[2];
+};
+
 const authMiddleware = (app: Elysia) =>
   app.derive(async ({ request }) => {
     const session = await auth.api.getSession({ headers: request.headers });
@@ -26,7 +36,7 @@ export const libraryRoutes = new Elysia({ prefix: "/library" })
   .post(
     "/me/log",
     async ({ userId, body }) => {
-      return await LibraryService.logAnime(userId, body);
+      return await LibraryService.logAnime(userId, body as LogAnimeInput);
     },
     {
       body: t.Object({
@@ -51,7 +61,8 @@ export const libraryRoutes = new Elysia({ prefix: "/library" })
   .patch(
     "/me/:animeId/status",
     async ({ userId, params, body }) => {
-      return await LibraryService.updateStatus(userId, params.animeId, body.status, body.currentEpisode);
+      const payload = body as UpdateStatusInput;
+      return await LibraryService.updateStatus(userId, Number(params.animeId), payload.status, payload.currentEpisode);
     },
     {
       params: t.Object({ animeId: t.Integer() }),
@@ -64,7 +75,7 @@ export const libraryRoutes = new Elysia({ prefix: "/library" })
   .patch(
     "/me/:animeId/progress",
     async ({ userId, params, body }) => {
-      return await LibraryService.updateProgress(userId, params.animeId, body);
+      return await LibraryService.updateProgress(userId, Number(params.animeId), body as UpdateProgressInput);
     },
     {
       params: t.Object({ animeId: t.Integer() }),
@@ -77,7 +88,8 @@ export const libraryRoutes = new Elysia({ prefix: "/library" })
   .patch(
     "/me/:animeId/rating",
     async ({ userId, params, body }) => {
-      return await LibraryService.updateRating(userId, params.animeId, body.rating);
+      const payload = body as UpdateRatingInput;
+      return await LibraryService.updateRating(userId, Number(params.animeId), payload.rating);
     },
     {
       params: t.Object({ animeId: t.Integer() }),
@@ -89,7 +101,7 @@ export const libraryRoutes = new Elysia({ prefix: "/library" })
   .delete(
     "/me/:animeId",
     async ({ userId, params }) => {
-      return await LibraryService.removeFromLibrary(userId, params.animeId);
+      return await LibraryService.removeFromLibrary(userId, Number(params.animeId));
     },
     {
       params: t.Object({ animeId: t.Integer() }),

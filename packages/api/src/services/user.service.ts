@@ -205,11 +205,13 @@ export class UserService {
   }
 
   static async isFollowing(followerId: string, followingId: string): Promise<boolean> {
-    const result = await db.query.userFollow.findFirst({
-      where: (follow, { and, eq }) => and(eq(follow.followerId, followerId), eq(follow.followingId, followingId)),
-    });
+    const result = await db
+      .select({ followerId: userFollow.followerId })
+      .from(userFollow)
+      .where(and(eq(userFollow.followerId, followerId), eq(userFollow.followingId, followingId)))
+      .limit(1);
 
-    return !!result;
+    return result.length > 0;
   }
 
   static async getFollowers(userId: string): Promise<UserWithProfile[]> {
