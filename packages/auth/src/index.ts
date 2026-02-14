@@ -5,13 +5,18 @@ import { db } from "@anilog/db";
 import * as schema from "@anilog/db/schema/auth";
 import { UserService } from "@anilog/api";
 
+const trustedOrigins = (process.env.CORS_ORIGIN || "")
+	.split(",")
+	.map((origin) => origin.trim())
+	.filter(Boolean);
+
 export const auth = betterAuth({
 	database: drizzleAdapter(db, {
 		provider: "pg",
 		schema: schema,
 	}),
 	basePath: "/auth",
-	trustedOrigins: [process.env.CORS_ORIGIN || ""],
+	trustedOrigins,
 	emailAndPassword: {
 		enabled: true,
 	},

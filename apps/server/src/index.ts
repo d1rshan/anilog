@@ -6,10 +6,17 @@ import { animeRoutes } from "./routes/anime";
 import { userRoutes } from "./routes/users";
 import { libraryRoutes } from "./routes/library";
 
+const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:3001")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const port = Number(process.env.PORT || 3000);
+
 const app = new Elysia()
   .use(
     cors({
-      origin: process.env.CORS_ORIGIN || "",
+      origin: allowedOrigins,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization", "x-user-id"],
       credentials: true,
@@ -24,8 +31,8 @@ const app = new Elysia()
   })
   .group("/api", (app) => app.use(animeRoutes).use(libraryRoutes).use(userRoutes))
   .get("/", () => "OK")
-  .listen(3000, () => {
-    console.log("Server is running on http://localhost:3000");
+  .listen(port, () => {
+    console.log(`Server is running on port ${port}`);
   });
 
 export type App = typeof app;
