@@ -2,17 +2,31 @@ import { Elysia, t } from "elysia";
 import { AnimeService } from "@anilog/api";
 
 type UpsertAnimeInput = Parameters<typeof AnimeService.upsertAnime>[0];
+const cronSecret = process.env.CRON_SECRET;
+
+function isCronAuthorized(request: Request) {
+  if (!cronSecret) return false;
+  return request.headers.get("authorization") === `Bearer ${cronSecret}`;
+}
 
 export const animeRoutes = new Elysia({ prefix: "/anime" })
   .get("/trending", async () => {
     const anime = await AnimeService.getTrendingAnime();
     return anime;
   })
-  .get("/sync", async () => {
+  .get("/sync", async ({ request, set }) => {
+    if (!isCronAuthorized(request)) {
+      set.status = 401;
+      return { success: false, error: "Unauthorized" };
+    }
     const result = await AnimeService.syncTrendingAnime();
     return result;
   })
-  .get("/sync-all", async () => {
+  .get("/sync-all", async ({ request, set }) => {
+    if (!isCronAuthorized(request)) {
+      set.status = 401;
+      return { success: false, error: "Unauthorized" };
+    }
     const result = await AnimeService.syncAllAnime();
     return result;
   })

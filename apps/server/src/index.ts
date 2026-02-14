@@ -6,10 +6,7 @@ import { animeRoutes } from "./routes/anime";
 import { userRoutes } from "./routes/users";
 import { libraryRoutes } from "./routes/library";
 
-const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:3001")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const allowedOrigins = process.env.CORS_ORIGIN || "http://localhost:3001"
 
 const port = Number(process.env.PORT || 3000);
 
