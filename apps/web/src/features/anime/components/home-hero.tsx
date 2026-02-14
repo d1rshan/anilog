@@ -1,176 +1,253 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { useTrendingAnime } from "../lib/hooks";
+import { useState, useRef, useEffect } from "react";
+import YouTube, { type YouTubeProps, YouTubePlayer } from "react-youtube";
 import { AnimeSearch } from "./anime-search";
-import { Star, ChevronRight, ChevronLeft } from "lucide-react";
+import { Volume2, VolumeX, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
+
+// --- MONTHLY CURATION CONFIG ---
+const CURATIONS = [
+  {
+    videoId: "cszyD9FxsP0",
+    start: 0,
+    stop: 60, // Plays for 28 seconds when unmuted
+    title: "ONE PIECE",
+    subtitle: "Egghead Arc Selection",
+    description: "Witness the pinnacle of modern animation as the Straw Hats reach the island of the future and the truth of the world begins to unravel.",
+    tag: "Series Spotlight"
+  },
+  {
+    videoId: "GrLh_7ykWRk",
+    start: 140,
+    stop: 177,
+    title: "Jujutsu Kaisen",
+    subtitle: "Visual Poetry",
+    description: "Exploring the hyper-realistic backgrounds, emotional lighting, and cosmic scales that have made Makoto Shinkai a global phenomenon.",
+    tag: "Director Focus"
+  }
+];
 
 export function HomeHero() {
-  const { data: anime = [], isLoading } = useTrendingAnime();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isMuted, setIsMuted] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const playerRef = useRef<YouTubePlayer | null>(null);
 
-  // Find top 5 anime that have banners for the rotation
-  const featuredList = useMemo(() => {
-    const withBanners = anime.filter(a => !!a.bannerImage).slice(0, 5);
-    // Fallback if not enough banners: just take top 5
-    return withBanners.length > 0 ? withBanners : anime.slice(0, 5);
-  }, [anime]);
+  const current = CURATIONS[currentIndex];
 
+  // --- AUTO-CYCLE LOGIC ---
+  // If muted: Auto-cycle every 15s.
+  // If unmuted: Disable auto-cycle (let the video play to 'stop' time).
   useEffect(() => {
-    if (featuredList.length <= 1) return;
+    if (!isMuted) return; // Stop the timer if audio is on
 
     const interval = setInterval(() => {
       handleNext();
-    }, 8000); // 8 seconds per slide
-
+    }, 15000);
     return () => clearInterval(interval);
-  }, [featuredList.length, currentIndex]);
+  }, [currentIndex, isMuted]);
 
   const handleNext = () => {
     setIsTransitioning(true);
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % featuredList.length);
+      setCurrentIndex((prev) => (prev + 1) % CURATIONS.length);
       setIsTransitioning(false);
-    }, 500);
+    }, 600);
   };
 
   const handlePrev = () => {
     setIsTransitioning(true);
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev - 1 + featuredList.length) % featuredList.length);
+      setCurrentIndex((prev) => (prev - 1 + CURATIONS.length) % CURATIONS.length);
       setIsTransitioning(false);
-    }, 500);
+    }, 600);
   };
 
-  if (isLoading) {
-    return <Skeleton className="h-[75vh] w-full rounded-none bg-white/5" />;
-  }
+  // --- AUDIO CONTROL ---
+  const toggleMute = () => {
+    if (!playerRef.current) return;
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
 
-  const featured = featuredList[currentIndex];
-  if (!featured) return null;
+    if (newMutedState) {
+      playerRef.current.mute();
+    } else {
+      playerRef.current.unMute();
+      playerRef.current.setVolume(100);
+      // Optional: Reset to start when unmute to ensure full experience?
+      // playerRef.current.seekTo(current.start); 
+    }
+  };
 
-  const hasBanner = !!featured.bannerImage;
+  // --- PLAYER EVENTS ---
+  const onPlayerReady = (event: { target: YouTubePlayer }) => {
+    playerRef.current = event.target;
+    if (isMuted) {
+      event.target.mute();
+    } else {
+      event.target.unMute();
+      event.target.setVolume(100);
+    }
+  };
+
+  // Check play progress to enforce 'stop' time
+  const onStateChange = (event: { target: YouTubePlayer; data: number }) => {
+    // 0 = Ended (Standard YouTube end)
+    if (event.data === 0 && !isMuted) {
+      handleNext();
+    }
+  };
+
+  // While playing, check if we passed the 'stop' timestamp
+  useEffect(() => {
+    if (isMuted || !playerRef.current) return;
+
+    const checkTime = setInterval(async () => {
+      try {
+        const currentTime = await playerRef.current.getCurrentTime();
+        if (currentTime >= current.stop) {
+          handleNext();
+        }
+      } catch (e) {
+        // Player might not be ready yet
+      }
+    }, 1000);
+
+    return () => clearInterval(checkTime);
+  }, [currentIndex, isMuted, current.stop]);
+
+  // YouTube Options
+  const opts: YouTubeProps['opts'] = {
+    height: '100%',
+    width: '100%',
+    playerVars: {
+      autoplay: 1,
+      controls: 0,
+      rel: 0,
+      showinfo: 0,
+      mute: 1,
+      loop: 1,
+      start: current.start,
+      end: current.stop, // Native YouTube 'end' param (hard cut)
+      playlist: current.videoId,
+      modestbranding: 1,
+      iv_load_policy: 3,
+    },
+  };
 
   return (
-    <section className="relative h-[80vh] min-h-[600px] w-full overflow-hidden bg-[#050505]">
-      {/* Background Layers for Smooth Transitions */}
-      {featuredList.map((item, index) => (
-        <div
-          key={item.id}
-          className={cn(
-            "absolute inset-0 z-10 transition-all duration-1000 ease-in-out",
-            index === currentIndex ? "opacity-100 scale-100" : "opacity-0 scale-110 pointer-events-none"
-          )}
-        >
-          {/* Cinema Scope Container */}
-          <div className={cn(
-            "absolute inset-0 flex items-center justify-center overflow-hidden",
-            hasBanner ? "h-[75%] top-0" : "h-full"
-          )}>
-            <img
-              src={item.bannerImage || item.imageUrl}
-              alt=""
-              className={cn(
-                "h-full w-full object-cover",
-                !item.bannerImage && "blur-xl opacity-30 scale-150"
-              )}
-              style={{ 
-                objectPosition: "50% 35%",
-                animation: index === currentIndex ? "ken-burns 30s ease-in-out infinite alternate" : undefined
-              }}
+    <section className="relative h-screen w-full overflow-hidden bg-[#050505]">
+      {/* 1. YouTube Background Layer */}
+      <div className={cn(
+        "absolute inset-0 z-0 scale-[1.15] origin-center transition-all duration-1000",
+        isTransitioning ? "opacity-0 scale-125" : "opacity-100 scale-110"
+      )}>
+        <div className="relative h-full w-full pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100vw] h-[56.25vw] min-h-[100vh] min-w-[177.77vh]">
+            <YouTube
+              videoId={current.videoId}
+              opts={opts}
+              onReady={onPlayerReady}
+              onStateChange={onStateChange}
+              className="h-full w-full"
+              iframeClassName="h-full w-full pointer-events-none"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-[#050505]/40" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-transparent to-[#050505]/20" />
           </div>
         </div>
-      ))}
 
-      {/* Floating "ANILOG" Background Text */}
-      <div className="pointer-events-none absolute left-[-2vw] top-[5vh] z-0 select-none opacity-[0.02]">
-        <h1 className="font-display text-[35vw] font-black uppercase leading-none tracking-tighter text-white">
-          Anilog
-        </h1>
+        {/* Cinematic Overlays */}
+        <div className="absolute inset-0 bg-[#050505]/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-transparent to-transparent opacity-80" />
       </div>
 
-      {/* Static Overlays: Controls & Content */}
-      <div className="container relative z-30 mx-auto flex h-full flex-col justify-end px-4 pb-16 md:pb-24">
+      {/* 2. Editorial Content Overlay */}
+      <div className="container relative z-20 mx-auto flex h-full items-center px-4 pt-20">
         <div className="max-w-4xl space-y-10">
-          
-          {/* Content with its own transition state */}
+
           <div className={cn(
-            "space-y-6 transition-all duration-500",
-            isTransitioning ? "opacity-0 -translate-x-4" : "opacity-100 translate-x-0"
+            "space-y-6 transition-all duration-700 ease-out",
+            isTransitioning ? "opacity-0 -translate-y-8" : "opacity-100 translate-y-0"
           )}>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white backdrop-blur-md ring-1 ring-white/20">
-                <Star className="h-3 w-3 fill-white" />
-                <span>{featured.rating ? (featured.rating / 10).toFixed(1) : "N/A"}</span>
-              </div>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">
-                TOP TRENDING • {featured.year} • {featured.genres?.slice(0, 2).join(" / ")}
+              <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.3em] text-white backdrop-blur-md">
+                {current.tag}
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">
+                {current.subtitle}
               </span>
             </div>
 
-            <h2 className="font-display text-5xl font-black uppercase leading-[0.85] tracking-tighter md:text-7xl lg:text-8xl">
-              {featured.title}
+            <h2 className="font-display text-7xl font-black uppercase leading-[0.85] tracking-tighter text-white md:text-9xl">
+              {current.title}
             </h2>
 
-            <p className="line-clamp-2 max-w-2xl text-base font-medium leading-relaxed text-white/60 md:text-lg">
-              {featured.description?.replace(/<[^>]*>?/gm, "")}
+            <p className="max-w-2xl text-lg font-medium leading-relaxed text-white/60 md:text-xl">
+              {current.description}
             </p>
           </div>
 
-          <div className="flex flex-col gap-12 md:flex-row md:items-center">
+          <div className={cn(
+            "transition-all duration-1000 delay-300",
+            isTransitioning ? "opacity-0" : "opacity-100"
+          )}>
+            <p className="mb-4 text-[10px] font-black uppercase tracking-[0.4em] text-white/30">Continue Discovery</p>
             <AnimeSearch variant="hero" />
-            
-            {/* Slide Indicators */}
-            <div className="flex items-center gap-3">
-              {featuredList.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setIsTransitioning(true);
-                    setTimeout(() => {
-                      setCurrentIndex(idx);
-                      setIsTransitioning(false);
-                    }, 500);
-                  }}
-                  className={cn(
-                    "h-1 transition-all duration-500 rounded-full",
-                    idx === currentIndex ? "w-12 bg-white" : "w-4 bg-white/20 hover:bg-white/40"
-                  )}
-                />
-              ))}
-            </div>
           </div>
         </div>
       </div>
 
-      {/* Manual Navigation Arrows */}
-      <div className="absolute right-8 bottom-24 z-40 hidden flex-col gap-4 md:flex">
-        <button 
-          onClick={handlePrev}
-          className="group flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-black/20 text-white backdrop-blur-md transition-all hover:bg-white hover:text-black"
+      {/* 3. Interactive Controls */}
+      <div className="absolute bottom-12 right-12 z-30 flex items-center gap-8">
+        <div className="hidden items-center gap-3 md:flex">
+          {CURATIONS.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => {
+                if (idx === currentIndex) return;
+                setIsTransitioning(true);
+                setTimeout(() => {
+                  setCurrentIndex(idx);
+                  setIsTransitioning(false);
+                }, 600);
+              }}
+              className={cn(
+                "h-1 rounded-full transition-all duration-500",
+                idx === currentIndex ? "w-16 bg-white" : "w-4 bg-white/20 hover:bg-white/40"
+              )}
+            />
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handlePrev}
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white backdrop-blur-2xl transition-all hover:bg-white hover:text-black active:scale-90"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            onClick={handleNext}
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white backdrop-blur-2xl transition-all hover:bg-white hover:text-black active:scale-90"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="h-8 w-px bg-white/10" />
+
+        <button
+          onClick={toggleMute}
+          className="group flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white backdrop-blur-2xl transition-all hover:bg-white hover:text-black active:scale-90 shadow-2xl"
+          title={isMuted ? "Unmute" : "Mute"}
         >
-          <ChevronLeft className="h-5 w-5 transition-transform group-active:scale-90" />
-        </button>
-        <button 
-          onClick={handleNext}
-          className="group flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-black/20 text-white backdrop-blur-md transition-all hover:bg-white hover:text-black"
-        >
-          <ChevronRight className="h-5 w-5 transition-transform group-active:scale-90" />
+          {isMuted ? <VolumeX className="h-5 w-5 transition-transform group-hover:scale-110" /> : <Volume2 className="h-5 w-5 transition-transform group-hover:scale-110" />}
         </button>
       </div>
 
-      <style jsx global>{`
-        @keyframes ken-burns {
-          0% { transform: scale(1.05) translate(0, 0); }
-          100% { transform: scale(1.15) translate(-1%, -1%); }
-        }
-      `}</style>
+      <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-black/40 to-transparent z-40 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#050505] to-transparent z-40 pointer-events-none" />
     </section>
   );
 }
