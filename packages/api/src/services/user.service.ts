@@ -1,7 +1,7 @@
 import { db } from "@anilog/db";
-import { userFollow, userProfile, userList, listEntry, anime } from "@anilog/db/schema/anilog";
+import { userFollow, userProfile, userAnime, anime, type LibraryStatus } from "@anilog/db/schema/anilog";
 import { user } from "@anilog/db/schema/auth";
-import { eq, getTableColumns, count, and, ilike } from "drizzle-orm";
+import { eq, getTableColumns, count, and, ilike, asc } from "drizzle-orm";
 import type { UserProfile } from "@anilog/db/schema/anilog";
 
 export type ProfileData = {
@@ -27,23 +27,22 @@ export type UserWithProfile = {
   followingCount: number;
 };
 
-export type PublicUserLists = {
+export type PublicUserLibrary = {
   id: string;
-  name: string;
+  animeId: number;
+  status: LibraryStatus;
+  currentEpisode: number;
+  rating: number | null;
   createdAt: Date;
-  entries: {
-    id: string;
-    currentEpisode: number;
-    rating: number | null;
-    anime: {
-      id: number;
-      title: string;
-      titleJapanese: string | null;
-      imageUrl: string;
-      year: number | null;
-      episodes: number | null;
-    };
-  }[];
+  anime: {
+    id: number;
+    title: string;
+    titleJapanese: string | null;
+    imageUrl: string;
+    year: number | null;
+    episodes: number | null;
+    status: string | null;
+  };
 }[];
 
 export class UserService {
@@ -142,10 +141,7 @@ export class UserService {
     };
   }
 
-  static async updateUserProfile(
-    userId: string,
-    data: ProfileData
-  ): Promise<UserProfile> {
+  static async updateUserProfile(userId: string, data: ProfileData): Promise<UserProfile> {
     const [updatedProfile] = await db
       .update(userProfile)
       .set({
@@ -164,7 +160,7 @@ export class UserService {
 
   static async followUser(
     followerId: string,
-    followingId: string
+    followingId: string,
   ): Promise<{ success: boolean; message: string }> {
     if (followerId === followingId) {
       throw new Error("Cannot follow yourself");
@@ -194,16 +190,11 @@ export class UserService {
 
   static async unfollowUser(
     followerId: string,
-    followingId: string
+    followingId: string,
   ): Promise<{ success: boolean; message: string }> {
     const result = await db
       .delete(userFollow)
-      .where(
-        and(
-          eq(userFollow.followerId, followerId),
-          eq(userFollow.followingId, followingId)
-        )
-      )
+      .where(and(eq(userFollow.followerId, followerId), eq(userFollow.followingId, followingId)))
       .returning();
 
     if (result.length === 0) {
@@ -213,16 +204,9 @@ export class UserService {
     return { success: true, message: "Successfully unfollowed user" };
   }
 
-  static async isFollowing(
-    followerId: string,
-    followingId: string
-  ): Promise<boolean> {
+  static async isFollowing(followerId: string, followingId: string): Promise<boolean> {
     const result = await db.query.userFollow.findFirst({
-      where: (follow, { and, eq }) =>
-        and(
-          eq(follow.followerId, followerId),
-          eq(follow.followingId, followingId)
-        ),
+      where: (follow, { and, eq }) => and(eq(follow.followerId, followerId), eq(follow.followingId, followingId)),
     });
 
     return !!result;
@@ -253,7 +237,7 @@ export class UserService {
         profile: f.profile,
         followerCount: await this.getFollowerCount(f.id),
         followingCount: await this.getFollowingCount(f.id),
-      }))
+      })),
     );
   }
 
@@ -282,32 +266,23 @@ export class UserService {
         profile: f.profile,
         followerCount: await this.getFollowerCount(f.id),
         followingCount: await this.getFollowingCount(f.id),
-      }))
+      })),
     );
   }
 
   static async getFollowerCount(userId: string): Promise<number> {
-    const result = await db
-      .select({ count: count() })
-      .from(userFollow)
-      .where(eq(userFollow.followingId, userId));
+    const result = await db.select({ count: count() }).from(userFollow).where(eq(userFollow.followingId, userId));
 
     return result[0]?.count || 0;
   }
 
   static async getFollowingCount(userId: string): Promise<number> {
-    const result = await db
-      .select({ count: count() })
-      .from(userFollow)
-      .where(eq(userFollow.followerId, userId));
+    const result = await db.select({ count: count() }).from(userFollow).where(eq(userFollow.followerId, userId));
 
     return result[0]?.count || 0;
   }
 
-  static async getFollowCounts(userId: string): Promise<{
-    followerCount: number;
-    followingCount: number;
-  }> {
+  static async getFollowCounts(userId: string): Promise<{ followerCount: number; followingCount: number }> {
     const [followerResult, followingResult] = await Promise.all([
       db.select({ count: count() }).from(userFollow).where(eq(userFollow.followingId, userId)),
       db.select({ count: count() }).from(userFollow).where(eq(userFollow.followerId, userId)),
@@ -319,49 +294,37 @@ export class UserService {
     };
   }
 
-  static async getPublicUserLists(userId: string): Promise<PublicUserLists> {
-    const lists = await db
+  static async getPublicUserLibrary(userId: string): Promise<PublicUserLibrary> {
+    const library = await db
       .select({
-        ...getTableColumns(userList),
+        ...getTableColumns(userAnime),
+        anime: {
+          id: anime.id,
+          title: anime.title,
+          titleJapanese: anime.titleJapanese,
+          imageUrl: anime.imageUrl,
+          year: anime.year,
+          episodes: anime.episodes,
+          status: anime.status,
+        },
       })
-      .from(userList)
-      .where(eq(userList.userId, userId));
+      .from(userAnime)
+      .innerJoin(anime, eq(userAnime.animeId, anime.id))
+      .where(eq(userAnime.userId, userId))
+      .orderBy(asc(userAnime.createdAt));
 
-    return Promise.all(
-      lists.map(async (list) => {
-        const entries = await db
-          .select({
-            ...getTableColumns(listEntry),
-            anime: {
-              id: anime.id,
-              title: anime.title,
-              titleJapanese: anime.titleJapanese,
-              imageUrl: anime.imageUrl,
-              year: anime.year,
-              episodes: anime.episodes,
-            },
-          })
-          .from(listEntry)
-          .innerJoin(anime, eq(listEntry.animeId, anime.id))
-          .where(eq(listEntry.listId, list.id));
-
-        return {
-          ...list,
-          entries: entries.map((e) => ({
-            id: e.id,
-            currentEpisode: e.currentEpisode,
-            rating: e.rating,
-            anime: e.anime,
-          })),
-        };
-      })
-    );
+    return library.map((e) => ({
+      id: e.id,
+      animeId: e.animeId,
+      status: e.status,
+      currentEpisode: e.currentEpisode,
+      rating: e.rating,
+      createdAt: e.createdAt,
+      anime: e.anime,
+    }));
   }
 
-  static async searchUsers(
-    query: string,
-    limit: number = 20
-  ): Promise<UserWithProfile[]> {
+  static async searchUsers(query: string, limit: number = 20): Promise<UserWithProfile[]> {
     const searchPattern = `%${query}%`;
 
     const users = await db
@@ -375,12 +338,7 @@ export class UserService {
       })
       .from(user)
       .leftJoin(userProfile, eq(user.id, userProfile.userId))
-      .where(
-        and(
-          ilike(user.name, searchPattern),
-          eq(userProfile.isPublic, true)
-        )
-      )
+      .where(and(ilike(user.name, searchPattern), eq(userProfile.isPublic, true)))
       .limit(limit);
 
     return Promise.all(
@@ -393,7 +351,7 @@ export class UserService {
         profile: u.profile,
         followerCount: await this.getFollowerCount(u.id),
         followingCount: await this.getFollowingCount(u.id),
-      }))
+      })),
     );
   }
 }

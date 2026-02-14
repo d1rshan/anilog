@@ -8,7 +8,6 @@ import { useSession } from "@/features/auth/lib/hooks";
 import UserMenu from "@/features/auth/components/user-menu";
 import Link from "next/link";
 import type { Route } from "next";
-import type { UrlObject } from "url";
 import { cn } from "@/lib/utils";
 
 export default function Navbar() {
@@ -26,19 +25,22 @@ export default function Navbar() {
   if (pathname === "/login") return null;
   if (!session) return null;
 
+  const username = session.user.username ?? session.user.name;
+  const profilePath = `/${username}` as Route;
+
   type NavLink = {
-    href: Route | UrlObject;
+    href: Route;
     label: string;
-    activePath: string;
+    activePath: Route;
   };
 
   const links: NavLink[] = [
-    { href: "/" as Route, label: "Discovery", activePath: "/" },
-    { href: "/users" as Route, label: "Community", activePath: "/users" },
+    { href: "/" as Route, label: "Discovery", activePath: "/" as Route },
+    { href: "/users" as Route, label: "Community", activePath: "/users" as Route },
     {
-      href: { pathname: "/[username]", query: { username: session.user.name } },
+      href: profilePath,
       label: "Archive",
-      activePath: `/${session.user.name}`,
+      activePath: profilePath,
     },
   ];
 

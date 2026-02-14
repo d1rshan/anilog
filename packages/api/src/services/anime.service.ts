@@ -18,6 +18,77 @@ export class AnimeService {
     }
   }
 
+  static async syncAllAnime(): Promise<{ success: boolean; count: number }> {
+    const allAnime = await db.select({ id: anime.id }).from(anime);
+    const ids = allAnime.map((a) => a.id);
+
+    if (ids.length === 0) return { success: true, count: 0 };
+
+    const batchSize = 50;
+    let count = 0;
+
+    for (let i = 0; i < ids.length; i += batchSize) {
+      const batchIds = ids.slice(i, i + batchSize);
+      const query = `
+        query ($ids: [Int]) {
+          Page(page: 1, perPage: 50) {
+            media(id_in: $ids, type: ANIME) {
+              id
+              title { english native }
+              description
+              episodes
+              status
+              genres
+              coverImage { extraLarge large }
+              bannerImage
+              seasonYear
+              averageScore
+            }
+          }
+        }
+      `;
+
+      const res = await fetch(ANILIST_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ query, variables: { ids: batchIds } }),
+      });
+
+      if (!res.ok) continue;
+
+      const json = await res.json();
+      const mediaList = json.data?.Page?.media;
+
+      if (!mediaList) continue;
+
+      const animeInserts = mediaList.map((media: any) => ({
+        id: media.id,
+        title: media.title.english ?? media.title.native ?? "UNKNOWN",
+        titleJapanese: media.title.native,
+        description: media.description,
+        episodes: media.episodes,
+        status: media.status,
+        genres: media.genres,
+        imageUrl: media.coverImage?.extraLarge ?? media.coverImage?.large,
+        bannerImage: media.bannerImage,
+        year: media.seasonYear,
+        rating: media.averageScore,
+        updatedAt: new Date()
+      }));
+
+      for (const item of animeInserts) {
+        await db.insert(anime).values(item).onConflictDoUpdate({
+          target: anime.id,
+          set: item
+        });
+      }
+      
+      count += animeInserts.length;
+    }
+
+    return { success: true, count };
+  }
+
   static async syncTrendingAnime(): Promise<{ success: boolean; count: number }> {
     const query = `
       query TrendingAnime {
@@ -37,8 +108,10 @@ export class AnimeService {
             status
             genres
             coverImage {
+              extraLarge
               large
             }
+            bannerImage
             seasonYear
             averageScore
           }
@@ -69,7 +142,8 @@ export class AnimeService {
             episodes: number | null;
             status: string | null;
             genres: string[];
-            coverImage: { large: string; };
+            coverImage: { extraLarge: string; large: string; };
+            bannerImage: string | null;
             seasonYear: number | null;
             averageScore: number | null;
           }>;
@@ -87,7 +161,8 @@ export class AnimeService {
       episodes: media.episodes,
       status: media.status,
       genres: media.genres,
-      imageUrl: media.coverImage?.large,
+      imageUrl: media.coverImage?.extraLarge ?? media.coverImage?.large,
+      bannerImage: media.bannerImage,
       year: media.seasonYear,
       rating: media.averageScore,
     }));
@@ -103,6 +178,7 @@ export class AnimeService {
         status: anime.status,
         genres: anime.genres,
         imageUrl: anime.imageUrl,
+        bannerImage: anime.bannerImage,
         year: anime.year,
         rating: anime.rating,
         updatedAt: new Date()
@@ -137,8 +213,10 @@ export class AnimeService {
               status
               genres
               coverImage {
+                extraLarge
                 large
               }
+              bannerImage
               seasonYear
               averageScore
             }
@@ -176,7 +254,8 @@ export class AnimeService {
         episodes: media.episodes,
         status: media.status,
         genres: media.genres,
-        imageUrl: media.coverImage?.large,
+        imageUrl: media.coverImage?.extraLarge ?? media.coverImage?.large,
+        bannerImage: media.bannerImage,
         year: media.seasonYear,
         rating: media.averageScore,
       }));
@@ -194,6 +273,7 @@ export class AnimeService {
     status?: string | null;
     genres?: string[] | null;
     imageUrl: string;
+    bannerImage?: string | null;
     year?: number | null;
     rating?: number | null;
   }) {
@@ -207,6 +287,7 @@ export class AnimeService {
         status: animeData.status,
         genres: animeData.genres,
         imageUrl: animeData.imageUrl,
+        bannerImage: animeData.bannerImage,
         year: animeData.year,
         rating: animeData.rating,
       }).onConflictDoUpdate({
@@ -219,6 +300,7 @@ export class AnimeService {
           status: animeData.status,
           genres: animeData.genres,
           imageUrl: animeData.imageUrl,
+          bannerImage: animeData.bannerImage,
           year: animeData.year,
           rating: animeData.rating,
           updatedAt: new Date()
