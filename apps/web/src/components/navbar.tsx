@@ -1,31 +1,31 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
-import { useSession } from "@/features/auth/lib/hooks";
-import UserMenu from "@/features/auth/components/user-menu";
 import Link from "next/link";
 import type { Route } from "next";
+import { usePathname, useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
+
+import { UserMenu } from "@/features/auth/components/user-menu";
+import { useAuth } from "@/features/auth/lib/hooks";
 import { cn } from "@/lib/utils";
 
-export default function Navbar() {
+export const Navbar = () => {
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session, isPending } = useSession();
+  const { isPending, isAuthenticated, username } = useAuth();
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
-    if (!isPending && !session && pathname !== "/login") {
+    if (!isPending && !isAuthenticated && pathname !== "/login") {
       router.push("/login");
     }
-  }, [session, isPending, pathname, router]);
+  }, [isAuthenticated, isPending, pathname, router]);
 
   if (pathname === "/login") return null;
-  if (!session) return null;
+  if (!isAuthenticated || !username) return null;
 
-  const username = session.user.username ?? session.user.name;
   const profilePath = `/${username}` as Route;
 
   type NavLink = {
@@ -88,4 +88,4 @@ export default function Navbar() {
       </div>
     </nav>
   );
-}
+};

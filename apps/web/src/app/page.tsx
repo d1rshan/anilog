@@ -1,3 +1,3 @@
-import HomePage from "@/features/anime/routes/home-page"
+import { HomePage } from "@/features/anime/pages/home-page";
 
 export default HomePage;

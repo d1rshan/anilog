@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Syne, Manrope } from "next/font/google";
+
 import "../index.css";
-import Providers from "@/components/providers";
-import Navbar from "@/components/navbar";
+import { Navbar } from "@/components/navbar";
+import { Providers } from "@/components/providers";
 
 const syne = Syne({
   variable: "--font-syne",

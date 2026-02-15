@@ -1,3 +1,7 @@
+import { User, LogOut, Shield, Settings } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+import { authClient } from "@/lib/auth-client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -5,16 +9,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useSession } from "../lib/hooks";
-import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
-import { User, LogOut, Shield, Settings } from "lucide-react";
 
-export default function UserMenu() {
+import { useAuth } from "../lib/hooks";
+
+export const UserMenu = () => {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { isAuthenticated, user, username } = useAuth();
 
-  if (!session) {
+  if (!isAuthenticated || !user || !username) {
     return null;
   }
 
@@ -36,8 +38,8 @@ export default function UserMenu() {
               <User className="h-5 w-5 text-muted-foreground" />
             </div>
             <div className="flex flex-col min-w-0">
-              <p className="truncate text-[10px] font-black uppercase tracking-tight">{session.user.name}</p>
-              <p className="truncate text-[10px] font-bold text-muted-foreground/60">{session.user.email}</p>
+              <p className="truncate text-[10px] font-black uppercase tracking-tight">{user.name}</p>
+              <p className="truncate text-[10px] font-bold text-muted-foreground/60">{user.email}</p>
             </div>
           </div>
         </div>
@@ -45,7 +47,7 @@ export default function UserMenu() {
         <div className="p-1">
           <DropdownMenuItem
             className="cursor-pointer rounded-xl py-2 px-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground focus:bg-white/5 focus:text-foreground transition-colors"
-            onClick={() => router.push(`/${session.user.name}`)}
+            onClick={() => router.push(`/${username}`)}
           >
             <Shield className="mr-2 h-3.5 w-3.5" />
             Profile Archive
@@ -78,4 +80,4 @@ export default function UserMenu() {
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+};

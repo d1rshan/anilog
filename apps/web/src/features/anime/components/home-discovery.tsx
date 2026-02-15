@@ -9,7 +9,7 @@ import { AnimeCard } from "./anime-card";
 import { AddToListDialog } from "./add-to-list-dialog";
 import { type LibraryEntryWithAnime } from "@/features/lists/lib/requests";
 import { toast } from "sonner";
-import { useSession } from "@/features/auth/lib/hooks";
+import { useRequireAuth } from "@/features/auth/lib/hooks";
 import { cn } from "@/lib/utils";
 
 type DialogState = {
@@ -101,7 +101,9 @@ function ScrollRow({ title, subtitle, children, gap = "gap-6", padding = "px-4" 
 export function HomeDiscovery() {
   const { data: anime = [], isLoading: isTrendingLoading } = useTrendingAnime();
   const { data: library = [], isLoading: isLibraryLoading } = useMyLibrary();
-  const { data: session } = useSession();
+  const { requireAuth } = useRequireAuth({
+    toastMessage: "Please sign in to log anime",
+  });
   const logAnime = useLogAnime();
 
   const [dialog, setDialog] = useState<DialogState>({ isOpen: false, anime: null });
@@ -120,8 +122,7 @@ export function HomeDiscovery() {
   );
 
   const handleAddToWatchlist = (animeItem: Anime) => {
-    if (!session?.user?.id) {
-      toast.error("Please sign in to log anime");
+    if (!requireAuth()) {
       return;
     }
 
@@ -134,8 +135,7 @@ export function HomeDiscovery() {
   };
 
   const openEditor = (animeItem: any) => {
-    if (!session?.user?.id) {
-      toast.error("Please sign in to log anime");
+    if (!requireAuth()) {
       return;
     }
 

@@ -1,29 +1,26 @@
-import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import {
   HydrationBoundary,
   QueryClient,
   dehydrate,
 } from "@tanstack/react-query";
-import { getTrendingAnime, searchAnime } from "../lib/requests";
+
+import { requireCurrentUser } from "@/features/auth/lib/server";
 import { getMyLibrary } from "@/features/lists/lib/requests";
+import { cn } from "@/lib/utils";
+
 import { HomeDiscovery } from "../components/home-discovery";
 import { HomeHero } from "../components/home-hero";
 import { SearchResults } from "../components/search-results";
-import { getSession } from "@/features/auth/lib/server";
-import { cn } from "@/lib/utils";
+import { getTrendingAnime, searchAnime } from "../lib/requests";
 
 interface HomePageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default async function HomePage({ searchParams }: HomePageProps) {
-  const session = await getSession(await headers());
+export const HomePage = async ({ searchParams }: HomePageProps) => {
+  await requireCurrentUser(await headers());
   const params = await searchParams;
-
-  if (!session?.user) {
-    redirect("/login");
-  }
 
   const searchQuery = typeof params.search === "string" ? params.search : "";
   const isSearching = searchQuery.length >= 3;
@@ -75,4 +72,4 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       </div>
     </div>
   );
-}
+};

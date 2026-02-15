@@ -2,7 +2,7 @@
 
 import { UserSearch } from "../components/user-search";
 
-export function UsersPage() {
+export const UsersPage = () => {
   return (
     <div className="container mx-auto px-4 py-32">
       <div className="mb-24 space-y-4 text-center">
@@ -17,4 +17,4 @@ export function UsersPage() {
       <UserSearch />
     </div>
   );
-}
+};
