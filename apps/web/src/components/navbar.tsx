@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
 import { Moon, Sun } from "lucide-react";
 import Link from "next/link";
 import type { Route } from "next";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 
 import { UserMenu } from "@/features/auth/components/user-menu";
@@ -13,15 +12,8 @@ import { cn } from "@/lib/utils";
 
 export const Navbar = () => {
   const pathname = usePathname();
-  const router = useRouter();
-  const { isPending, isAuthenticated, username } = useAuth();
+  const { isAuthenticated, username } = useAuth();
   const { theme, setTheme } = useTheme();
-
-  useEffect(() => {
-    if (!isPending && !isAuthenticated && pathname !== "/login") {
-      router.push("/login");
-    }
-  }, [isAuthenticated, isPending, pathname, router]);
 
   if (pathname === "/login") return null;
   if (!isAuthenticated || !username) return null;

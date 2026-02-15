@@ -26,13 +26,15 @@ export const SignUpForm = ({
       username: "",
     },
     onSubmit: async ({ value }) => {
+      const payload: Parameters<typeof authClient.signUp.email>[0] = {
+        email: value.email,
+        password: value.password,
+        name: value.username,
+        username: value.username,
+      };
+
       await authClient.signUp.email(
-        {
-          email: value.email,
-          password: value.password,
-          name: value.username, // Use username as name
-          username: value.username,
-        } as any,
+        payload,
         {
           onSuccess: () => {
             router.push("/");

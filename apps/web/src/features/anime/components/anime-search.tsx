@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import type { Route } from "next";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -11,6 +12,7 @@ interface AnimeSearchProps {
 }
 
 export function AnimeSearch({ variant = "default" }: AnimeSearchProps) {
+  const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -53,10 +55,10 @@ export function AnimeSearch({ variant = "default" }: AnimeSearchProps) {
 
       // Only update if URL actually changed
       if (newUrl !== currentUrl) {
-        router.push(newUrl as any, { scroll: false });
+        router.replace(`${pathname}${newUrl}` as Route, { scroll: false });
       }
     },
-    [router, searchParams]
+    [pathname, router, searchParams]
   );
 
   // Debounce timer ref

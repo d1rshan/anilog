@@ -134,16 +134,22 @@ export function HomeDiscovery() {
     toast.success(`${animeItem.title} added to planned`);
   };
 
-  const openEditor = (animeItem: any) => {
+  const openEditor = (target: Anime | LibraryEntryWithAnime) => {
     if (!requireAuth()) {
       return;
     }
 
+    const anime = "anime" in target ? (target.anime as Anime) : target;
+    const existingEntry =
+      "anime" in target
+        ? target
+        : (entryByAnimeId.get(target.id) ?? null);
+
     setDialog({
       isOpen: true,
-      anime: animeItem as Anime,
-      entry: entryByAnimeId.get(animeItem.id) ?? null,
-      initialStatus: entryByAnimeId.get(animeItem.id)?.status ?? "watching",
+      anime,
+      entry: existingEntry,
+      initialStatus: existingEntry?.status ?? "watching",
     });
   };
 
@@ -172,12 +178,11 @@ export function HomeDiscovery() {
           {watchingEntries.map((entry) => (
             <div key={entry.id} className="w-[200px] shrink-0 transition-transform duration-500 hover:z-10 sm:w-[260px]">
               <AnimeCard
-                anime={entry.anime as any}
+                anime={entry.anime}
                 currentEpisode={entry.currentEpisode}
                 loggedStatus={entry.status}
                 actionMode="discovery"
-                onQuickAdd={() => openEditor(entry.anime)}
-                onAddToWatchlist={() => handleAddToWatchlist(entry.anime as any)}
+                onQuickAdd={() => openEditor(entry)}
               />
             </div>
           ))}
