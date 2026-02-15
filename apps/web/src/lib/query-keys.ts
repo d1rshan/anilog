@@ -1,0 +1,24 @@
+export const animeKeys = {
+  all: ["anime"] as const,
+  trending: () => [...animeKeys.all, "trending"] as const,
+  search: (query: string) => [...animeKeys.all, "search", query] as const,
+};
+
+export const libraryKeys = {
+  all: ["library"] as const,
+  me: () => [...libraryKeys.all, "me"] as const,
+  publicByUserId: (userId: string) => ["users", "library", userId] as const,
+};
+
+export const userKeys = {
+  all: ["users"] as const,
+  searchRoot: () => [...userKeys.all, "search"] as const,
+  search: (query: string) => [...userKeys.all, "search", query] as const,
+  profileRoot: () => [...userKeys.all, "profile"] as const,
+  profile: (userId: string) => [...userKeys.all, "profile", userId] as const,
+  byUsernameRoot: () => [...userKeys.all, "username"] as const,
+  byUsername: (username: string) => [...userKeys.all, "username", username] as const,
+  isFollowing: (userId: string) => [...userKeys.all, "is-following", userId] as const,
+  following: () => [...userKeys.all, "following"] as const,
+  meProfile: () => [...userKeys.all, "me", "profile"] as const,
+};

@@ -1,10 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
 import { type Anime, type LibraryStatus } from "@anilog/db/schema/anilog";
 
-import { useSession } from "@/features/auth/lib/hooks";
+import { useRequireAuth } from "@/features/auth/lib/hooks";
 import {
   useLogAnime,
   useMyLibrary,
@@ -23,7 +22,9 @@ type DialogState = {
 
 export function AnimeGrid() {
   const { data: anime = [], isLoading, isError, error } = useTrendingAnime();
-  const { data: session } = useSession();
+  const { requireAuth } = useRequireAuth({
+    toastMessage: "Please sign in to log anime",
+  });
   const { data: library } = useMyLibrary();
   const logAnime = useLogAnime();
   const [dialog, setDialog] = useState<DialogState>({ isOpen: false, anime: null });
@@ -33,19 +34,10 @@ export function AnimeGrid() {
     [library],
   );
 
-  const ensureAuth = () => {
-    if (!session?.user?.id) {
-      toast.error("Please sign in to log anime");
-      return false;
-    }
-
-    return true;
-  };
-
   const getAnime = (animeId: number) => anime.find((item) => item.id === animeId);
 
   const openEditor = (animeId: number, initialStatus?: LibraryStatus) => {
-    if (!ensureAuth()) {
+    if (!requireAuth()) {
       return;
     }
 
@@ -63,7 +55,7 @@ export function AnimeGrid() {
   };
 
   const handleAddToWatchlist = (animeId: number) => {
-    if (!ensureAuth()) {
+    if (!requireAuth()) {
       return;
     }
 

@@ -1,4 +1,5 @@
 import { Check, ListTodo, Pencil, Plus, Play, Star, X, Ban } from "lucide-react";
+import Image from "next/image";
 import { type Anime, type LibraryStatus } from "@anilog/db/schema/anilog";
 
 import { cn } from "@/lib/utils";
@@ -85,14 +86,12 @@ export function AnimeCard({
 
   return (
     <div className="group relative aspect-[3/4.2] overflow-hidden rounded-lg bg-muted shadow-lg transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl">
-      <img
+      <Image
         src={anime.imageUrl}
         alt={anime.title}
-        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-        onError={(e) => {
-          const img = e.target as HTMLImageElement;
-          img.src = `https://via.placeholder.com/300x450?text=${encodeURIComponent(anime.title)}`;
-        }}
+        fill
+        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 16vw"
+        className="object-cover transition-transform duration-700 group-hover:scale-110"
       />
 
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-100" />

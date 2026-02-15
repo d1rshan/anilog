@@ -1,8 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { Anime, LibraryStatus } from "@anilog/db/schema/anilog";
+
+import { myLibraryQueryOptions } from "@/lib/query-options";
+import { libraryKeys } from "@/lib/query-keys";
+
 import {
-  getMyLibrary,
   logAnime,
   removeFromLibrary,
   updateLibraryProgress,
@@ -14,11 +17,15 @@ import {
   type UpdateLibraryRatingData,
   type UpdateLibraryStatusData,
 } from "./requests";
+import type { PublicUserLibrary } from "@/features/users/lib/requests";
 
-const LIBRARY_QUERY_KEY = ["library", "me"] as const;
+type MutationContext = {
+  previous?: LibraryEntryWithAnime[];
+  currentUserId?: string;
+};
 
 function upsertLibraryEntryInCache(queryClient: ReturnType<typeof useQueryClient>, entry: LibraryEntryWithAnime) {
-  queryClient.setQueryData<LibraryEntryWithAnime[]>(LIBRARY_QUERY_KEY, (current = []) => {
+  queryClient.setQueryData<LibraryEntryWithAnime[]>(libraryKeys.me(), (current = []) => {
     const index = current.findIndex((item) => item.animeId === entry.animeId);
 
     if (index === -1) {
@@ -31,11 +38,73 @@ function upsertLibraryEntryInCache(queryClient: ReturnType<typeof useQueryClient
   });
 }
 
+function mapToPublicLibraryEntry(entry: LibraryEntryWithAnime): PublicUserLibrary[number] {
+  return {
+    id: entry.id,
+    animeId: entry.animeId,
+    status: entry.status,
+    createdAt: entry.createdAt,
+    currentEpisode: entry.currentEpisode,
+    rating: entry.rating,
+    anime: {
+      id: entry.anime.id,
+      title: entry.anime.title,
+      titleJapanese: entry.anime.titleJapanese,
+      imageUrl: entry.anime.imageUrl,
+      year: entry.anime.year,
+      episodes: entry.anime.episodes,
+      status: entry.anime.status,
+    },
+  };
+}
+
+function upsertPublicLibraryEntryInCache(
+  queryClient: ReturnType<typeof useQueryClient>,
+  entry: LibraryEntryWithAnime,
+) {
+  if (!entry.userId) {
+    return;
+  }
+
+  queryClient.setQueryData<PublicUserLibrary>(
+    libraryKeys.publicByUserId(entry.userId),
+    (current) => {
+      if (!current) {
+        return current;
+      }
+
+      const nextEntry = mapToPublicLibraryEntry(entry);
+      const index = current.findIndex((item) => item.animeId === entry.animeId);
+      if (index === -1) {
+        return [...current, nextEntry];
+      }
+
+      const next = [...current];
+      next[index] = nextEntry;
+      return next;
+    },
+  );
+}
+
+function removePublicLibraryEntryFromCache(
+  queryClient: ReturnType<typeof useQueryClient>,
+  userId: string,
+  animeId: number,
+) {
+  queryClient.setQueryData<PublicUserLibrary>(
+    libraryKeys.publicByUserId(userId),
+    (current) => {
+      if (!current) {
+        return current;
+      }
+
+      return current.filter((entry) => entry.animeId !== animeId);
+    },
+  );
+}
+
 export const useMyLibrary = () => {
-  return useQuery<LibraryEntryWithAnime[]>({
-    queryKey: LIBRARY_QUERY_KEY,
-    queryFn: getMyLibrary,
-  });
+  return useQuery(myLibraryQueryOptions());
 };
 
 // Backward-compatible alias to keep imports stable while refactoring.
@@ -47,8 +116,8 @@ export const useLogAnime = () => {
   return useMutation({
     mutationFn: logAnime,
     onMutate: async (payload: LogAnimeData) => {
-      await queryClient.cancelQueries({ queryKey: LIBRARY_QUERY_KEY });
-      const previous = queryClient.getQueryData<LibraryEntryWithAnime[]>(LIBRARY_QUERY_KEY);
+      await queryClient.cancelQueries({ queryKey: libraryKeys.me() });
+      const previous = queryClient.getQueryData<LibraryEntryWithAnime[]>(libraryKeys.me());
 
       if (previous) {
         const optimistic: LibraryEntryWithAnime = {
@@ -74,20 +143,26 @@ export const useLogAnime = () => {
         upsertLibraryEntryInCache(queryClient, optimistic);
       }
 
-      return { previous };
+      return { previous, currentUserId: previous?.[0]?.userId };
     },
-    onError: (error, _payload, context) => {
+    onError: (error, _payload, context: MutationContext | undefined) => {
       if (context?.previous) {
-        queryClient.setQueryData(LIBRARY_QUERY_KEY, context.previous);
+        queryClient.setQueryData(libraryKeys.me(), context.previous);
       }
       toast.error(error.message || "Failed to log anime");
     },
     onSuccess: (data) => {
       upsertLibraryEntryInCache(queryClient, data);
+      upsertPublicLibraryEntryInCache(queryClient, data);
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: LIBRARY_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: ["users", "library"] });
+    onSettled: (_data, _error, _payload, context) => {
+      queryClient.invalidateQueries({ queryKey: libraryKeys.me() });
+
+      if (context?.currentUserId) {
+        queryClient.invalidateQueries({
+          queryKey: libraryKeys.publicByUserId(context.currentUserId),
+        });
+      }
     },
   });
 };
@@ -102,10 +177,10 @@ export const useUpdateLibraryStatus = () => {
     },
     onSuccess: (data) => {
       upsertLibraryEntryInCache(queryClient, data);
+      upsertPublicLibraryEntryInCache(queryClient, data);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: LIBRARY_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: ["users", "library"] });
+      queryClient.invalidateQueries({ queryKey: libraryKeys.me() });
     },
   });
 };
@@ -116,8 +191,8 @@ export const useUpdateLibraryProgress = () => {
   return useMutation({
     mutationFn: updateLibraryProgress,
     onMutate: async (payload: UpdateLibraryProgressData) => {
-      await queryClient.cancelQueries({ queryKey: LIBRARY_QUERY_KEY });
-      const previous = queryClient.getQueryData<LibraryEntryWithAnime[]>(LIBRARY_QUERY_KEY);
+      await queryClient.cancelQueries({ queryKey: libraryKeys.me() });
+      const previous = queryClient.getQueryData<LibraryEntryWithAnime[]>(libraryKeys.me());
 
       if (previous) {
         const target = previous.find((entry) => entry.animeId === payload.animeId);
@@ -134,20 +209,26 @@ export const useUpdateLibraryProgress = () => {
         }
       }
 
-      return { previous };
+      return { previous, currentUserId: previous?.[0]?.userId };
     },
-    onError: (error, _payload, context) => {
+    onError: (error, _payload, context: MutationContext | undefined) => {
       if (context?.previous) {
-        queryClient.setQueryData(LIBRARY_QUERY_KEY, context.previous);
+        queryClient.setQueryData(libraryKeys.me(), context.previous);
       }
       toast.error(error.message || "Failed to update progress");
     },
     onSuccess: (data) => {
       upsertLibraryEntryInCache(queryClient, data);
+      upsertPublicLibraryEntryInCache(queryClient, data);
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: LIBRARY_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: ["users", "library"] });
+    onSettled: (_data, _error, _payload, context) => {
+      queryClient.invalidateQueries({ queryKey: libraryKeys.me() });
+
+      if (context?.currentUserId) {
+        queryClient.invalidateQueries({
+          queryKey: libraryKeys.publicByUserId(context.currentUserId),
+        });
+      }
     },
   });
 };
@@ -162,10 +243,10 @@ export const useUpdateLibraryRating = () => {
     },
     onSuccess: (data) => {
       upsertLibraryEntryInCache(queryClient, data);
+      upsertPublicLibraryEntryInCache(queryClient, data);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: LIBRARY_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: ["users", "library"] });
+      queryClient.invalidateQueries({ queryKey: libraryKeys.me() });
     },
   });
 };
@@ -176,27 +257,33 @@ export const useRemoveFromLibrary = () => {
   return useMutation({
     mutationFn: removeFromLibrary,
     onMutate: async (animeId) => {
-      await queryClient.cancelQueries({ queryKey: LIBRARY_QUERY_KEY });
-      const previous = queryClient.getQueryData<LibraryEntryWithAnime[]>(LIBRARY_QUERY_KEY);
+      await queryClient.cancelQueries({ queryKey: libraryKeys.me() });
+      const previous = queryClient.getQueryData<LibraryEntryWithAnime[]>(libraryKeys.me());
 
       if (previous) {
         queryClient.setQueryData(
-          LIBRARY_QUERY_KEY,
+          libraryKeys.me(),
           previous.filter((entry) => entry.animeId !== animeId),
         );
       }
 
-      return { previous };
+      return { previous, currentUserId: previous?.[0]?.userId };
     },
-    onError: (error, _animeId, context) => {
+    onError: (error, _animeId, context: MutationContext | undefined) => {
       if (context?.previous) {
-        queryClient.setQueryData(LIBRARY_QUERY_KEY, context.previous);
+        queryClient.setQueryData(libraryKeys.me(), context.previous);
       }
       toast.error(error.message || "Failed to remove anime");
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: LIBRARY_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: ["users", "library"] });
+    onSettled: (_data, _error, animeId, context) => {
+      queryClient.invalidateQueries({ queryKey: libraryKeys.me() });
+
+      if (context?.currentUserId) {
+        queryClient.invalidateQueries({
+          queryKey: libraryKeys.publicByUserId(context.currentUserId),
+        });
+        removePublicLibraryEntryFromCache(queryClient, context.currentUserId, animeId);
+      }
     },
   });
 };

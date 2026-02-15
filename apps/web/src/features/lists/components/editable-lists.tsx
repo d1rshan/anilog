@@ -8,9 +8,6 @@ import { AddToListDialog } from "@/features/anime/components/add-to-list-dialog"
 import { AnimeStackPreview } from "./anime-stack-preview";
 import {
   useMyLibrary,
-  useRemoveFromLibrary,
-  useUpdateLibraryProgress,
-  useUpdateLibraryStatus,
   groupLibraryByStatus,
 } from "../lib/hooks";
 import { LIBRARY_STATUSES, type LibraryEntryWithAnime } from "../lib/requests";
@@ -32,9 +29,6 @@ type DialogState = {
 
 export function EditableLists() {
   const { data: library, isLoading } = useMyLibrary();
-  const removeFromLibrary = useRemoveFromLibrary();
-  const updateProgress = useUpdateLibraryProgress();
-  const updateStatus = useUpdateLibraryStatus();
   
   const grouped = groupLibraryByStatus(library);
   const [expandedStatuses, setExpandedStatuses] = useState<Record<LibraryStatus, boolean>>({

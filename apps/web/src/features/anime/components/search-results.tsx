@@ -1,10 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
 import { type Anime, type LibraryStatus } from "@anilog/db/schema/anilog";
 
-import { useSession } from "@/features/auth/lib/hooks";
+import { useRequireAuth } from "@/features/auth/lib/hooks";
 import {
   useLogAnime,
   useMyLibrary,
@@ -28,7 +27,9 @@ type DialogState = {
 
 export function SearchResults({ query }: SearchResultsProps) {
   const { data: anime, isLoading, isError, error } = useSearchAnime(query);
-  const { data: session } = useSession();
+  const { requireAuth } = useRequireAuth({
+    toastMessage: "Please sign in to log anime",
+  });
   const { data: library } = useMyLibrary();
   const logAnime = useLogAnime();
   const [dialog, setDialog] = useState<DialogState>({ isOpen: false, anime: null });
@@ -38,19 +39,10 @@ export function SearchResults({ query }: SearchResultsProps) {
     [library],
   );
 
-  const ensureAuth = () => {
-    if (!session?.user?.id) {
-      toast.error("Please sign in to log anime");
-      return false;
-    }
-
-    return true;
-  };
-
   const getAnime = (animeId: number) => anime?.find((item) => item.id === animeId);
 
   const openEditor = (animeId: number, initialStatus?: LibraryStatus) => {
-    if (!ensureAuth()) {
+    if (!requireAuth()) {
       return;
     }
 
@@ -68,7 +60,7 @@ export function SearchResults({ query }: SearchResultsProps) {
   };
 
   const handleAddToWatchlist = (animeId: number) => {
-    if (!ensureAuth()) {
+    if (!requireAuth()) {
       return;
     }
 

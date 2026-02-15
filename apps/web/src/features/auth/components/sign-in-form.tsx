@@ -1,30 +1,23 @@
-import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 import { useForm } from "@tanstack/react-form";
 import { toast } from "sonner";
 import z from "zod";
-import Loader from "@/components/loader";
+
+import { Loader } from "@/components/loader";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
-import { useSession } from "../lib/hooks";
+import { authClient } from "@/lib/auth-client";
 
-export default function SignInForm({
+import { useAuth } from "../lib/hooks";
+
+export const SignInForm = ({
   onSwitchToSignUp,
 }: {
   onSwitchToSignUp: () => void;
-}) {
+}) => {
   const router = useRouter();
-  const { isPending } = useSession();
+  const { isPending } = useAuth();
 
   const form = useForm({
     defaultValues: {
@@ -173,4 +166,4 @@ export default function SignInForm({
       </form>
     </div>
   );
-}
+};

@@ -1,10 +1,12 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
-import QueryProvider from "@/lib/query-provider";
+import { QueryProvider } from "@/lib/query-provider";
 
-export default function Providers({ children }: { children: React.ReactNode }) {
+export const Providers = ({ children }: { children: ReactNode }) => {
   return (
     <QueryProvider>
       <ThemeProvider
@@ -18,4 +20,4 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       </ThemeProvider>
     </QueryProvider>
   );
-}
+};

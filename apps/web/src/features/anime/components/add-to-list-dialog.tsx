@@ -1,7 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ChevronRight, Star, Plus, Minus, Check, Play, ListTodo, X, Trash2, Ban } from "lucide-react";
+import {
+  ChevronRight,
+  Star,
+  Plus,
+  Minus,
+  Check,
+  Play,
+  ListTodo,
+  Trash2,
+  Ban,
+  type LucideIcon,
+} from "lucide-react";
 import type { Anime, LibraryStatus } from "@anilog/db/schema/anilog";
 
 import { Button } from "@/components/ui/button";
@@ -20,7 +31,10 @@ interface AddToListDialogProps {
   initialStatus?: LibraryStatus;
 }
 
-const STATUS_CONFIG: Record<LibraryStatus, { label: string; icon: any; color: string }> = {
+const STATUS_CONFIG: Record<
+  LibraryStatus,
+  { label: string; icon: LucideIcon; color: string }
+> = {
   watching: { label: "Watching", icon: Play, color: "bg-white text-black" },
   completed: { label: "Completed", icon: Check, color: "bg-emerald-500 text-white" },
   planned: { label: "Planned", icon: ListTodo, color: "bg-blue-500 text-white" },

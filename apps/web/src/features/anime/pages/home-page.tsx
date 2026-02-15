@@ -1,29 +1,29 @@
-import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import {
   HydrationBoundary,
   QueryClient,
   dehydrate,
 } from "@tanstack/react-query";
-import { getTrendingAnime, searchAnime } from "../lib/requests";
-import { getMyLibrary } from "@/features/lists/lib/requests";
+
+import { requireCurrentUser } from "@/features/auth/lib/server";
+import {
+  myLibraryQueryOptions,
+  searchAnimeQueryOptions,
+  trendingAnimeQueryOptions,
+} from "@/lib/query-options";
+import { cn } from "@/lib/utils";
+
 import { HomeDiscovery } from "../components/home-discovery";
 import { HomeHero } from "../components/home-hero";
 import { SearchResults } from "../components/search-results";
-import { getSession } from "@/features/auth/lib/server";
-import { cn } from "@/lib/utils";
 
 interface HomePageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default async function HomePage({ searchParams }: HomePageProps) {
-  const session = await getSession(await headers());
+export const HomePage = async ({ searchParams }: HomePageProps) => {
+  await requireCurrentUser(await headers());
   const params = await searchParams;
-
-  if (!session?.user) {
-    redirect("/login");
-  }
 
   const searchQuery = typeof params.search === "string" ? params.search : "";
   const isSearching = searchQuery.length >= 3;
@@ -31,21 +31,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const queryClient = new QueryClient();
 
   if (isSearching) {
-    await queryClient.prefetchQuery({
-      queryKey: ["search-anime", searchQuery],
-      queryFn: () => searchAnime(searchQuery),
-    });
-  } else {
-    // Prefetch both trending and user library for instant loading of HomeDiscovery
     await Promise.all([
-      queryClient.prefetchQuery({
-        queryKey: ["trending-anime"],
-        queryFn: getTrendingAnime,
-      }),
-      queryClient.prefetchQuery({
-        queryKey: ["library", "me"],
-        queryFn: getMyLibrary,
-      }),
+      queryClient.prefetchQuery(searchAnimeQueryOptions(searchQuery)),
+      queryClient.prefetchQuery(myLibraryQueryOptions()),
+    ]);
+  } else {
+    await Promise.all([
+      queryClient.prefetchQuery(trendingAnimeQueryOptions()),
+      queryClient.prefetchQuery(myLibraryQueryOptions()),
     ]);
   }
 
@@ -75,4 +68,4 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       </div>
     </div>
   );
-}
+};
