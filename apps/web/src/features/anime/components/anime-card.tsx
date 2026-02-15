@@ -85,16 +85,16 @@ export function AnimeCard({
   const canShowWatchlistButton = !loggedStatus;
 
   return (
-    <div className="group relative aspect-[3/4.2] overflow-hidden rounded-lg bg-muted shadow-lg transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl">
+    <div className="group relative aspect-[3/4.2] overflow-hidden rounded-lg bg-muted shadow-lg transition-all duration-500 md:hover:-translate-y-1 md:hover:shadow-2xl">
       <Image
         src={anime.imageUrl}
         alt={anime.title}
         fill
         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 16vw"
-        className="object-cover transition-transform duration-700 group-hover:scale-110"
+        className="object-cover transition-transform duration-700 md:group-hover:scale-110"
       />
 
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-100" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-90 transition-opacity duration-500 md:opacity-80 md:group-hover:opacity-100" />
 
       <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
         {anime.status && (
@@ -193,12 +193,12 @@ export function AnimeCard({
       </div>
 
       {showActions && actionMode === "discovery" && (
-        <div className="absolute right-3 top-1/2 flex -translate-y-1/2 translate-x-4 flex-col gap-2 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+        <div className="absolute right-3 top-1/2 flex -translate-y-1/2 flex-col gap-2 opacity-100 transition-all duration-300 md:translate-x-4 md:opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100">
           {canShowWatchlistButton && (
             <Button
               size="icon"
               variant="secondary"
-              className="h-10 w-10 rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-xl hover:bg-white hover:text-black"
+              className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-white backdrop-blur-xl md:h-10 md:w-10 md:hover:bg-white md:hover:text-black"
               onClick={(e) => {
                 e.stopPropagation();
                 onAddToWatchlist?.(anime.id);
@@ -213,7 +213,7 @@ export function AnimeCard({
             size="icon"
             variant="secondary"
             className={cn(
-              "h-10 w-10 rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-xl hover:bg-white hover:text-black",
+              "h-9 w-9 rounded-full border border-white/10 bg-black/55 text-white backdrop-blur-xl md:h-10 md:w-10 md:hover:bg-white md:hover:text-black",
               loggedStatus && "bg-white text-black",
             )}
             onClick={(e) => {
@@ -229,12 +229,12 @@ export function AnimeCard({
       )}
 
       {showActions && actionMode === "default" && (
-        <div className="absolute right-3 top-1/2 flex -translate-y-1/2 translate-x-4 flex-col gap-2 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+        <div className="absolute right-3 top-1/2 flex -translate-y-1/2 flex-col gap-2 opacity-100 transition-all duration-300 md:translate-x-4 md:opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100">
           {onPlan && !loggedStatus && (
             <Button
               size="icon"
               variant="secondary"
-              className="h-10 w-10 rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-xl hover:bg-white hover:text-black"
+              className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-white backdrop-blur-xl md:h-10 md:w-10 md:hover:bg-white md:hover:text-black"
               onClick={(e) => {
                 e.stopPropagation();
                 onPlan(anime.id);
@@ -250,7 +250,7 @@ export function AnimeCard({
             <Button
               size="icon"
               variant="secondary"
-              className="h-10 w-10 rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-xl hover:bg-white hover:text-black"
+              className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-white backdrop-blur-xl md:h-10 md:w-10 md:hover:bg-white md:hover:text-black"
               onClick={(e) => {
                 e.stopPropagation();
                 onStartWatching(anime.id);
@@ -266,7 +266,7 @@ export function AnimeCard({
             <Button
               size="icon"
               variant="secondary"
-              className="h-10 w-10 rounded-full border border-white/10 bg-white text-black backdrop-blur-xl hover:bg-white/90"
+              className="h-9 w-9 rounded-full border border-white/10 bg-white text-black backdrop-blur-xl md:h-10 md:w-10 md:hover:bg-white/90"
               onClick={(e) => {
                 e.stopPropagation();
                 onIncrementEpisode(anime.id);
@@ -282,7 +282,7 @@ export function AnimeCard({
             <Button
               size="icon"
               variant="secondary"
-              className="h-10 w-10 rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-xl hover:bg-white hover:text-black"
+              className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-white backdrop-blur-xl md:h-10 md:w-10 md:hover:bg-white md:hover:text-black"
               onClick={(e) => {
                 e.stopPropagation();
                 onComplete(anime.id);
@@ -299,7 +299,7 @@ export function AnimeCard({
               size="icon"
               variant="secondary"
               className={cn(
-                "h-10 w-10 rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-xl hover:bg-white hover:text-black",
+                "h-9 w-9 rounded-full border border-white/10 bg-black/55 text-white backdrop-blur-xl md:h-10 md:w-10 md:hover:bg-white md:hover:text-black",
                 loggedStatus && "bg-white text-black",
               )}
               onClick={(e) => {
@@ -317,7 +317,7 @@ export function AnimeCard({
             <Button
               size="icon"
               variant="secondary"
-              className="h-10 w-10 rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-xl hover:bg-white hover:text-black"
+              className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-white backdrop-blur-xl md:h-10 md:w-10 md:hover:bg-white md:hover:text-black"
               onClick={(e) => {
                 e.stopPropagation();
                 onRemove();
@@ -331,8 +331,8 @@ export function AnimeCard({
         </div>
       )}
 
-      <div className="absolute bottom-0 left-0 right-0 translate-y-2 space-y-2 p-5 transition-transform duration-500 group-hover:translate-y-0">
-        <h3 className="font-display line-clamp-2 text-xl font-bold uppercase leading-none tracking-tight text-white">{anime.title}</h3>
+      <div className="absolute bottom-0 left-0 right-0 translate-y-0 space-y-1.5 p-4 transition-transform duration-500 md:translate-y-2 md:space-y-2 md:p-5 md:group-hover:translate-y-0">
+        <h3 className="font-display line-clamp-2 text-lg font-bold uppercase leading-none tracking-tight text-white md:text-xl">{anime.title}</h3>
         <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/60">
           <span>{anime.year}</span>
           <span>•</span>

@@ -78,7 +78,7 @@ export function SearchResults({ query }: SearchResultsProps) {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 md:gap-6 lg:grid-cols-4 xl:grid-cols-6">
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="w-full space-y-3">
             <div className="aspect-[2/3] animate-pulse rounded-md bg-muted" />
@@ -112,7 +112,7 @@ export function SearchResults({ query }: SearchResultsProps) {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 md:gap-6 lg:grid-cols-4 xl:grid-cols-6">
         {anime.map((animeItem: Anime) => {
           const entry = entryByAnimeId.get(animeItem.id);
 

@@ -91,8 +91,8 @@ export function AnimeSearch({ variant = "default" }: AnimeSearchProps) {
   const isHero = variant === "hero";
 
   return (
-    <div className={cn("relative w-full", isHero ? "max-w-2xl" : "max-w-md")}>
-      <Search className={cn("absolute top-1/2 -translate-y-1/2 text-muted-foreground", isHero ? "left-6 h-6 w-6" : "left-4 h-4 w-4")} />
+    <div className={cn("relative w-full", isHero ? "max-w-full md:max-w-2xl" : "max-w-full md:max-w-md")}>
+      <Search className={cn("absolute top-1/2 -translate-y-1/2 text-muted-foreground", isHero ? "left-4 h-5 w-5 md:left-6 md:h-6 md:w-6" : "left-4 h-4 w-4")} />
       <Input
         ref={inputRef}
         type="text"
@@ -100,10 +100,10 @@ export function AnimeSearch({ variant = "default" }: AnimeSearchProps) {
         value={inputValue}
         onChange={handleInputChange}
         className={cn(
-          "border-none font-black uppercase tracking-[0.2em] focus-visible:ring-1 focus-visible:ring-foreground",
+          "border-none font-black uppercase focus-visible:ring-1 focus-visible:ring-foreground",
           isHero 
-            ? "h-20 bg-white/5 pl-16 text-xl backdrop-blur-xl transition-all hover:bg-white/10" 
-            : "h-12 bg-muted pl-12 text-sm tracking-widest"
+            ? "h-14 bg-white/5 pl-12 text-sm tracking-[0.16em] backdrop-blur-xl transition-all md:h-20 md:pl-16 md:text-xl md:tracking-[0.2em] md:hover:bg-white/10"
+            : "h-12 bg-muted pl-12 text-sm tracking-[0.16em] md:tracking-widest"
         )}
       />
     </div>

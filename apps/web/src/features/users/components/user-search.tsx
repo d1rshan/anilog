@@ -30,14 +30,14 @@ export function UserSearch() {
   const hasResults = users && users.length > 0;
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-6">
+    <div className="mx-auto w-full max-w-2xl space-y-6">
       <div className="relative">
         <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder="SEARCH USERS..."
           value={searchQuery}
           onChange={handleSearchChange}
-          className="h-14 border-none bg-muted pl-12 text-sm font-black uppercase tracking-widest focus-visible:ring-1 focus-visible:ring-foreground"
+          className="h-12 border-none bg-muted pl-12 text-sm font-black uppercase tracking-[0.15em] focus-visible:ring-1 focus-visible:ring-foreground md:h-14 md:tracking-widest"
         />
         {isLoading && (
           <Loader2 className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />

@@ -7,12 +7,12 @@ export const UsersPage = async () => {
   await requireCurrentUser(await headers());
 
   return (
-    <div className="container mx-auto px-4 py-32">
-      <div className="mb-24 space-y-4 text-center">
-        <h1 className="font-display text-[15vw] font-extrabold uppercase leading-[0.8] tracking-tighter text-foreground mix-blend-difference">
+    <div className="container mx-auto px-4 pb-20 pt-24 md:py-32">
+      <div className="mb-12 space-y-4 text-center md:mb-24">
+        <h1 className="font-display text-5xl font-extrabold uppercase leading-[0.8] tracking-tighter text-foreground sm:text-7xl md:text-[15vw]">
           COMMUNITY
         </h1>
-        <p className="mx-auto max-w-xl text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">
+        <p className="mx-auto max-w-xl text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground md:tracking-[0.3em]">
           Find and connect with other anime enthusiasts across the globe.
         </p>
       </div>

@@ -20,9 +20,9 @@ export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
 
   return (
     <>
-      <div className="flex flex-col gap-8 py-12">
+      <div className="flex flex-col gap-6 py-8 md:gap-8 md:py-12">
         {/* TOP SECTION: AVATAR & BASIC INFO */}
-        <div className="flex flex-col items-center gap-6 md:flex-row md:items-end md:gap-10">
+        <div className="flex flex-col items-center gap-5 md:flex-row md:items-end md:gap-10">
           <Avatar className="h-32 w-32 border-4 border-background shadow-xl ring-1 ring-border md:h-40 md:w-40">
             <AvatarImage src={user.image || undefined} alt={displayName} />
             <AvatarFallback className="bg-muted text-4xl font-black uppercase tracking-tighter">
@@ -30,12 +30,12 @@ export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
             </AvatarFallback>
           </Avatar>
 
-          <div className="flex flex-1 flex-col items-center gap-4 md:items-start md:gap-6">
+          <div className="flex flex-1 flex-col items-center gap-3 md:items-start md:gap-6">
             <div className="space-y-1 text-center md:text-left">
-              <h1 className="font-display text-5xl font-extrabold uppercase tracking-tight md:text-7xl leading-[0.9]">
+              <h1 className="font-display text-4xl font-extrabold uppercase leading-[0.9] tracking-tight sm:text-5xl md:text-7xl">
                 {displayName}
               </h1>
-              <div className="flex items-center justify-center gap-3 text-[10px] font-bold tracking-[0.2em] text-muted-foreground uppercase md:justify-start">
+              <div className="flex flex-wrap items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground md:justify-start md:tracking-[0.2em]">
                 <span>@{user.username || user.name}</span>
                 {user.profile?.location && (
                   <>
@@ -49,7 +49,7 @@ export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start md:gap-3">
               {!isOwnProfile ? (
                 <FollowButton userId={user.id} size="lg" />
               ) : (
@@ -70,13 +70,13 @@ export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
         </div>
 
         {/* BOTTOM SECTION: BIO & STATS */}
-        <div className="grid grid-cols-1 gap-8 border-t border-white/10 pt-8 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 border-t border-white/10 pt-6 md:grid-cols-3 md:gap-8 md:pt-8">
           <div className="md:col-span-2">
             <h2 className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
               ABOUT
             </h2>
             {user.profile?.bio ? (
-              <p className="max-w-xl text-lg font-medium leading-relaxed tracking-tight">
+              <p className="max-w-xl text-base font-medium leading-relaxed tracking-tight md:text-lg">
                 {user.profile.bio}
               </p>
             ) : (
@@ -86,7 +86,7 @@ export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
             )}
           </div>
 
-          <div className="flex flex-row gap-10">
+          <div className="flex flex-row gap-8">
             <div className="space-y-1">
               <p className="font-display text-4xl font-bold tracking-tight md:text-6xl leading-[0.9]">
                 {user.followerCount}

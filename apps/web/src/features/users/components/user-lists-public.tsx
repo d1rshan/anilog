@@ -38,7 +38,7 @@ export function UserListsPublic({ userId }: UserListsPublicProps) {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 md:gap-6 lg:grid-cols-4 xl:grid-cols-6">
         {Array.from({ length: 12 }).map((_, i) => (
           <div key={i} className="aspect-[2/3] w-full animate-pulse rounded-lg bg-muted" />
         ))}
@@ -56,15 +56,15 @@ export function UserListsPublic({ userId }: UserListsPublicProps) {
   }
 
   return (
-    <div className="space-y-24 py-10">
+    <div className="space-y-12 py-6 md:space-y-24 md:py-10">
       {LIBRARY_STATUSES.map((status) => {
         const sectionEntries = entries.filter((entry) => entry.status === status);
 
         return (
-          <section key={status} className="space-y-8">
+          <section key={status} className="space-y-6 md:space-y-8">
             <div className="flex items-end justify-between border-b border-white/10 pb-4">
               <div className="space-y-1">
-                <h3 className="font-display text-5xl font-bold uppercase leading-[0.9] tracking-tight">{STATUS_LABELS[status]}</h3>
+                <h3 className="font-display text-3xl font-bold uppercase leading-[0.9] tracking-tight sm:text-4xl md:text-5xl">{STATUS_LABELS[status]}</h3>
                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">{sectionEntries.length} Titles</p>
               </div>
               {expandedStatuses[status] && (
@@ -94,7 +94,7 @@ export function UserListsPublic({ userId }: UserListsPublicProps) {
                 <AnimeStackPreview entries={sectionEntries} />
               </button>
             ) : (
-              <div className="grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+              <div className="grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 md:gap-6 lg:grid-cols-4 xl:grid-cols-6">
                 {sectionEntries.map((entry) => (
                   <div key={entry.id} className="w-full">
                     <AnimeCard

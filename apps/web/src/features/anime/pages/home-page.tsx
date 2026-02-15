@@ -47,12 +47,12 @@ export const HomePage = async ({ searchParams }: HomePageProps) => {
     <div className="flex min-h-screen flex-col">
       {!isSearching && <HomeHero />}
 
-      <div className={cn("container mx-auto px-4", isSearching ? "py-32" : "pt-8 pb-24 md:pt-12 md:pb-40")}>
+      <div className={cn("container mx-auto px-4", isSearching ? "py-20 md:py-32" : "pt-8 pb-24 md:pt-12 md:pb-40")}>
         {isSearching && (
-          <div className="mb-14 space-y-6">
+          <div className="mb-10 space-y-4 md:mb-14 md:space-y-6">
             <AnimeSearch />
             <div className="space-y-4">
-              <h1 className="font-display text-5xl font-black uppercase tracking-tighter md:text-7xl">
+              <h1 className="font-display text-3xl font-black uppercase tracking-tighter sm:text-4xl md:text-7xl">
                 Results for &quot;{searchQuery}&quot;
               </h1>
               <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/60">

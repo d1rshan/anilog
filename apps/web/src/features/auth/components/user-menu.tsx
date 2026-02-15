@@ -23,12 +23,12 @@ export const UserMenu = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="h-8 w-8 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition-all active:scale-95 focus:outline-none cursor-pointer">
+        <button className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 transition-all active:scale-95 focus:outline-none cursor-pointer md:h-8 md:w-8 md:hover:bg-white/5">
           <User className="h-4 w-4 text-muted-foreground" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
-        className="w-64 border border-white/10 bg-black/80 backdrop-blur-2xl p-2 shadow-2xl rounded-lg" 
+        className="w-56 border border-white/10 bg-black/80 p-2 shadow-2xl backdrop-blur-2xl rounded-lg md:w-64" 
         align="end" 
         sideOffset={16}
       >

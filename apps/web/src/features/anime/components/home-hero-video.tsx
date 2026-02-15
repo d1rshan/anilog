@@ -137,10 +137,10 @@ export function HomeHeroVideo() {
   };
 
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-[#050505]">
+    <section className="relative h-[88svh] w-full overflow-hidden bg-[#050505] md:h-screen">
       {/* 1. YouTube Background Layer */}
       <div className={cn(
-        "absolute inset-0 z-0 scale-[1.15] origin-center transition-all duration-1000",
+        "absolute inset-0 z-0 origin-center transition-all duration-1000",
         isTransitioning ? "opacity-0 scale-125" : "opacity-100 scale-110"
       )}>
         <div className="relative h-full w-full pointer-events-none">
@@ -163,27 +163,27 @@ export function HomeHeroVideo() {
       </div>
 
       {/* 2. Editorial Content Overlay */}
-      <div className="container relative z-20 mx-auto flex h-full items-center px-4 pt-20">
-        <div className="max-w-4xl space-y-10">
+      <div className="container relative z-20 mx-auto flex h-full items-center px-4 pt-16 md:pt-20">
+        <div className="max-w-4xl space-y-8 md:space-y-10">
 
           <div className={cn(
-            "space-y-6 transition-all duration-700 ease-out",
+            "space-y-4 transition-all duration-700 ease-out md:space-y-6",
             isTransitioning ? "opacity-0 -translate-y-8" : "opacity-100 translate-y-0"
           )}>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3 md:gap-4">
               <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.3em] text-white backdrop-blur-md">
                 {current.tag}
               </span>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 md:block">
                 {current.subtitle}
               </span>
             </div>
 
-            <h2 className="font-display text-7xl font-black uppercase leading-[0.85] tracking-tighter text-white md:text-9xl">
+            <h2 className="font-display text-4xl font-black uppercase leading-[0.88] tracking-tighter text-white sm:text-5xl md:text-9xl">
               {current.title}
             </h2>
 
-            <p className="max-w-2xl text-lg font-medium leading-relaxed text-white/60 md:text-xl">
+            <p className="max-w-xl text-sm font-medium leading-relaxed text-white/65 sm:text-base md:max-w-2xl md:text-xl">
               {current.description}
             </p>
           </div>
@@ -199,7 +199,7 @@ export function HomeHeroVideo() {
       </div>
 
       {/* 3. Interactive Controls */}
-      <div className="absolute bottom-12 right-12 z-30 flex items-center gap-8">
+      <div className="absolute bottom-6 right-4 z-30 flex items-center gap-3 sm:bottom-8 sm:right-6 sm:gap-4 md:bottom-12 md:right-12 md:gap-8">
         <div className="hidden items-center gap-3 md:flex">
           {CURATIONS.map((_, idx) => (
             <button
@@ -223,15 +223,15 @@ export function HomeHeroVideo() {
         <div className="flex items-center gap-2">
           <button
             onClick={handlePrev}
-            className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white backdrop-blur-2xl transition-all hover:bg-white hover:text-black active:scale-90"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white backdrop-blur-2xl transition-all active:scale-90 md:h-12 md:w-12 md:hover:bg-white md:hover:text-black"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
           </button>
           <button
             onClick={handleNext}
-            className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white backdrop-blur-2xl transition-all hover:bg-white hover:text-black active:scale-90"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white backdrop-blur-2xl transition-all active:scale-90 md:h-12 md:w-12 md:hover:bg-white md:hover:text-black"
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
           </button>
         </div>
 
@@ -239,10 +239,10 @@ export function HomeHeroVideo() {
 
         <button
           onClick={toggleMute}
-          className="group flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white backdrop-blur-2xl transition-all hover:bg-white hover:text-black active:scale-90 shadow-2xl"
+          className="group flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white shadow-2xl backdrop-blur-2xl transition-all active:scale-90 md:h-14 md:w-14 md:hover:bg-white md:hover:text-black"
           title={isMuted ? "Unmute" : "Mute"}
         >
-          {isMuted ? <VolumeX className="h-5 w-5 transition-transform group-hover:scale-110" /> : <Volume2 className="h-5 w-5 transition-transform group-hover:scale-110" />}
+          {isMuted ? <VolumeX className="h-4 w-4 transition-transform md:h-5 md:w-5 md:group-hover:scale-110" /> : <Volume2 className="h-4 w-4 transition-transform md:h-5 md:w-5 md:group-hover:scale-110" />}
         </button>
       </div>
 

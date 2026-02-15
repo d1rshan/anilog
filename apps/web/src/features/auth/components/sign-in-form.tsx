@@ -76,9 +76,9 @@ export const SignInForm = ({
   }
 
   return (
-    <div className="w-full max-w-sm space-y-8">
+    <div className="w-full max-w-sm space-y-6 md:space-y-8">
       <div className="space-y-2 text-center">
-        <h1 className="text-4xl font-black uppercase tracking-tighter">Sign In</h1>
+        <h1 className="text-3xl font-black md:text-4xl uppercase tracking-tighter">Sign In</h1>
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
           Enter your credentials to access your logs
         </p>
@@ -90,7 +90,7 @@ export const SignInForm = ({
           e.stopPropagation();
           form.handleSubmit();
         }}
-        className="space-y-6"
+        className="space-y-5 md:space-y-6"
       >
         <div className="space-y-4">
           <form.Field name="email">

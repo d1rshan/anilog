@@ -50,9 +50,9 @@ function ScrollRow({ title, subtitle, children, gap = "gap-6", padding = "px-4" 
 
   return (
     <section className="group/row relative animate-in fade-in slide-in-from-bottom-8 duration-1000">
-      <div className="mb-10 flex items-end justify-between border-b border-white/5 pb-6">
+      <div className="mb-6 flex items-end justify-between border-b border-white/5 pb-4 md:mb-10 md:pb-6">
         <div className="space-y-2">
-          <h2 className="font-display text-6xl font-black uppercase leading-none tracking-tighter md:text-8xl">
+          <h2 className="font-display text-4xl font-black uppercase leading-none tracking-tighter sm:text-5xl md:text-8xl">
             {title}
           </h2>
           <p className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/40">
@@ -65,7 +65,7 @@ function ScrollRow({ title, subtitle, children, gap = "gap-6", padding = "px-4" 
         <button
           onClick={() => scroll("left")}
           className={cn(
-            "absolute -left-6 top-1/2 z-50 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white opacity-0 transition-all backdrop-blur-2xl hover:scale-110 hover:bg-white hover:text-black group-hover/row:opacity-100 disabled:hidden",
+            "absolute -left-6 top-1/2 z-50 hidden h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white opacity-0 transition-all backdrop-blur-2xl hover:scale-110 hover:bg-white hover:text-black group-hover/row:opacity-100 disabled:hidden md:flex",
             !showLeft && "hidden"
           )}
         >
@@ -76,7 +76,7 @@ function ScrollRow({ title, subtitle, children, gap = "gap-6", padding = "px-4" 
           ref={scrollRef}
           onScroll={handleScroll}
           className={cn(
-            "no-scrollbar -mx-4 flex overflow-x-hidden overflow-y-hidden pb-8 scroll-smooth",
+            "no-scrollbar -mx-4 flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden pb-6 scroll-smooth [scroll-padding-inline:1rem] md:snap-none md:overflow-x-hidden md:pb-8",
             gap,
             padding
           )}
@@ -87,7 +87,7 @@ function ScrollRow({ title, subtitle, children, gap = "gap-6", padding = "px-4" 
         <button
           onClick={() => scroll("right")}
           className={cn(
-            "absolute -right-6 top-1/2 z-50 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white opacity-0 transition-all backdrop-blur-2xl hover:scale-110 hover:bg-white hover:text-black group-hover/row:opacity-100 disabled:hidden",
+            "absolute -right-6 top-1/2 z-50 hidden h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white opacity-0 transition-all backdrop-blur-2xl hover:scale-110 hover:bg-white hover:text-black group-hover/row:opacity-100 disabled:hidden md:flex",
             !showRight && "hidden"
           )}
         >
@@ -171,12 +171,12 @@ export function HomeDiscovery() {
   }
 
   return (
-    <div className="space-y-32 pb-40">
+    <div className="space-y-16 pb-24 md:space-y-32 md:pb-40">
       {/* ACTIVE ARCHIVE */}
       {watchingEntries.length > 0 && (
         <ScrollRow title="Active Archive" subtitle="Currently Logging">
           {watchingEntries.map((entry) => (
-            <div key={entry.id} className="w-[200px] shrink-0 transition-transform duration-500 hover:z-10 sm:w-[260px]">
+            <div key={entry.id} className="w-[146px] shrink-0 snap-start transition-transform duration-500 hover:z-10 sm:w-[200px] md:w-[260px]">
               <AnimeCard
                 anime={entry.anime}
                 currentEpisode={entry.currentEpisode}
@@ -190,19 +190,19 @@ export function HomeDiscovery() {
       )}
 
       {/* TOP 10 RANKING */}
-      <ScrollRow title="Top 10 Trending" subtitle="Global Trending Rankings" gap="gap-24" padding="px-24">
+      <ScrollRow title="Top 10 Trending" subtitle="Global Trending Rankings" gap="gap-8 sm:gap-16 md:gap-24" padding="px-6 sm:px-16 md:px-24">
         {topTen.map((animeItem, index) => {
           const entry = entryByAnimeId.get(animeItem.id);
           return (
-            <div key={animeItem.id} className="relative flex shrink-0 items-end pl-20 pt-6 transition-all duration-500 hover:z-20 sm:pl-24 sm:pt-8">
+            <div key={animeItem.id} className="relative flex shrink-0 snap-start items-end pl-10 pt-3 transition-all duration-500 hover:z-20 sm:pl-16 sm:pt-6 md:pl-24 md:pt-8">
               <span 
-                className="pointer-events-none absolute left-0 bottom-2 z-0 select-none font-display text-[240px] font-black leading-[0.58] text-transparent transition-colors md:text-[300px]"
+                className="pointer-events-none absolute left-0 bottom-1 z-0 select-none font-display text-[132px] font-black leading-[0.58] text-transparent transition-colors sm:text-[200px] md:bottom-2 md:text-[300px]"
                 style={{ WebkitTextStroke: "2.25px rgba(255,255,255,0.16)" }}
               >
                 {index + 1}
               </span>
             
-              <div className="relative z-10 w-[200px] sm:w-[260px]">
+              <div className="relative z-10 w-[146px] sm:w-[200px] md:w-[260px]">
                 <AnimeCard
                   anime={animeItem}
                   loggedStatus={entry?.status}
@@ -219,9 +219,9 @@ export function HomeDiscovery() {
 
       {/* COLLECTION GRID */}
       <section className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
-        <div className="mb-10 flex items-end justify-between border-b border-white/5 pb-6">
+        <div className="mb-6 flex items-end justify-between border-b border-white/5 pb-4 md:mb-10 md:pb-6">
           <div className="space-y-2">
-            <h2 className="font-display text-6xl font-black uppercase leading-none tracking-tighter md:text-8xl">
+            <h2 className="font-display text-4xl font-black uppercase leading-none tracking-tighter sm:text-5xl md:text-8xl">
               Collection
             </h2>
             <p className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/40">
@@ -229,11 +229,11 @@ export function HomeDiscovery() {
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-4 sm:gap-6 md:gap-8 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
           {restOfTrending.map((animeItem) => {
             const entry = entryByAnimeId.get(animeItem.id);
             return (
-              <div key={animeItem.id} className="transition-transform duration-500 hover:z-10 hover:-translate-y-2">
+              <div key={animeItem.id} className="min-w-0 transition-transform duration-500 hover:z-10 md:hover:-translate-y-2">
                 <AnimeCard
                   anime={animeItem}
                   loggedStatus={entry?.status}

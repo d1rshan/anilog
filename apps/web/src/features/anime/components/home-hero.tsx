@@ -40,14 +40,14 @@ export function HomeHero() {
   }, []);
 
   return (
-    <section ref={containerRef} className="relative min-h-screen w-full overflow-hidden bg-[#050505]">
+    <section ref={containerRef} className="relative min-h-[88svh] w-full overflow-hidden bg-[#050505] md:min-h-screen">
       {shouldLoadVideo ? (
         <HomeHeroVideo />
       ) : (
-        <div className="container relative z-10 mx-auto flex min-h-screen items-center px-4 pt-20">
-          <div className="max-w-4xl space-y-10">
-            <div className="space-y-6">
-              <div className="flex items-center gap-4">
+        <div className="container relative z-10 mx-auto flex min-h-[88svh] items-center px-4 pt-16 md:min-h-screen md:pt-20">
+          <div className="max-w-4xl space-y-8 md:space-y-10">
+            <div className="space-y-4 md:space-y-6">
+              <div className="flex flex-wrap items-center gap-3 md:gap-4">
                 <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.3em] text-white backdrop-blur-md">
                   Monthly Curation
                 </span>
@@ -55,10 +55,10 @@ export function HomeHero() {
                   Preparing Stream
                 </span>
               </div>
-              <h2 className="font-display text-7xl font-black uppercase leading-[0.85] tracking-tighter text-white md:text-9xl">
+              <h2 className="font-display text-5xl font-black uppercase leading-[0.85] tracking-tighter text-white sm:text-6xl md:text-9xl">
                 Discovery
               </h2>
-              <p className="max-w-2xl text-lg font-medium leading-relaxed text-white/60 md:text-xl">
+              <p className="max-w-xl text-base font-medium leading-relaxed text-white/60 sm:max-w-2xl md:text-xl">
                 Explore what anime fans are logging right now.
               </p>
             </div>
