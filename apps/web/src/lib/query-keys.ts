@@ -2,6 +2,7 @@ export const animeKeys = {
   all: ["anime"] as const,
   trending: () => [...animeKeys.all, "trending"] as const,
   search: (query: string) => [...animeKeys.all, "search", query] as const,
+  archiveSearch: (query: string) => [...animeKeys.all, "archive-search", query] as const,
 };
 
 export const libraryKeys = {

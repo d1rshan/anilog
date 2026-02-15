@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { searchAnimeQueryOptions, trendingAnimeQueryOptions } from "@/lib/query-options";
+import { archiveSearchQueryOptions, searchAnimeQueryOptions, trendingAnimeQueryOptions } from "@/lib/query-options";
 import { animeKeys } from "@/lib/query-keys";
 
 import { upsertAnime } from "./requests";
@@ -19,7 +19,7 @@ export function useSearchAnime(query: string) {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(query);
-    }, 300);
+    }, 400);
 
     return () => clearTimeout(timer);
   }, [query]);
@@ -27,6 +27,25 @@ export function useSearchAnime(query: string) {
   return useQuery({
     ...searchAnimeQueryOptions(debouncedQuery),
     enabled: debouncedQuery.length >= 3,
+    placeholderData: (previousData) => previousData,
+  });
+}
+
+export function useArchiveSearch(query: string) {
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  return useQuery({
+    ...archiveSearchQueryOptions(debouncedQuery),
+    enabled: debouncedQuery.length >= 2,
+    placeholderData: (previousData) => previousData,
   });
 }
 

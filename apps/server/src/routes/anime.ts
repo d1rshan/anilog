@@ -1,5 +1,6 @@
 import { Elysia, t } from "elysia";
 import { AnimeService } from "@anilog/api";
+import { auth } from "@anilog/auth";
 
 type UpsertAnimeInput = Parameters<typeof AnimeService.upsertAnime>[0];
 const cronSecret = process.env.CRON_SECRET;
@@ -35,6 +36,23 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
     return result;
   }, {
     params: t.Object({ query: t.String() })
+  })
+  .get("/archive-search", async ({ request, query, set }) => {
+    const session = await auth.api.getSession({ headers: request.headers });
+    if (!session?.user?.id) {
+      set.status = 401;
+      return { error: "User not authenticated" };
+    }
+
+    const q = query.q?.trim() ?? "";
+    const limit = query.limit ?? 12;
+
+    return await AnimeService.searchArchive(session.user.id, q, limit);
+  }, {
+    query: t.Object({
+      q: t.String(),
+      limit: t.Optional(t.Integer({ minimum: 1, maximum: 50 })),
+    }),
   })
   .post("/upsert", async ({ body }) => {
     const result = await AnimeService.upsertAnime(body as UpsertAnimeInput);

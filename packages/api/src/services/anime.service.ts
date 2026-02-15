@@ -1,9 +1,24 @@
 import { db } from "@anilog/db";
-import { anime, trendingAnime } from "@anilog/db/schema/anilog";
-import { eq, getTableColumns } from "drizzle-orm"
+import { anime, trendingAnime, userAnime } from "@anilog/db/schema/anilog";
+import { and, desc, eq, getTableColumns, ilike, notInArray, or } from "drizzle-orm";
 
 
 const ANILIST_API = "https://graphql.anilist.co";
+const SEARCH_CACHE_TTL_MS = 30_000;
+const ANILIST_CACHE_TTL_MS = 60_000;
+
+type SearchCacheValue = {
+  expiresAt: number;
+  value: { library: typeof anime.$inferSelect[]; archive: typeof anime.$inferSelect[] };
+};
+
+type AniListCacheValue = {
+  expiresAt: number;
+  value: typeof anime.$inferSelect[];
+};
+
+const archiveSearchCache = new Map<string, SearchCacheValue>();
+const anilistSearchCache = new Map<string, AniListCacheValue>();
 
 type AniListMedia = {
   id: number;
@@ -27,6 +42,54 @@ type AniListPageResponse = {
 };
 
 export class AnimeService {
+  private static getMatchScore(animeItem: typeof anime.$inferSelect, query: string) {
+    const normalizedQuery = query.toLowerCase();
+    const titles = [animeItem.title, animeItem.titleJapanese].filter((title): title is string => Boolean(title));
+    let bestScore = 0;
+
+    for (const title of titles) {
+      const normalizedTitle = title.toLowerCase();
+
+      if (normalizedTitle === normalizedQuery) {
+        return 4;
+      }
+
+      if (normalizedTitle.startsWith(normalizedQuery)) {
+        bestScore = Math.max(bestScore, 3);
+      }
+
+      const wordBoundary = new RegExp(`(^|\\s|[-:()])${normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`);
+      if (wordBoundary.test(normalizedTitle)) {
+        bestScore = Math.max(bestScore, 2);
+      }
+
+      if (normalizedTitle.includes(normalizedQuery)) {
+        bestScore = Math.max(bestScore, 1);
+      }
+    }
+
+    return bestScore;
+  }
+
+  private static rankMatches(items: typeof anime.$inferSelect[], query: string, limit: number) {
+    return items
+      .map((item) => ({
+        item,
+        score: this.getMatchScore(item, query),
+      }))
+      .sort((a, b) => {
+        if (b.score !== a.score) {
+          return b.score - a.score;
+        }
+
+        const updatedA = new Date(a.item.updatedAt).getTime();
+        const updatedB = new Date(b.item.updatedAt).getTime();
+        return updatedB - updatedA;
+      })
+      .slice(0, limit)
+      .map((entry) => entry.item);
+  }
+
   static async getTrendingAnime() {
     try {
       const result = await db.select({
@@ -37,6 +100,62 @@ export class AnimeService {
       console.error("Error getting all anime:", error);
       throw new Error("Failed to fetch anime");
     }
+  }
+
+  static async searchArchive(userId: string, userQuery: string, limit: number = 12) {
+    const normalizedQuery = userQuery.trim().toLowerCase();
+    const safeLimit = Math.min(Math.max(limit, 1), 50);
+    if (normalizedQuery.length < 2) {
+      return { library: [], archive: [] };
+    }
+
+    const cacheKey = `${userId}:${normalizedQuery}:${safeLimit}`;
+    const cached = archiveSearchCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.value;
+    }
+
+    const pattern = `%${normalizedQuery}%`;
+
+    const libraryRows = await db
+      .select({
+        ...getTableColumns(anime),
+      })
+      .from(anime)
+      .innerJoin(userAnime, eq(anime.id, userAnime.animeId))
+      .where(
+        and(
+          eq(userAnime.userId, userId),
+          or(ilike(anime.title, pattern), ilike(anime.titleJapanese, pattern)),
+        ),
+      );
+
+    const libraryResult = this.rankMatches(libraryRows, normalizedQuery, safeLimit);
+
+    const excludeIds = new Set(libraryResult.map((item) => item.id));
+    const whereClauses = [or(ilike(anime.title, pattern), ilike(anime.titleJapanese, pattern))];
+    if (excludeIds.size > 0) {
+      whereClauses.push(notInArray(anime.id, Array.from(excludeIds)));
+    }
+
+    const archiveRows = await db
+      .select({
+        ...getTableColumns(anime),
+      })
+      .from(anime)
+      .where(and(...whereClauses))
+      .orderBy(desc(anime.updatedAt))
+      .limit(safeLimit * 4);
+
+    const archiveResult = this.rankMatches(archiveRows, normalizedQuery, safeLimit);
+
+    const value = { library: libraryResult, archive: archiveResult };
+    archiveSearchCache.set(cacheKey, {
+      expiresAt: Date.now() + SEARCH_CACHE_TTL_MS,
+      value,
+    });
+
+    return value;
   }
 
   static async syncAllAnime(): Promise<{ success: boolean; count: number }> {
@@ -220,6 +339,16 @@ export class AnimeService {
   }
 
   static async searchAnime(userQuery: string) {
+    const normalizedQuery = userQuery.trim().toLowerCase();
+    if (normalizedQuery.length < 3) {
+      return [];
+    }
+
+    const cached = anilistSearchCache.get(normalizedQuery);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.value;
+    }
+
     const query = `
         query ($search: String!) {
           Page(page: 1, perPage: 20) {
@@ -255,7 +384,7 @@ export class AnimeService {
         body: JSON.stringify({
           query,
           variables: {
-            search: userQuery
+            search: normalizedQuery
           }
         })
       });
@@ -267,7 +396,7 @@ export class AnimeService {
       }
 
       // Transform AniList response to match Anime type
-      return json.data.Page.media.map((media: any) => ({
+      const result = json.data.Page.media.map((media: any) => ({
         id: media.id,
         title: media.title.english ?? media.title.native ?? "Unknown",
         titleJapanese: media.title.native,
@@ -280,6 +409,13 @@ export class AnimeService {
         year: media.seasonYear,
         rating: media.averageScore,
       }));
+
+      anilistSearchCache.set(normalizedQuery, {
+        expiresAt: Date.now() + ANILIST_CACHE_TTL_MS,
+        value: result,
+      });
+
+      return result;
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : "Failed to search anime");
     }

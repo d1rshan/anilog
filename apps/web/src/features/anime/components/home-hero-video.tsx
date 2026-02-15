@@ -28,7 +28,12 @@ const CURATIONS = [
   }
 ];
 
-export function HomeHeroVideo() {
+interface HomeHeroVideoProps {
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+}
+
+export function HomeHeroVideo({ searchValue, onSearchChange }: HomeHeroVideoProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -193,7 +198,7 @@ export function HomeHeroVideo() {
             isTransitioning ? "opacity-0" : "opacity-100"
           )}>
             <p className="mb-4 text-[10px] font-black uppercase tracking-[0.4em] text-white/30">Continue Discovery</p>
-            <AnimeSearch variant="hero" />
+            <AnimeSearch variant="hero" value={searchValue} onChange={onSearchChange} />
           </div>
         </div>
       </div>

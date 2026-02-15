@@ -12,7 +12,12 @@ const HomeHeroVideo = dynamic(
   },
 );
 
-export function HomeHero() {
+interface HomeHeroProps {
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+}
+
+export function HomeHero({ searchValue, onSearchChange }: HomeHeroProps) {
   const containerRef = useRef<HTMLElement | null>(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
@@ -42,7 +47,7 @@ export function HomeHero() {
   return (
     <section ref={containerRef} className="relative min-h-[88svh] w-full overflow-hidden bg-[#050505] md:min-h-screen">
       {shouldLoadVideo ? (
-        <HomeHeroVideo />
+        <HomeHeroVideo searchValue={searchValue} onSearchChange={onSearchChange} />
       ) : (
         <div className="container relative z-10 mx-auto flex min-h-[88svh] items-center px-4 pt-16 md:min-h-screen md:pt-20">
           <div className="max-w-4xl space-y-8 md:space-y-10">
@@ -66,7 +71,7 @@ export function HomeHero() {
               <p className="mb-4 text-[10px] font-black uppercase tracking-[0.4em] text-white/30">
                 Continue Discovery
               </p>
-              <AnimeSearch variant="hero" />
+              <AnimeSearch variant="hero" value={searchValue} onChange={onSearchChange} />
             </div>
           </div>
         </div>
