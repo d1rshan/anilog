@@ -28,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body
         className={`${syne.variable} ${manrope.variable} font-sans antialiased bg-[#050505] text-[#ededed] selection:bg-[#ededed] selection:text-[#050505]`}
       >

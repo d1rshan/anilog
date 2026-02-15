@@ -50,7 +50,7 @@ function ScrollRow({ title, subtitle, children, gap = "gap-6", padding = "px-4" 
 
   return (
     <section className="group/row relative animate-in fade-in slide-in-from-bottom-8 duration-1000">
-      <div className="mb-12 flex items-end justify-between border-b border-white/5 pb-8">
+      <div className="mb-10 flex items-end justify-between border-b border-white/5 pb-6">
         <div className="space-y-2">
           <h2 className="font-display text-6xl font-black uppercase leading-none tracking-tighter md:text-8xl">
             {title}
@@ -155,9 +155,9 @@ export function HomeDiscovery() {
 
   if (isTrendingLoading || isLibraryLoading) {
     return (
-      <div className="space-y-32">
+      <div className="space-y-24">
         {[1, 2].map((i) => (
-          <div key={i} className="space-y-12">
+          <div key={i} className="space-y-10">
             <div className="h-16 w-64 animate-pulse rounded bg-white/5" />
             <div className="flex gap-8 overflow-hidden">
               {[1, 2, 3, 4, 5, 6].map((j) => (
@@ -171,7 +171,7 @@ export function HomeDiscovery() {
   }
 
   return (
-    <div className="space-y-48 pb-48">
+    <div className="space-y-32 pb-40">
       {/* ACTIVE ARCHIVE */}
       {watchingEntries.length > 0 && (
         <ScrollRow title="Active Archive" subtitle="Currently Logging">
@@ -190,14 +190,14 @@ export function HomeDiscovery() {
       )}
 
       {/* TOP 10 RANKING */}
-      <ScrollRow title="The Canon" subtitle="Global Trending Rankings" gap="gap-32" padding="px-24">
+      <ScrollRow title="Top 10 Trending" subtitle="Global Trending Rankings" gap="gap-24" padding="px-24">
         {topTen.map((animeItem, index) => {
           const entry = entryByAnimeId.get(animeItem.id);
           return (
-            <div key={animeItem.id} className="relative flex shrink-0 items-end transition-all duration-500 hover:z-20">
+            <div key={animeItem.id} className="relative flex shrink-0 items-end pl-20 pt-6 transition-all duration-500 hover:z-20 sm:pl-24 sm:pt-8">
               <span 
-                className="pointer-events-none absolute -left-20 bottom-0 z-0 select-none font-display text-[260px] font-black leading-[0.6] text-transparent transition-colors md:text-[320px]"
-                style={{ WebkitTextStroke: "2px rgba(255,255,255,0.1)" }}
+                className="pointer-events-none absolute left-0 bottom-2 z-0 select-none font-display text-[240px] font-black leading-[0.58] text-transparent transition-colors md:text-[300px]"
+                style={{ WebkitTextStroke: "2.25px rgba(255,255,255,0.16)" }}
               >
                 {index + 1}
               </span>
@@ -219,7 +219,7 @@ export function HomeDiscovery() {
 
       {/* COLLECTION GRID */}
       <section className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
-        <div className="mb-16 flex items-end justify-between border-b border-white/5 pb-8">
+        <div className="mb-10 flex items-end justify-between border-b border-white/5 pb-6">
           <div className="space-y-2">
             <h2 className="font-display text-6xl font-black uppercase leading-none tracking-tighter md:text-8xl">
               Collection
@@ -229,7 +229,7 @@ export function HomeDiscovery() {
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-x-8 gap-y-24 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
           {restOfTrending.map((animeItem) => {
             const entry = entryByAnimeId.get(animeItem.id);
             return (

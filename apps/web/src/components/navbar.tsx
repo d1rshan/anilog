@@ -1,10 +1,8 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import { useTheme } from "next-themes";
 
 import { UserMenu } from "@/features/auth/components/user-menu";
 import { useAuth } from "@/features/auth/lib/hooks";
@@ -13,7 +11,6 @@ import { cn } from "@/lib/utils";
 export const Navbar = () => {
   const pathname = usePathname();
   const { isAuthenticated, username } = useAuth();
-  const { theme, setTheme } = useTheme();
 
   if (pathname === "/login") return null;
   if (!isAuthenticated || !username) return null;
@@ -67,14 +64,7 @@ export const Navbar = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="p-2 text-muted-foreground hover:text-foreground transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer"
-          >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
-          <div className="h-4 w-[1px] bg-white/10" />
+        <div className="flex items-center">
           <UserMenu />
         </div>
       </div>
