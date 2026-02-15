@@ -3,14 +3,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { getTrendingAnime, searchAnime, upsertAnime } from "./requests";
-import type { Anime } from "@anilog/db/schema/anilog";
+
+import { searchAnimeQueryOptions, trendingAnimeQueryOptions } from "@/lib/query-options";
+import { animeKeys } from "@/lib/query-keys";
+
+import { upsertAnime } from "./requests";
 
 export function useTrendingAnime() {
-  return useQuery<Anime[]>({
-    queryKey: ["trending-anime"],
-    queryFn: getTrendingAnime,
-  });
+  return useQuery(trendingAnimeQueryOptions());
 }
 
 export function useSearchAnime(query: string) {
@@ -24,11 +24,9 @@ export function useSearchAnime(query: string) {
     return () => clearTimeout(timer);
   }, [query]);
 
-  return useQuery<Anime[]>({
-    queryKey: ["search-anime", debouncedQuery],
-    queryFn: () => searchAnime(debouncedQuery),
+  return useQuery({
+    ...searchAnimeQueryOptions(debouncedQuery),
     enabled: debouncedQuery.length >= 3,
-    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
 
@@ -38,8 +36,7 @@ export function useUpsertAnime() {
   return useMutation({
     mutationFn: upsertAnime,
     onSuccess: () => {
-      // Invalidate trending anime cache since we may have added new anime
-      queryClient.invalidateQueries({ queryKey: ["trending-anime"] });
+      queryClient.invalidateQueries({ queryKey: animeKeys.trending() });
     },
     onError: (error) => {
       toast.error(error.message || "Failed to add anime");

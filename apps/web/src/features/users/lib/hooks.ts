@@ -1,59 +1,56 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+
 import {
-  searchUsers,
-  getUserProfile,
-  getUserByUsername,
-  getUserPublicLibrary,
+  isFollowingQueryOptions,
+  myFollowingQueryOptions,
+  myProfileQueryOptions,
+  userByUsernameQueryOptions,
+  userProfileQueryOptions,
+  userPublicLibraryQueryOptions,
+  userSearchQueryOptions,
+} from "@/lib/query-options";
+import { userKeys } from "@/lib/query-keys";
+
+import {
   followUser,
   unfollowUser,
-  checkIsFollowing,
-  getMyFollowing,
-  getMyProfile,
   updateMyProfile,
   type UserWithProfile,
   type UpdateProfileData,
 } from "./requests";
 
 export const useSearchUsers = (query: string) => {
-  return useQuery<UserWithProfile[]>({
-    queryKey: ["users", "search", query],
-    queryFn: () => searchUsers(query),
+  return useQuery({
+    ...userSearchQueryOptions(query),
     enabled: query.length >= 3,
   });
 };
 
 export const useUserProfile = (userId: string) => {
-  return useQuery<UserWithProfile>({
-    queryKey: ["users", "profile", userId],
-    queryFn: () => getUserProfile(userId),
+  return useQuery({
+    ...userProfileQueryOptions(userId),
     enabled: !!userId,
   });
 };
 
 export const useUserByUsername = (username: string) => {
-  return useQuery<UserWithProfile>({
-    queryKey: ["users", "username", username],
-    queryFn: () => getUserByUsername(username),
+  return useQuery({
+    ...userByUsernameQueryOptions(username),
     enabled: !!username,
   });
 };
 
 export const useUserLists = (userId: string) => {
   return useQuery({
-    queryKey: ["users", "library", userId],
-    queryFn: () => getUserPublicLibrary(userId),
+    ...userPublicLibraryQueryOptions(userId),
     enabled: !!userId,
   });
 };
 
 export const useIsFollowing = (userId: string) => {
-  return useQuery<{ isFollowing: boolean }>({
-    queryKey: ["users", "is-following", userId],
-    queryFn: async () => {
-      const isFollowing = await checkIsFollowing(userId);
-      return { isFollowing };
-    },
+  return useQuery({
+    ...isFollowingQueryOptions(userId),
     enabled: !!userId,
   });
 };
@@ -63,9 +60,17 @@ export const useFollowUser = () => {
   return useMutation({
     mutationFn: followUser,
     onSuccess: (_, userId) => {
-      queryClient.invalidateQueries({ queryKey: ["users", "is-following", userId] });
-      queryClient.invalidateQueries({ queryKey: ["users", "profile", userId] });
-      queryClient.invalidateQueries({ queryKey: ["users", "following"] });
+      queryClient.setQueryData(userKeys.isFollowing(userId), { isFollowing: true });
+      queryClient.setQueryData<UserWithProfile>(
+        userKeys.profile(userId),
+        (current) =>
+          current
+            ? { ...current, followerCount: current.followerCount + 1 }
+            : current,
+      );
+
+      queryClient.invalidateQueries({ queryKey: userKeys.byUsernameRoot() });
+      queryClient.invalidateQueries({ queryKey: userKeys.following() });
       toast.success("Successfully followed user!");
     },
     onError: (error) => {
@@ -79,9 +84,17 @@ export const useUnfollowUser = () => {
   return useMutation({
     mutationFn: unfollowUser,
     onSuccess: (_, userId) => {
-      queryClient.invalidateQueries({ queryKey: ["users", "is-following", userId] });
-      queryClient.invalidateQueries({ queryKey: ["users", "profile", userId] });
-      queryClient.invalidateQueries({ queryKey: ["users", "following"] });
+      queryClient.setQueryData(userKeys.isFollowing(userId), { isFollowing: false });
+      queryClient.setQueryData<UserWithProfile>(
+        userKeys.profile(userId),
+        (current) =>
+          current
+            ? { ...current, followerCount: Math.max(0, current.followerCount - 1) }
+            : current,
+      );
+
+      queryClient.invalidateQueries({ queryKey: userKeys.byUsernameRoot() });
+      queryClient.invalidateQueries({ queryKey: userKeys.following() });
       toast.success("Successfully unfollowed user");
     },
     onError: (error) => {
@@ -91,17 +104,11 @@ export const useUnfollowUser = () => {
 };
 
 export const useMyFollowing = () => {
-  return useQuery<UserWithProfile[]>({
-    queryKey: ["users", "following"],
-    queryFn: getMyFollowing,
-  });
+  return useQuery(myFollowingQueryOptions());
 };
 
 export const useMyProfile = () => {
-  return useQuery<UserWithProfile>({
-    queryKey: ["users", "me", "profile"],
-    queryFn: getMyProfile,
-  });
+  return useQuery(myProfileQueryOptions());
 };
 
 export const useUpdateMyProfile = () => {
@@ -109,11 +116,10 @@ export const useUpdateMyProfile = () => {
   return useMutation({
     mutationFn: (data: UpdateProfileData) => updateMyProfile(data),
     onSuccess: () => {
-      // Invalidate all profile-related queries
-      queryClient.invalidateQueries({ queryKey: ["users", "me", "profile"] });
-      queryClient.invalidateQueries({ queryKey: ["users", "profile"] }); // catches all by userId
-      queryClient.invalidateQueries({ queryKey: ["users", "username"] }); // catches all by username
-      queryClient.invalidateQueries({ queryKey: ["users", "search"] }); // search results too
+      queryClient.invalidateQueries({ queryKey: userKeys.meProfile() });
+      queryClient.invalidateQueries({ queryKey: userKeys.profileRoot() });
+      queryClient.invalidateQueries({ queryKey: userKeys.byUsernameRoot() });
+      queryClient.invalidateQueries({ queryKey: userKeys.searchRoot() });
       toast.success("Profile updated successfully!");
     },
     onError: (error) => {

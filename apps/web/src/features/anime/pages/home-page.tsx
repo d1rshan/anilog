@@ -6,13 +6,16 @@ import {
 } from "@tanstack/react-query";
 
 import { requireCurrentUser } from "@/features/auth/lib/server";
-import { getMyLibrary } from "@/features/lists/lib/requests";
+import {
+  myLibraryQueryOptions,
+  searchAnimeQueryOptions,
+  trendingAnimeQueryOptions,
+} from "@/lib/query-options";
 import { cn } from "@/lib/utils";
 
 import { HomeDiscovery } from "../components/home-discovery";
 import { HomeHero } from "../components/home-hero";
 import { SearchResults } from "../components/search-results";
-import { getTrendingAnime, searchAnime } from "../lib/requests";
 
 interface HomePageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -28,21 +31,14 @@ export const HomePage = async ({ searchParams }: HomePageProps) => {
   const queryClient = new QueryClient();
 
   if (isSearching) {
-    await queryClient.prefetchQuery({
-      queryKey: ["search-anime", searchQuery],
-      queryFn: () => searchAnime(searchQuery),
-    });
-  } else {
-    // Prefetch both trending and user library for instant loading of HomeDiscovery
     await Promise.all([
-      queryClient.prefetchQuery({
-        queryKey: ["trending-anime"],
-        queryFn: getTrendingAnime,
-      }),
-      queryClient.prefetchQuery({
-        queryKey: ["library", "me"],
-        queryFn: getMyLibrary,
-      }),
+      queryClient.prefetchQuery(searchAnimeQueryOptions(searchQuery)),
+      queryClient.prefetchQuery(myLibraryQueryOptions()),
+    ]);
+  } else {
+    await Promise.all([
+      queryClient.prefetchQuery(trendingAnimeQueryOptions()),
+      queryClient.prefetchQuery(myLibraryQueryOptions()),
     ]);
   }
 

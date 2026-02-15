@@ -7,10 +7,14 @@ import {
 } from "@tanstack/react-query";
 
 import { getCurrentUser } from "@/features/auth/lib/server";
-import { api } from "@/lib/api";
+import {
+  myLibraryQueryOptions,
+  userByUsernameQueryOptions,
+  userPublicLibraryQueryOptions,
+} from "@/lib/query-options";
+import { userKeys } from "@/lib/query-keys";
 
 import { UnifiedProfile } from "../components/unified-profile";
-import { getUserByUsername } from "../lib/requests";
 import type { UserWithProfile } from "../lib/requests";
 
 interface UserProfilePageProps {
@@ -26,31 +30,28 @@ export const UserProfilePage = async ({ params }: UserProfilePageProps) => {
 
   const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery({
-    queryKey: ["users", "username", username],
-    queryFn: () => getUserByUsername(username),
-  });
+  try {
+    await queryClient.prefetchQuery(userByUsernameQueryOptions(username));
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      notFound();
+    }
+    throw error;
+  }
 
-  const user = queryClient.getQueryData<UserWithProfile>([
-    "users",
-    "username",
-    username,
-  ]);
+  const user = queryClient.getQueryData<UserWithProfile>(userKeys.byUsername(username));
 
   if (!user) {
     notFound();
   }
 
-  await queryClient.prefetchQuery({
-    queryKey: ["users", "library", user.id],
-    queryFn: async () => {
-      const libraryRes = await api.users({ id: user.id }).library.get();
-      if (libraryRes.error) throw libraryRes.error;
-      return libraryRes.data;
-    },
-  });
-
   const isOwnProfile = currentUser?.id === user.id;
+
+  if (isOwnProfile) {
+    await queryClient.prefetchQuery(myLibraryQueryOptions());
+  } else {
+    await queryClient.prefetchQuery(userPublicLibraryQueryOptions(user.id));
+  }
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
@@ -62,3 +63,15 @@ export const UserProfilePage = async ({ params }: UserProfilePageProps) => {
     </HydrationBoundary>
   );
 };
+
+function isNotFoundError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+
+  return (
+    "status" in error &&
+    typeof (error as { status?: unknown }).status === "number" &&
+    (error as { status: number }).status === 404
+  );
+}
