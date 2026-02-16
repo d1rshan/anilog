@@ -4,6 +4,7 @@ import { Syne, Manrope } from "next/font/google";
 import "../index.css";
 import { Navbar } from "@/components/navbar";
 import { Providers } from "@/components/providers";
+import { RouteTransitionShell } from "@/components/route-transition-shell";
 
 const syne = Syne({
   variable: "--font-syne",
@@ -36,7 +37,7 @@ export default function RootLayout({
           <Navbar />
 
           <main className="min-h-screen">
-            {children}
+            <RouteTransitionShell>{children}</RouteTransitionShell>
           </main>
         </Providers>
       </body>

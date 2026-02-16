@@ -9,6 +9,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { UserMenu } from "@/features/auth/components/user-menu";
 import { useAuth } from "@/features/auth/lib/hooks";
 import { authClient } from "@/lib/auth-client";
+import { useRouteTransition } from "@/lib/route-transition";
 import { cn } from "@/lib/utils";
 
 const Hamburger = ({ isOpen, onClick }: { isOpen: boolean; onClick: () => void }) => {
@@ -40,11 +41,15 @@ export const Navbar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { isAuthenticated, username, user } = useAuth();
+  const { startNavigation } = useRouteTransition();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [optimisticPath, setOptimisticPath] = useState<string | null>(null);
   const menuShellRef = useRef<HTMLDivElement | null>(null);
+  const profilePath = username ? (`/${username}` as Route) : null;
 
   useEffect(() => {
     setMobileMenuOpen(false);
+    setOptimisticPath(null);
   }, [pathname]);
 
   useEffect(() => {
@@ -69,16 +74,30 @@ export const Navbar = () => {
     };
   }, [mobileMenuOpen]);
 
+  useEffect(() => {
+    router.prefetch("/");
+    router.prefetch("/users");
+
+    if (profilePath) {
+      router.prefetch(profilePath);
+    }
+  }, [router, profilePath]);
+
   if (pathname === "/login") return null;
   if (!isAuthenticated || !username || !user) return null;
-
-  const profilePath = `/${username}` as Route;
+  const userProfilePath = `/${username}` as Route;
+  const activePath = optimisticPath ?? pathname;
 
   const links = [
     { href: "/" as Route, label: "Discovery", activePath: "/" as Route },
     { href: "/users" as Route, label: "Community", activePath: "/users" as Route },
-    { href: profilePath, label: "Archive", activePath: profilePath },
+    { href: userProfilePath, label: "Archive", activePath: userProfilePath },
   ];
+
+  const handleNavClick = (targetPath: string) => {
+    setOptimisticPath(targetPath);
+    startNavigation(targetPath);
+  };
 
   return (
     <nav className="fixed left-0 right-0 top-0 z-50 flex justify-center p-3 md:p-6 pointer-events-none">
@@ -87,7 +106,7 @@ export const Navbar = () => {
           className="pointer-events-auto relative flex h-12 w-full items-center justify-between rounded-xl border border-white/10 bg-black/55 px-3 shadow-2xl backdrop-blur-2xl md:h-14 md:px-6"
         >
           <div className="flex items-center gap-4 md:gap-10">
-            <Link href="/" className="flex items-center gap-2 group">
+            <Link href="/" prefetch className="flex items-center gap-2 group" onClick={() => handleNavClick("/")}>
               <div className="h-1.5 w-1.5 rounded-full bg-foreground transition-all duration-300 group-hover:scale-[2]" />
               <span className="font-display text-base font-black uppercase tracking-tighter md:text-lg">
                 Anilog
@@ -99,15 +118,17 @@ export const Navbar = () => {
                 <Link
                   key={link.label}
                   href={link.href}
+                  prefetch
+                  onClick={() => handleNavClick(link.activePath)}
                   className={cn(
                     "text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-300 hover:text-foreground relative group/link",
-                    pathname === link.activePath ? "text-foreground" : "text-muted-foreground"
+                    activePath === link.activePath ? "text-foreground" : "text-muted-foreground"
                   )}
                 >
                   {link.label}
                   <span className={cn(
                     "absolute -bottom-1 left-0 h-px bg-foreground transition-all duration-300",
-                    pathname === link.activePath ? "w-full" : "w-0 group-hover/link:w-full"
+                    activePath === link.activePath ? "w-full" : "w-0 group-hover/link:w-full"
                   )} />
                 </Link>
               ))}
@@ -138,9 +159,11 @@ export const Navbar = () => {
               <Link
                 key={link.label}
                 href={link.href}
+                prefetch
+                onClick={() => handleNavClick(link.activePath)}
                 className={cn(
                   "group flex items-center justify-between rounded-lg px-4 py-3 transition-all duration-300",
-                  pathname === link.activePath ? "bg-white/10" : "hover:bg-white/5",
+                  activePath === link.activePath ? "bg-white/10" : "hover:bg-white/5",
                   mobileMenuOpen ? "translate-x-0 opacity-100" : "-translate-x-2 opacity-0"
                 )}
                 style={{ transitionDelay: `${i * 50}ms` }}
@@ -148,18 +171,18 @@ export const Navbar = () => {
                 <div className="flex items-center gap-3">
                   <div className={cn(
                     "h-1 w-1 rounded-full transition-all duration-300",
-                    pathname === link.activePath ? "bg-foreground scale-125" : "bg-white/20 group-hover:bg-white/40"
+                    activePath === link.activePath ? "bg-foreground scale-125" : "bg-white/20 group-hover:bg-white/40"
                   )} />
                   <span className={cn(
                     "text-[10px] font-black uppercase tracking-[0.2em]",
-                    pathname === link.activePath ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
+                    activePath === link.activePath ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
                   )}>
                     {link.label}
                   </span>
                 </div>
                 <ArrowRight className={cn(
                     "h-3.5 w-3.5 transition-all duration-500",
-                    pathname === link.activePath ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"
+                    activePath === link.activePath ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"
                   )} 
                 />
               </Link>
