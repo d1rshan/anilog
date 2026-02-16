@@ -8,7 +8,6 @@ import { useMyLibrary, useLogAnime } from "@/features/lists/lib/hooks";
 import { AnimeCard } from "./anime-card";
 import { AddToListDialog } from "./add-to-list-dialog";
 import { type LibraryEntryWithAnime } from "@/features/lists/lib/requests";
-import { toast } from "sonner";
 import { useRequireAuth } from "@/features/auth/lib/hooks";
 import { cn } from "@/lib/utils";
 
@@ -131,7 +130,6 @@ export function HomeDiscovery() {
     }
 
     logAnime.mutate({ anime: animeItem, status: "planned", currentEpisode: 0, rating: null });
-    toast.success(`${animeItem.title} added to planned`);
   };
 
   const openEditor = (target: Anime | LibraryEntryWithAnime) => {
