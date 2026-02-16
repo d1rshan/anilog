@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus, Pencil } from "lucide-react";
 import { type Anime, type LibraryStatus } from "@anilog/db/schema/anilog";
 import { useTrendingAnime } from "../lib/hooks";
@@ -29,14 +29,51 @@ interface ScrollRowProps {
 function ScrollRow({ title, subtitle, children, gap = "gap-6", padding = "px-4" }: ScrollRowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeft, setShowLeft] = useState(false);
-  const [showRight, setShowRight] = useState(true);
+  const [showRight, setShowRight] = useState(false);
 
-  const handleScroll = () => {
-    if (!scrollRef.current) return;
+  const updateScrollControls = useCallback(() => {
+    if (!scrollRef.current) {
+      setShowLeft(false);
+      setShowRight(false);
+      return;
+    }
+
     const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+    const hasOverflow = scrollWidth > clientWidth + 1;
+    if (!hasOverflow) {
+      setShowLeft(false);
+      setShowRight(false);
+      return;
+    }
+
     setShowLeft(scrollLeft > 20);
     setShowRight(scrollLeft < scrollWidth - clientWidth - 20);
+  }, []);
+
+  const handleScroll = () => {
+    updateScrollControls();
   };
+
+  useEffect(() => {
+    updateScrollControls();
+
+    const container = scrollRef.current;
+    if (!container) {
+      return;
+    }
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateScrollControls();
+    });
+
+    resizeObserver.observe(container);
+    window.addEventListener("resize", updateScrollControls);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateScrollControls);
+    };
+  }, [children, updateScrollControls]);
 
   const scroll = (direction: "left" | "right") => {
     if (!scrollRef.current) return;
@@ -64,8 +101,8 @@ function ScrollRow({ title, subtitle, children, gap = "gap-6", padding = "px-4" 
         <button
           onClick={() => scroll("left")}
           className={cn(
-            "absolute -left-6 top-1/2 z-50 hidden h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white opacity-0 transition-all backdrop-blur-2xl hover:scale-110 hover:bg-white hover:text-black group-hover/row:opacity-100 disabled:hidden md:flex",
-            !showLeft && "hidden"
+            "absolute -left-6 top-1/2 z-50 h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white opacity-0 transition-all backdrop-blur-2xl hover:scale-110 hover:bg-white hover:text-black group-hover/row:opacity-100 disabled:hidden",
+            showLeft ? "hidden md:flex" : "hidden md:hidden",
           )}
         >
           <ChevronLeft className="h-6 w-6" />
@@ -86,8 +123,8 @@ function ScrollRow({ title, subtitle, children, gap = "gap-6", padding = "px-4" 
         <button
           onClick={() => scroll("right")}
           className={cn(
-            "absolute -right-6 top-1/2 z-50 hidden h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white opacity-0 transition-all backdrop-blur-2xl hover:scale-110 hover:bg-white hover:text-black group-hover/row:opacity-100 disabled:hidden md:flex",
-            !showRight && "hidden"
+            "absolute -right-6 top-1/2 z-50 h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white opacity-0 transition-all backdrop-blur-2xl hover:scale-110 hover:bg-white hover:text-black group-hover/row:opacity-100 disabled:hidden",
+            showRight ? "hidden md:flex" : "hidden md:hidden",
           )}
         >
           <ChevronRight className="h-6 w-6" />

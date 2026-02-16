@@ -13,7 +13,7 @@ import {
   Ban,
   type LucideIcon,
 } from "lucide-react";
-import { AnimatePresence, animate, motion, useMotionValue } from "framer-motion";
+import { animate, motion, useMotionValue } from "framer-motion";
 import type { Anime, LibraryStatus } from "@anilog/db/schema/anilog";
 
 import { Button } from "@/components/ui/button";
@@ -52,11 +52,6 @@ function allowedStatusesForAnime(animeStatus?: string | null): LibraryStatus[] {
 
   return [...LIBRARY_STATUSES];
 }
-
-const PANEL_TRANSITION = {
-  duration: 0.26,
-  ease: [0.22, 1, 0.36, 1] as const,
-};
 
 export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialStatus }: AddToListDialogProps) {
   const logAnime = useLogAnime();
@@ -183,7 +178,7 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
         showCloseButton={false}
         className={cn(
           "fixed inset-x-0 bottom-0 top-auto left-0 z-50 w-full max-w-none translate-x-0 translate-y-0 border-0 bg-transparent p-0 shadow-none outline-none",
-          "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:slide-in-from-bottom-8 data-[state=closed]:slide-out-to-bottom-8 duration-300",
+          "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-bottom-4 duration-150",
           "sm:left-[50%] sm:top-[50%] sm:bottom-auto sm:w-full sm:max-w-3xl sm:-translate-x-1/2 sm:-translate-y-1/2",
         )}
       >
@@ -206,7 +201,7 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
             animate(dragY, 0, { type: "spring", stiffness: 480, damping: 38, mass: 0.72 });
           }}
           className={cn(
-            "flex max-h-[92svh] w-full flex-col overflow-hidden rounded-t-[1.4rem] rounded-b-none border border-white/10 bg-black/55 shadow-2xl backdrop-blur-2xl",
+            "flex max-h-[92svh] w-full transform-gpu flex-col overflow-hidden rounded-t-[1.4rem] rounded-b-none border border-white/10 bg-black/55 shadow-2xl backdrop-blur-2xl will-change-transform",
             "sm:max-h-[88svh] sm:rounded-2xl",
           )}
         >
@@ -223,71 +218,47 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
         </div>
 
         <div className="flex flex-1 flex-col overflow-hidden px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-5 sm:px-8 sm:pb-7 sm:pt-6">
-          <motion.div layout className="mb-5 grid grid-cols-2 gap-2.5 sm:mb-6 sm:grid-cols-4">
+          <div className="mb-5 grid grid-cols-2 gap-2.5 sm:mb-6 sm:grid-cols-4">
             {allowedStatuses.map((item) => {
               const selected = status === item;
               const Icon = STATUS_CONFIG[item].icon;
 
               return (
-                <motion.button
+                <button
                   key={item}
-                  layout
                   type="button"
                   onClick={() => handleStatusChange(item)}
-                  whileTap={{ scale: 0.98 }}
                   className={cn(
-                    "relative isolate overflow-hidden rounded-xl border px-3 py-3 transition-colors",
+                    "relative isolate overflow-hidden rounded-xl border px-3 py-3 transition-all active:scale-[0.99]",
                     selected
-                      ? "border-white/35 text-black"
+                      ? "border-white/35 bg-white text-black"
                       : "border-white/10 bg-white/5 text-white/75 hover:border-white/20 hover:bg-white/10",
                   )}
                 >
-                  {selected && (
-                    <motion.span
-                      layoutId="status-active-pill"
-                      className="absolute inset-0 -z-10 rounded-xl bg-white"
-                      transition={PANEL_TRANSITION}
-                    />
-                  )}
                   <span className="flex items-center justify-center gap-2.5">
                     <Icon className={cn("h-4 w-4", selected ? "text-black" : "text-white/55")} />
                     <span className="text-[10px] font-black uppercase tracking-[0.2em]">
                       {STATUS_CONFIG[item].label}
                     </span>
                   </span>
-                </motion.button>
+                </button>
               );
             })}
-          </motion.div>
+          </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
-            <AnimatePresence mode="wait" initial={false}>
-              {isPlanned ? (
-                <motion.div
-                  key="planned-panel"
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={PANEL_TRANSITION}
-                  className="space-y-4"
-                >
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">Watchlist Mode</p>
-                    <p className="mt-3 text-sm font-semibold text-white/85">
-                      Save this title to your watchlist now. You can switch to watching or completed later.
-                    </p>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="tracked-panel"
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={PANEL_TRANSITION}
-                  className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5"
-                >
-                  <motion.div layout className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5">
+            {isPlanned ? (
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">Watchlist Mode</p>
+                  <p className="mt-3 text-sm font-semibold text-white/85">
+                    Save this title to your watchlist now. You can switch to watching or completed later.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5">
                     <div className="mb-4 flex items-center justify-between">
                       <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">Progress</Label>
                       {maxEpisodes && (
@@ -343,28 +314,25 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
 
                     {episodePercent !== null && (
                       <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-                        <motion.div
-                          className="h-full rounded-full bg-white"
-                          animate={{ width: `${episodePercent}%` }}
-                          transition={PANEL_TRANSITION}
+                        <div
+                          className="h-full rounded-full bg-white transition-[width] duration-200 ease-out"
+                          style={{ width: `${episodePercent}%` }}
                         />
                       </div>
                     )}
-                  </motion.div>
+                  </div>
 
-                  <motion.div layout className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5">
                     <Label className="mb-4 block text-[10px] font-black uppercase tracking-[0.3em] text-white/45">
                       Rating
                     </Label>
                     <div className="flex h-11 items-center justify-between gap-1 rounded-xl border border-white/10 bg-black/35 px-3.5">
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <motion.button
+                        <button
                           key={star}
                           type="button"
-                          whileHover={{ scale: 1.12, y: -1 }}
-                          whileTap={{ scale: 0.95 }}
                           onClick={() => setRating((prev) => (prev === star ? null : star))}
-                          className="group relative h-8 w-8"
+                          className="group relative h-8 w-8 transition-transform hover:scale-105 active:scale-95"
                         >
                           <Star
                             className={cn(
@@ -374,13 +342,12 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
                                 : "text-white/12 group-hover:text-white/40",
                             )}
                           />
-                        </motion.button>
+                        </button>
                       ))}
                     </div>
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  </div>
+                </div>
+            )}
           </div>
 
           <div className="mt-5 flex flex-col gap-3 border-t border-white/10 pt-4 sm:mt-6 sm:flex-row sm:items-center sm:justify-between">

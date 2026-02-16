@@ -44,6 +44,7 @@ export const Navbar = () => {
   const { startNavigation } = useRouteTransition();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [optimisticPath, setOptimisticPath] = useState<string | null>(null);
+  const [isSearchModeActive, setIsSearchModeActive] = useState(false);
   const menuShellRef = useRef<HTMLDivElement | null>(null);
   const profilePath = username ? (`/${username}` as Route) : null;
 
@@ -83,8 +84,19 @@ export const Navbar = () => {
     }
   }, [router, profilePath]);
 
+  useEffect(() => {
+    const onSearchState = (event: Event) => {
+      const customEvent = event as CustomEvent<{ active: boolean }>;
+      setIsSearchModeActive(Boolean(customEvent.detail?.active));
+    };
+
+    window.addEventListener("anilog:search-state", onSearchState as EventListener);
+    return () => window.removeEventListener("anilog:search-state", onSearchState as EventListener);
+  }, []);
+
   if (pathname === "/login") return null;
   if (!isAuthenticated || !username || !user) return null;
+  if (pathname === "/" && isSearchModeActive) return null;
   const userProfilePath = `/${username}` as Route;
   const activePath = optimisticPath ?? pathname;
 
