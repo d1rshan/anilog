@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { type Anime, type LibraryStatus } from "@anilog/db/schema/anilog";
+import { useRouter } from "next/navigation";
 
-import { useRequireAuth } from "@/features/auth/lib/hooks";
+import { useAuth, useRequireAuth } from "@/features/auth/lib/hooks";
 import { useLogAnime, useMyLibrary } from "@/features/lists/lib/hooks";
 import { type LibraryEntryWithAnime } from "@/features/lists/lib/requests";
 import { cn } from "@/lib/utils";
@@ -81,7 +82,11 @@ function LoadingGrid() {
 }
 
 export function SearchResults({ query }: SearchResultsProps) {
-  const { data: archiveResults, isLoading: isArchiveLoading, isError: isArchiveError, error: archiveError } = useArchiveSearch(query);
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  const { data: archiveResults, isLoading: isArchiveLoading, isError: isArchiveError, error: archiveError } = useArchiveSearch(query, {
+    enabled: isAuthenticated,
+  });
   const {
     data: anilistResults,
     isLoading: isAniListLoading,
@@ -91,8 +96,9 @@ export function SearchResults({ query }: SearchResultsProps) {
 
   const { requireAuth } = useRequireAuth({
     toastMessage: "Please sign in to log anime",
+    onUnauthenticated: () => router.push("/login?next=%2F"),
   });
-  const { data: library } = useMyLibrary();
+  const { data: library } = useMyLibrary({ enabled: isAuthenticated });
   const logAnime = useLogAnime();
   const [dialog, setDialog] = useState<DialogState>({ isOpen: false, anime: null });
 
@@ -153,7 +159,7 @@ export function SearchResults({ query }: SearchResultsProps) {
     logAnime.mutate({ anime: selectedAnime, status: "planned", currentEpisode: 0, rating: null });
   };
 
-  const hasArchiveMatches = (archiveResults?.library.length ?? 0) > 0 || (archiveResults?.archive.length ?? 0) > 0;
+  const hasArchiveMatches = isAuthenticated && ((archiveResults?.library.length ?? 0) > 0 || (archiveResults?.archive.length ?? 0) > 0);
   const hasAniListMatches = dedupedAniList.length > 0;
   const showAniListSection = query.trim().length >= 3;
 
@@ -161,7 +167,14 @@ export function SearchResults({ query }: SearchResultsProps) {
     <>
       <div className="space-y-14 md:space-y-16">
         <ResultSection title={`Results for \"${query}\"`} subtitle="From Your Archive">
-          {isArchiveLoading ? (
+          {!isAuthenticated ? (
+            <div className="rounded-xl border border-white/10 bg-black/40 p-6 backdrop-blur-xl">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">Sign In Required</p>
+              <p className="mt-2 text-sm font-semibold text-white/80">
+                Sign in to search your personal archive and library.
+              </p>
+            </div>
+          ) : isArchiveLoading ? (
             <LoadingGrid />
           ) : isArchiveError ? (
             <p className="text-sm font-black uppercase tracking-widest text-destructive">

@@ -41,6 +41,7 @@ export const Navbar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { isAuthenticated, username, user } = useAuth();
+  const isAuthedUser = isAuthenticated && !!username && !!user;
   const { startNavigation } = useRouteTransition();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [optimisticPath, setOptimisticPath] = useState<string | null>(null);
@@ -95,15 +96,16 @@ export const Navbar = () => {
   }, []);
 
   if (pathname === "/login") return null;
-  if (!isAuthenticated || !username || !user) return null;
   if (pathname === "/" && isSearchModeActive) return null;
-  const userProfilePath = `/${username}` as Route;
+  const userProfilePath = isAuthedUser ? (`/${username}` as Route) : null;
   const activePath = optimisticPath ?? pathname;
 
   const links = [
     { href: "/" as Route, label: "Discovery", activePath: "/" as Route },
     { href: "/users" as Route, label: "Community", activePath: "/users" as Route },
-    { href: userProfilePath, label: "Archive", activePath: userProfilePath },
+    ...(userProfilePath
+      ? [{ href: userProfilePath, label: "Archive", activePath: userProfilePath }]
+      : []),
   ];
 
   const handleNavClick = (targetPath: string) => {
@@ -151,9 +153,21 @@ export const Navbar = () => {
             <div className="md:hidden">
               <Hamburger isOpen={mobileMenuOpen} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
             </div>
-            <div className="hidden md:block">
-              <UserMenu />
-            </div>
+            {isAuthedUser ? (
+              <div className="hidden md:block">
+                <UserMenu />
+              </div>
+            ) : (
+              <div className="hidden md:block">
+                <Link
+                  href="/login"
+                  prefetch
+                  className="inline-flex h-9 items-center rounded-full px-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/85 transition hover:text-white"
+                >
+                  Login
+                </Link>
+              </div>
+            )}
           </div>
         </div>
 
@@ -202,32 +216,54 @@ export const Navbar = () => {
             
             <div className="my-1.5 h-px bg-white/5 mx-2" />
             
-            <button
-              onClick={() => {
-                authClient.signOut({
-                  fetchOptions: {
-                    onSuccess: () => {
-                      router.push("/login");
+            {isAuthedUser ? (
+              <button
+                onClick={() => {
+                  authClient.signOut({
+                    fetchOptions: {
+                      onSuccess: () => {
+                        router.push("/login");
+                      },
                     },
-                  },
-                });
-              }}
-              className={cn(
-                "group flex w-full items-center justify-between rounded-lg px-4 py-3 text-left transition-all duration-300 hover:bg-destructive/10",
-                mobileMenuOpen ? "translate-x-0 opacity-100" : "-translate-x-2 opacity-0"
-              )}
-              style={{ transitionDelay: `${links.length * 50}ms` }}
-            >
-              <div className="flex flex-col min-w-0">
-                <span className="text-[9px] font-black uppercase tracking-[0.15em] text-foreground truncate">
-                  {user.name}
-                </span>
-                <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground/50 truncate">
-                  Sign Out
-                </span>
-              </div>
-              <LogOut className="h-3.5 w-3.5 text-foreground/70 group-hover:text-foreground" />
-            </button>
+                  });
+                }}
+                className={cn(
+                  "group flex w-full items-center justify-between rounded-lg px-4 py-3 text-left transition-all duration-300 hover:bg-destructive/10",
+                  mobileMenuOpen ? "translate-x-0 opacity-100" : "-translate-x-2 opacity-0"
+                )}
+                style={{ transitionDelay: `${links.length * 50}ms` }}
+              >
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-foreground truncate">
+                    {user.name}
+                  </span>
+                  <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground/50 truncate">
+                    Sign Out
+                  </span>
+                </div>
+                <LogOut className="h-3.5 w-3.5 text-foreground/70 group-hover:text-foreground" />
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                prefetch
+                className={cn(
+                  "group flex w-full items-center justify-between rounded-lg px-4 py-3 text-left transition-all duration-300 hover:bg-white/5",
+                  mobileMenuOpen ? "translate-x-0 opacity-100" : "-translate-x-2 opacity-0"
+                )}
+                style={{ transitionDelay: `${links.length * 50}ms` }}
+              >
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[9px] font-black uppercase tracking-[0.15em] text-foreground truncate">
+                    Welcome
+                  </span>
+                  <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground/50 truncate">
+                    Sign In / Create Account
+                  </span>
+                </div>
+                <ArrowRight className="h-3.5 w-3.5 text-foreground/70 group-hover:text-foreground" />
+              </Link>
+            )}
           </div>
         </div>
       </div>

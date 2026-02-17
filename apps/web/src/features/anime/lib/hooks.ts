@@ -31,7 +31,7 @@ export function useSearchAnime(query: string) {
   });
 }
 
-export function useArchiveSearch(query: string) {
+export function useArchiveSearch(query: string, options?: { enabled?: boolean }) {
   const [debouncedQuery, setDebouncedQuery] = useState(query);
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export function useArchiveSearch(query: string) {
 
   return useQuery({
     ...archiveSearchQueryOptions(debouncedQuery),
-    enabled: debouncedQuery.length >= 2,
+    enabled: (options?.enabled ?? true) && debouncedQuery.length >= 2,
     placeholderData: (previousData) => previousData,
   });
 }

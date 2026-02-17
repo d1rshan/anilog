@@ -103,8 +103,11 @@ function removePublicLibraryEntryFromCache(
   );
 }
 
-export const useMyLibrary = () => {
-  return useQuery(myLibraryQueryOptions());
+export const useMyLibrary = (options?: { enabled?: boolean }) => {
+  return useQuery({
+    ...myLibraryQueryOptions(),
+    enabled: options?.enabled ?? true,
+  });
 };
 
 // Backward-compatible alias to keep imports stable while refactoring.

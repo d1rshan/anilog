@@ -2,6 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { UserPlus, UserCheck, Loader2 } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth, useRequireAuth } from "@/features/auth/lib/hooks";
 import { useIsFollowing, useFollowUser, useUnfollowUser } from "../lib/hooks";
 
 interface FollowButtonProps {
@@ -15,14 +17,27 @@ export function FollowButton({
   size = "sm",
   variant = "default",
 }: FollowButtonProps) {
-  const { data: followStatus, isLoading: isChecking } = useIsFollowing(userId);
+  const router = useRouter();
+  const pathname = usePathname();
+  const { isAuthenticated } = useAuth();
+  const { requireAuth } = useRequireAuth({
+    toastMessage: "Please sign in to follow users",
+    onUnauthenticated: () => router.push(`/login?next=${encodeURIComponent(pathname || "/users")}`),
+  });
+  const { data: followStatus, isLoading: isChecking } = useIsFollowing(userId, {
+    enabled: isAuthenticated,
+  });
   const followMutation = useFollowUser();
   const unfollowMutation = useUnfollowUser();
 
   const isFollowing = followStatus?.isFollowing ?? false;
-  const isLoading = isChecking || followMutation.isPending || unfollowMutation.isPending;
+  const isLoading = (isAuthenticated && isChecking) || followMutation.isPending || unfollowMutation.isPending;
 
   const handleClick = () => {
+    if (!requireAuth()) {
+      return;
+    }
+
     if (isFollowing) {
       unfollowMutation.mutate(userId);
     } else {

@@ -1,7 +1,9 @@
 import { useRouter } from "next/navigation";
+import type { Route } from "next";
 import { useForm } from "@tanstack/react-form";
 import { toast } from "sonner";
 import z from "zod";
+import { ArrowLeft } from "lucide-react";
 
 import { Loader } from "@/components/loader";
 import { Button } from "@/components/ui/button";
@@ -13,11 +15,14 @@ import { useAuth } from "../lib/hooks";
 
 export const SignInForm = ({
   onSwitchToSignUp,
+  redirectTo,
 }: {
   onSwitchToSignUp: () => void;
+  redirectTo?: string;
 }) => {
   const router = useRouter();
   const { isPending } = useAuth();
+  const redirectPath = (redirectTo || "/") as Route;
 
   const form = useForm({
     defaultValues: {
@@ -36,7 +41,7 @@ export const SignInForm = ({
           },
           {
             onSuccess: () => {
-              router.push("/");
+              router.push(redirectPath);
               toast.success("Sign in successful");
             },
             onError: (error: { error: { message: string; statusText: string } }) => {
@@ -53,7 +58,7 @@ export const SignInForm = ({
           },
           {
             onSuccess: () => {
-              router.push("/");
+              router.push(redirectPath);
               toast.success("Sign in successful");
             },
             onError: (error: { error: { message: string; statusText: string } }) => {
@@ -153,6 +158,23 @@ export const SignInForm = ({
             </Button>
           )}
         </form.Subscribe>
+
+        <div className="relative py-1">
+          <div className="h-px w-full bg-white/10" />
+          <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-3 text-[9px] font-black uppercase tracking-[0.25em] text-muted-foreground">
+            OR
+          </span>
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="h-11 w-full border-white/15 bg-transparent text-[10px] font-black uppercase tracking-[0.2em] text-foreground/80 hover:border-white/30 hover:bg-white/5 hover:text-foreground"
+          onClick={() => router.push(redirectPath)}
+        >
+          <ArrowLeft className="mr-2 h-3.5 w-3.5" />
+          Continue in Guest Mode
+        </Button>
 
         <div className="text-center">
           <button

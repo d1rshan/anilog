@@ -48,10 +48,10 @@ export const useUserLists = (userId: string) => {
   });
 };
 
-export const useIsFollowing = (userId: string) => {
+export const useIsFollowing = (userId: string, options?: { enabled?: boolean }) => {
   return useQuery({
     ...isFollowingQueryOptions(userId),
-    enabled: !!userId,
+    enabled: !!userId && (options?.enabled ?? true),
   });
 };
 

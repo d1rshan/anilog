@@ -5,7 +5,7 @@ import {
   dehydrate,
 } from "@tanstack/react-query";
 
-import { requireCurrentUser } from "@/features/auth/lib/server";
+import { getCurrentUser } from "@/features/auth/lib/server";
 import {
   myLibraryQueryOptions,
   trendingAnimeQueryOptions,
@@ -13,14 +13,16 @@ import {
 import { DiscoverSearchShell } from "../components/discover-search-shell";
 
 export const HomePage = async () => {
-  await requireCurrentUser(await headers());
+  const headersList = await headers();
+  const user = await getCurrentUser(headersList);
 
   const queryClient = new QueryClient();
 
-  await Promise.all([
-    queryClient.prefetchQuery(trendingAnimeQueryOptions()),
-    queryClient.prefetchQuery(myLibraryQueryOptions()),
-  ]);
+  await queryClient.prefetchQuery(trendingAnimeQueryOptions());
+
+  if (user) {
+    await queryClient.prefetchQuery(myLibraryQueryOptions());
+  }
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

@@ -1,14 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Plus, Pencil } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { type Anime, type LibraryStatus } from "@anilog/db/schema/anilog";
+import { useRouter } from "next/navigation";
 import { useTrendingAnime } from "../lib/hooks";
 import { useMyLibrary, useLogAnime } from "@/features/lists/lib/hooks";
 import { AnimeCard } from "./anime-card";
 import { AddToListDialog } from "./add-to-list-dialog";
 import { type LibraryEntryWithAnime } from "@/features/lists/lib/requests";
-import { useRequireAuth } from "@/features/auth/lib/hooks";
+import { useAuth, useRequireAuth } from "@/features/auth/lib/hooks";
 import { cn } from "@/lib/utils";
 
 type DialogState = {
@@ -135,10 +136,15 @@ function ScrollRow({ title, subtitle, children, gap = "gap-6", padding = "px-4" 
 }
 
 export function HomeDiscovery() {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const { data: anime = [], isLoading: isTrendingLoading } = useTrendingAnime();
-  const { data: library = [], isLoading: isLibraryLoading } = useMyLibrary();
+  const { data: library = [], isLoading: isLibraryLoading } = useMyLibrary({
+    enabled: isAuthenticated,
+  });
   const { requireAuth } = useRequireAuth({
     toastMessage: "Please sign in to log anime",
+    onUnauthenticated: () => router.push("/login?next=%2F"),
   });
   const logAnime = useLogAnime();
 
@@ -188,7 +194,7 @@ export function HomeDiscovery() {
     });
   };
 
-  if (isTrendingLoading || isLibraryLoading) {
+  if (isTrendingLoading || (isAuthenticated && isLibraryLoading)) {
     return (
       <div className="space-y-24">
         {[1, 2].map((i) => (
@@ -207,6 +213,15 @@ export function HomeDiscovery() {
 
   return (
     <div className="space-y-16 pb-24 md:space-y-32 md:pb-40">
+      {!isAuthenticated && (
+        <section className="rounded-2xl border border-white/10 bg-black/40 p-5 backdrop-blur-xl md:p-7">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">Guest Mode</p>
+          <p className="mt-2 text-sm font-semibold text-white/80 md:text-base">
+            Sign in to unlock your archive, logging, and personalized discovery.
+          </p>
+        </section>
+      )}
+
       {/* ACTIVE ARCHIVE */}
       {watchingEntries.length > 0 && (
         <ScrollRow title="Active Archive" subtitle="Currently Logging">

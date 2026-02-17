@@ -1,15 +1,33 @@
 import { headers } from "next/headers";
+import type { Route } from "next";
 import { redirect } from "next/navigation";
 
 import { LoginPageClient } from "../components/login-page-client";
 import { getCurrentUser } from "../lib/server";
 
-export const LoginPage = async () => {
+interface LoginPageProps {
+  redirectTo?: string;
+}
+
+function sanitizeRedirectPath(path: string | undefined): Route {
+  if (!path) {
+    return "/" as Route;
+  }
+
+  if (!path.startsWith("/") || path.startsWith("//")) {
+    return "/" as Route;
+  }
+
+  return path as Route;
+}
+
+export const LoginPage = async ({ redirectTo }: LoginPageProps) => {
+  const safeRedirectPath = sanitizeRedirectPath(redirectTo);
   const user = await getCurrentUser(await headers());
 
   if (user) {
-    redirect("/");
+    redirect(safeRedirectPath);
   }
 
-  return <LoginPageClient />;
+  return <LoginPageClient redirectTo={safeRedirectPath} />;
 };
