@@ -1,5 +1,7 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
 import { useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export const useSession = () => authClient.useSession();
@@ -47,4 +49,26 @@ export function useRequireAuth(options: UseRequireAuthOptions = {}) {
     ...auth,
     requireAuth,
   };
+}
+
+export function useLogout() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const result = await authClient.signOut();
+      if (result.error) {
+        throw new Error(result.error.message || "Failed to sign out");
+      }
+    },
+    onSuccess: () => {
+      queryClient.clear();
+      router.replace("/");
+      router.refresh();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to sign out");
+    },
+  });
 }

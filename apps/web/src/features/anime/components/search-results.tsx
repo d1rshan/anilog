@@ -101,10 +101,11 @@ export function SearchResults({ query }: SearchResultsProps) {
   const { data: library } = useMyLibrary({ enabled: isAuthenticated });
   const logAnime = useLogAnime();
   const [dialog, setDialog] = useState<DialogState>({ isOpen: false, anime: null });
+  const visibleLibrary = isAuthenticated ? (library ?? []) : [];
 
   const entryByAnimeId = useMemo(
-    () => new Map((library ?? []).map((entry) => [entry.animeId, entry])),
-    [library],
+    () => new Map(visibleLibrary.map((entry) => [entry.animeId, entry])),
+    [visibleLibrary],
   );
 
   const animeById = useMemo(() => {

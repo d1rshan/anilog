@@ -1,7 +1,6 @@
 import { User, LogOut, Shield, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import { authClient } from "@/lib/auth-client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,11 +9,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { useAuth } from "../lib/hooks";
+import { useAuth, useLogout } from "../lib/hooks";
 
 export const UserMenu = () => {
   const router = useRouter();
   const { isAuthenticated, user, username } = useAuth();
+  const logout = useLogout();
 
   if (!isAuthenticated || !user || !username) {
     return null;
@@ -62,19 +62,14 @@ export const UserMenu = () => {
         <DropdownMenuSeparator className="bg-white/5 mx-2" />
         <div className="p-1">
           <DropdownMenuItem
-            className="cursor-pointer rounded-xl py-2 px-3 text-[10px] font-black uppercase tracking-widest text-destructive focus:bg-destructive/10 focus:text-destructive transition-colors"
+            disabled={logout.isPending}
+            className="cursor-pointer rounded-xl py-2 px-3 text-[10px] font-black uppercase tracking-widest text-destructive focus:bg-destructive/10 focus:text-destructive transition-colors disabled:pointer-events-none disabled:opacity-50"
             onClick={() => {
-              authClient.signOut({
-                fetchOptions: {
-                  onSuccess: () => {
-                    router.push("/login");
-                  },
-                },
-              });
+              logout.mutate();
             }}
           >
             <LogOut className="mr-2 h-3.5 w-3.5" />
-            Sign Out
+            {logout.isPending ? "Signing Out..." : "Sign Out"}
           </DropdownMenuItem>
         </div>
       </DropdownMenuContent>

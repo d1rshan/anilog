@@ -7,8 +7,7 @@ import type { Route } from "next";
 import { usePathname, useRouter } from "next/navigation";
 
 import { UserMenu } from "@/features/auth/components/user-menu";
-import { useAuth } from "@/features/auth/lib/hooks";
-import { authClient } from "@/lib/auth-client";
+import { useAuth, useLogout } from "@/features/auth/lib/hooks";
 import { useRouteTransition } from "@/lib/route-transition";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +40,7 @@ export const Navbar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { isAuthenticated, username, user } = useAuth();
+  const logout = useLogout();
   const isAuthedUser = isAuthenticated && !!username && !!user;
   const { startNavigation } = useRouteTransition();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -218,17 +218,13 @@ export const Navbar = () => {
             
             {isAuthedUser ? (
               <button
+                disabled={logout.isPending}
                 onClick={() => {
-                  authClient.signOut({
-                    fetchOptions: {
-                      onSuccess: () => {
-                        router.push("/login");
-                      },
-                    },
-                  });
+                  logout.mutate();
                 }}
                 className={cn(
                   "group flex w-full items-center justify-between rounded-lg px-4 py-3 text-left transition-all duration-300 hover:bg-destructive/10",
+                  logout.isPending && "cursor-not-allowed opacity-50",
                   mobileMenuOpen ? "translate-x-0 opacity-100" : "-translate-x-2 opacity-0"
                 )}
                 style={{ transitionDelay: `${links.length * 50}ms` }}
@@ -238,7 +234,7 @@ export const Navbar = () => {
                     {user.name}
                   </span>
                   <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground/50 truncate">
-                    Sign Out
+                    {logout.isPending ? "Signing Out..." : "Sign Out"}
                   </span>
                 </div>
                 <LogOut className="h-3.5 w-3.5 text-foreground/70 group-hover:text-foreground" />

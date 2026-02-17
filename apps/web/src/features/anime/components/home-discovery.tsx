@@ -150,17 +150,19 @@ export function HomeDiscovery() {
 
   const [dialog, setDialog] = useState<DialogState>({ isOpen: false, anime: null });
 
+  const visibleLibrary = isAuthenticated ? library : [];
+
   const watchingEntries = useMemo(
-    () => library.filter((entry) => entry.status === "watching"),
-    [library]
+    () => visibleLibrary.filter((entry) => entry.status === "watching"),
+    [visibleLibrary]
   );
 
   const topTen = useMemo(() => anime.slice(0, 10), [anime]);
   const restOfTrending = useMemo(() => anime.slice(10), [anime]);
 
   const entryByAnimeId = useMemo(
-    () => new Map((library ?? []).map((entry) => [entry.animeId, entry])),
-    [library]
+    () => new Map(visibleLibrary.map((entry) => [entry.animeId, entry])),
+    [visibleLibrary]
   );
 
   const handleAddToWatchlist = (animeItem: Anime) => {

@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { type Anime, type LibraryStatus } from "@anilog/db/schema/anilog";
 
-import { useRequireAuth } from "@/features/auth/lib/hooks";
+import { useAuth, useRequireAuth } from "@/features/auth/lib/hooks";
 import {
   useLogAnime,
   useMyLibrary,
@@ -21,17 +21,18 @@ type DialogState = {
 };
 
 export function AnimeGrid() {
+  const { isAuthenticated } = useAuth();
   const { data: anime = [], isLoading, isError, error } = useTrendingAnime();
   const { requireAuth } = useRequireAuth({
     toastMessage: "Please sign in to log anime",
   });
-  const { data: library } = useMyLibrary();
+  const { data: library } = useMyLibrary({ enabled: isAuthenticated });
   const logAnime = useLogAnime();
   const [dialog, setDialog] = useState<DialogState>({ isOpen: false, anime: null });
 
   const entryByAnimeId = useMemo(
-    () => new Map((library ?? []).map((entry) => [entry.animeId, entry])),
-    [library],
+    () => new Map((isAuthenticated ? (library ?? []) : []).map((entry) => [entry.animeId, entry])),
+    [isAuthenticated, library],
   );
 
   const getAnime = (animeId: number) => anime.find((item) => item.id === animeId);

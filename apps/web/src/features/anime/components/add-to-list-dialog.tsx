@@ -359,10 +359,16 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
             {entry ? (
               <button
                 onClick={handleRemove}
-                className="group inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-white/38 transition-colors hover:text-rose-400"
+                disabled={removeAnime.isPending}
+                className={cn(
+                  "group inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] transition-colors",
+                  removeAnime.isPending
+                    ? "cursor-not-allowed text-white/25"
+                    : "text-white/38 hover:text-rose-400",
+                )}
               >
                 <Trash2 className="h-3.5 w-3.5" />
-                <span>Remove Entry</span>
+                <span>{removeAnime.isPending ? "Removing..." : "Remove Entry"}</span>
               </button>
             ) : (
               <span className="hidden sm:inline-block" />
