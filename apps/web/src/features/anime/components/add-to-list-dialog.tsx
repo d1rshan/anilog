@@ -17,7 +17,12 @@ import { animate, motion, useMotionValue } from "framer-motion";
 import type { Anime, LibraryStatus } from "@anilog/db/schema/anilog";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  CustomDialog,
+  CustomDialogContent,
+  CustomDialogHeader,
+  CustomDialogTitle,
+} from "@/components/custom-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -173,13 +178,13 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent
+    <CustomDialog open={isOpen} onOpenChange={onOpenChange}>
+      <CustomDialogContent
         showCloseButton={false}
         className={cn(
           "fixed inset-x-0 bottom-0 top-auto left-0 z-50 w-full max-w-none translate-x-0 translate-y-0 border-0 bg-transparent p-0 shadow-none outline-none",
           "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-bottom-4 duration-150",
-          "sm:left-[50%] sm:top-[50%] sm:bottom-auto sm:w-full sm:max-w-3xl sm:-translate-x-1/2 sm:-translate-y-1/2",
+          "sm:left-[50%] sm:top-[50%] sm:bottom-auto sm:w-full sm:max-w-2xl sm:-translate-x-1/2 sm:-translate-y-1/2",
         )}
       >
         <motion.div
@@ -201,20 +206,20 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
             animate(dragY, 0, { type: "spring", stiffness: 480, damping: 38, mass: 0.72 });
           }}
           className={cn(
-            "flex max-h-[92svh] w-full transform-gpu flex-col overflow-hidden rounded-t-[1.4rem] rounded-b-none border border-white/10 bg-black/55 shadow-2xl backdrop-blur-2xl will-change-transform",
+            "flex max-h-[92svh] w-full transform-gpu flex-col overflow-hidden rounded-t-[1.4rem] rounded-b-none border border-white/10 bg-black shadow-2xl will-change-transform",
             "sm:max-h-[88svh] sm:rounded-2xl",
           )}
         >
         <div className="relative border-b border-white/10 px-5 pb-4 pt-3 sm:px-8 sm:pb-6 sm:pt-6">
           <div className="mx-auto mb-3 h-1.5 w-14 rounded-full bg-white/20 sm:hidden" />
-          <DialogHeader className="space-y-2 text-left">
+          <CustomDialogHeader className="space-y-2 text-left">
             <p className="text-[10px] font-black uppercase tracking-[0.32em] text-white/40">
               Archive Console
             </p>
-            <DialogTitle className="pr-9 font-display text-2xl font-black uppercase leading-[0.9] tracking-tight text-white sm:text-4xl">
+            <CustomDialogTitle className="pr-9 font-display text-2xl font-black uppercase leading-[0.9] tracking-tight text-white sm:text-4xl">
               {title}
-            </DialogTitle>
-          </DialogHeader>
+            </CustomDialogTitle>
+          </CustomDialogHeader>
         </div>
 
         <div className="flex flex-1 flex-col overflow-hidden px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-5 sm:px-8 sm:pb-7 sm:pt-6">
@@ -375,7 +380,7 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
           </div>
         </div>
         </motion.div>
-      </DialogContent>
-    </Dialog>
+      </CustomDialogContent>
+    </CustomDialog>
   );
 }
