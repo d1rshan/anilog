@@ -11,11 +11,12 @@ const CURATIONS = [
   {
     videoId: "cszyD9FxsP0",
     start: 0,
-    stop: 60, // Plays for 28 seconds when unmuted
+    stop: 60,
     title: "ONE PIECE",
     subtitle: "Egghead Arc Selection",
-    description: "Witness the pinnacle of modern animation as the Straw Hats reach the island of the future and the truth of the world begins to unravel.",
-    tag: "Series Spotlight"
+    description:
+      "Witness the pinnacle of modern animation as the Straw Hats reach the island of the future and the truth of the world begins to unravel.",
+    tag: "Series Spotlight",
   },
   {
     videoId: "GrLh_7ykWRk",
@@ -23,9 +24,20 @@ const CURATIONS = [
     stop: 177,
     title: "Jujutsu Kaisen",
     subtitle: "Visual Poetry",
-    description: "Exploring the hyper-realistic backgrounds, emotional lighting, and cosmic scales that have made Makoto Shinkai a global phenomenon.",
-    tag: "Director Focus"
-  }
+    description:
+      "A kinetic blend of sorcery, cursed energy, and choreography that pushes modern action animation into overdrive.",
+    tag: "Action Showcase",
+  },
+  {
+    videoId: "IZ9yPVlwgzE",
+    start: 0,
+    stop: 11,
+    title: "Chainsaw Man",
+    subtitle: "Chaos & Catharsis",
+    description:
+      "A wild collage of experimental endings and high-energy sequences that defined a new era of anime openings.",
+    tag: "Editor’s Pick",
+  },
 ];
 
 interface HomeHeroVideoProps {
@@ -81,7 +93,7 @@ export function HomeHeroVideo({ searchValue, onSearchChange }: HomeHeroVideoProp
       playerRef.current.unMute();
       playerRef.current.setVolume(100);
       // Optional: Reset to start when unmute to ensure full experience?
-      // playerRef.current.seekTo(current.start); 
+      // playerRef.current.seekTo(current.start);
     }
   };
 
@@ -123,9 +135,9 @@ export function HomeHeroVideo({ searchValue, onSearchChange }: HomeHeroVideoProp
   }, [currentIndex, isMuted, current.stop]);
 
   // YouTube Options
-  const opts: YouTubeProps['opts'] = {
-    height: '100%',
-    width: '100%',
+  const opts: YouTubeProps["opts"] = {
+    height: "100%",
+    width: "100%",
     playerVars: {
       autoplay: 1,
       controls: 0,
@@ -144,10 +156,12 @@ export function HomeHeroVideo({ searchValue, onSearchChange }: HomeHeroVideoProp
   return (
     <section className="relative h-[88svh] w-full overflow-hidden bg-[#050505] md:h-screen">
       {/* 1. YouTube Background Layer */}
-      <div className={cn(
-        "absolute inset-0 z-0 origin-center transition-all duration-1000",
-        isTransitioning ? "opacity-0 scale-125" : "opacity-100 scale-110"
-      )}>
+      <div
+        className={cn(
+          "absolute inset-0 z-0 origin-center transition-all duration-1000",
+          isTransitioning ? "opacity-0 scale-125" : "opacity-100 scale-110",
+        )}
+      >
         <div className="relative h-full w-full pointer-events-none">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100vw] h-[56.25vw] min-h-[100vh] min-w-[177.77vh]">
             <YouTube
@@ -170,11 +184,12 @@ export function HomeHeroVideo({ searchValue, onSearchChange }: HomeHeroVideoProp
       {/* 2. Editorial Content Overlay */}
       <div className="container relative z-20 mx-auto flex h-full items-center px-4 pt-16 md:pt-20">
         <div className="max-w-4xl space-y-8 md:space-y-10">
-
-          <div className={cn(
-            "space-y-4 transition-all duration-700 ease-out md:space-y-6",
-            isTransitioning ? "opacity-0 -translate-y-8" : "opacity-100 translate-y-0"
-          )}>
+          <div
+            className={cn(
+              "space-y-4 transition-all duration-700 ease-out md:space-y-6",
+              isTransitioning ? "opacity-0 -translate-y-8" : "opacity-100 translate-y-0",
+            )}
+          >
             <div className="flex flex-wrap items-center gap-3 md:gap-4">
               <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.3em] text-white backdrop-blur-md">
                 {current.tag}
@@ -193,11 +208,15 @@ export function HomeHeroVideo({ searchValue, onSearchChange }: HomeHeroVideoProp
             </p>
           </div>
 
-          <div className={cn(
-            "transition-all duration-1000 delay-300",
-            isTransitioning ? "opacity-0" : "opacity-100"
-          )}>
-            <p className="mb-4 text-[10px] font-black uppercase tracking-[0.4em] text-white/30">Continue Discovery</p>
+          <div
+            className={cn(
+              "transition-all duration-1000 delay-300",
+              isTransitioning ? "opacity-0" : "opacity-100",
+            )}
+          >
+            <p className="mb-4 text-[10px] font-black uppercase tracking-[0.4em] text-white/30">
+              Continue Discovery
+            </p>
             <AnimeSearch variant="hero" value={searchValue} onChange={onSearchChange} />
           </div>
         </div>
@@ -219,7 +238,7 @@ export function HomeHeroVideo({ searchValue, onSearchChange }: HomeHeroVideoProp
               }}
               className={cn(
                 "h-1 rounded-full transition-all duration-500",
-                idx === currentIndex ? "w-16 bg-white" : "w-4 bg-white/20 hover:bg-white/40"
+                idx === currentIndex ? "w-16 bg-white" : "w-4 bg-white/20 hover:bg-white/40",
               )}
             />
           ))}
@@ -247,7 +266,11 @@ export function HomeHeroVideo({ searchValue, onSearchChange }: HomeHeroVideoProp
           className="group flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white shadow-2xl backdrop-blur-2xl transition-all active:scale-90 md:h-14 md:w-14 md:hover:bg-white md:hover:text-black"
           title={isMuted ? "Unmute" : "Mute"}
         >
-          {isMuted ? <VolumeX className="h-4 w-4 transition-transform md:h-5 md:w-5 md:group-hover:scale-110" /> : <Volume2 className="h-4 w-4 transition-transform md:h-5 md:w-5 md:group-hover:scale-110" />}
+          {isMuted ? (
+            <VolumeX className="h-4 w-4 transition-transform md:h-5 md:w-5 md:group-hover:scale-110" />
+          ) : (
+            <Volume2 className="h-4 w-4 transition-transform md:h-5 md:w-5 md:group-hover:scale-110" />
+          )}
         </button>
       </div>
 

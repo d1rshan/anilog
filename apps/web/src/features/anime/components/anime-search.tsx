@@ -36,7 +36,13 @@ export function AnimeSearch({
   const isDock = variant === "dock";
 
   return (
-    <div className={cn("relative w-full", isHero ? "max-w-full md:max-w-2xl" : "max-w-full md:max-w-md", isDock && "md:max-w-full")}>
+    <div
+      className={cn(
+        "relative w-full",
+        isHero ? "max-w-full md:max-w-2xl" : "max-w-full md:max-w-md",
+        isDock && "md:max-w-full",
+      )}
+    >
       <Search
         className={cn(
           "absolute top-1/2 -translate-y-1/2 text-muted-foreground",
@@ -52,8 +58,8 @@ export function AnimeSearch({
         autoFocus={autoFocus}
         className={cn(
           "font-black uppercase",
-          isHero 
-            ? "h-14 bg-white/5 pl-12 text-sm tracking-[0.16em] backdrop-blur-xl transition-all md:h-20 md:pl-16 md:text-xl md:tracking-[0.2em] md:hover:bg-white/10"
+          isHero
+            ? "h-14 border-none bg-white/5 pl-12 text-sm tracking-[0.16em] backdrop-blur-xl transition-all md:h-20 md:pl-16 md:text-xl md:tracking-[0.2em] md:hover:bg-white/10 focus-visible:ring-1 focus-visible:ring-white/40"
             : "h-12 bg-muted pl-12 text-sm tracking-[0.16em] md:tracking-widest",
           isDock &&
             "h-12 border-white/10 bg-white/5 pl-12 text-sm tracking-[0.18em] text-white placeholder:text-white/35 focus-visible:border-white/20 focus-visible:ring-2 focus-visible:ring-white/12",

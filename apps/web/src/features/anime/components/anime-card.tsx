@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { Check, ListTodo, Pencil, Plus, Play, Star, X, Ban } from "lucide-react";
 import Image from "next/image";
 import { type Anime, type LibraryStatus } from "@anilog/db/schema/anilog";
@@ -42,6 +43,27 @@ export function AnimeCard({
   onOpenEditor,
   onComplete,
 }: AnimeCardProps) {
+  const [mobileActionsVisible, setMobileActionsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (!cardRef.current) return;
+      if (!(event.target instanceof Node)) return;
+      if (!cardRef.current.contains(event.target)) {
+        setMobileActionsVisible(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, []);
+
   const normalizedAnimeStatus = anime.status?.toLowerCase().replaceAll("_", " ");
   const isReleasing = normalizedAnimeStatus === "releasing";
   const isFinished = normalizedAnimeStatus === "finished";
@@ -85,7 +107,11 @@ export function AnimeCard({
   const canShowWatchlistButton = !loggedStatus;
 
   return (
-    <div className="group relative aspect-[3/4.2] overflow-hidden rounded-lg bg-muted shadow-lg transition-all duration-500 md:hover:-translate-y-1 md:hover:shadow-2xl">
+    <div
+      ref={cardRef}
+      className="group relative aspect-[3/4.2] overflow-hidden rounded-lg bg-muted shadow-lg transition-all duration-500 md:hover:-translate-y-1 md:hover:shadow-2xl"
+      onClick={() => setMobileActionsVisible((v) => !v)}
+    >
       <Image
         src={anime.imageUrl}
         alt={anime.title}
@@ -193,7 +219,12 @@ export function AnimeCard({
       </div>
 
       {showActions && actionMode === "discovery" && (
-        <div className="absolute right-3 top-1/2 flex -translate-y-1/2 flex-col gap-2 opacity-100 transition-all duration-300 md:translate-x-4 md:opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100">
+        <div
+          className={cn(
+            "absolute right-3 top-1/2 -translate-y-1/2 flex-col gap-2 opacity-100 transition-all duration-300 md:translate-x-4 md:opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100",
+            mobileActionsVisible ? "flex" : "hidden md:flex",
+          )}
+        >
           {canShowWatchlistButton && (
             <Button
               size="icon"
@@ -229,7 +260,12 @@ export function AnimeCard({
       )}
 
       {showActions && actionMode === "default" && (
-        <div className="absolute right-3 top-1/2 flex -translate-y-1/2 flex-col gap-2 opacity-100 transition-all duration-300 md:translate-x-4 md:opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100">
+        <div
+          className={cn(
+            "absolute right-3 top-1/2 -translate-y-1/2 flex-col gap-2 opacity-100 transition-all duration-300 md:translate-x-4 md:opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100",
+            mobileActionsVisible ? "flex" : "hidden md:flex",
+          )}
+        >
           {onPlan && !loggedStatus && (
             <Button
               size="icon"
@@ -336,7 +372,10 @@ export function AnimeCard({
         <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/60">
           <span>{anime.year}</span>
           <span>•</span>
-          <span>{anime.episodes} Episodes</span>
+          <span>
+            {anime.episodes} <span className="inline md:hidden">EP</span>
+            <span className="hidden md:inline">Episodes</span>
+          </span>
         </div>
       </div>
     </div>

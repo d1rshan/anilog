@@ -92,9 +92,7 @@ function ScrollRow({ title, subtitle, children, gap = "gap-6", padding = "px-4" 
           <h2 className="font-display text-4xl font-black uppercase leading-none tracking-tighter sm:text-5xl md:text-8xl">
             {title}
           </h2>
-          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/40">
-            {subtitle}
-          </p>
+          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/40">{subtitle}</p>
         </div>
       </div>
 
@@ -115,7 +113,7 @@ function ScrollRow({ title, subtitle, children, gap = "gap-6", padding = "px-4" 
           className={cn(
             "no-scrollbar -mx-4 flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden pb-6 scroll-smooth [scroll-padding-inline:1rem] md:snap-none md:overflow-x-hidden md:pb-8",
             gap,
-            padding
+            padding,
           )}
         >
           {children}
@@ -154,7 +152,7 @@ export function HomeDiscovery() {
 
   const watchingEntries = useMemo(
     () => visibleLibrary.filter((entry) => entry.status === "watching"),
-    [visibleLibrary]
+    [visibleLibrary],
   );
 
   const topTen = useMemo(() => anime.slice(0, 10), [anime]);
@@ -162,7 +160,7 @@ export function HomeDiscovery() {
 
   const entryByAnimeId = useMemo(
     () => new Map(visibleLibrary.map((entry) => [entry.animeId, entry])),
-    [visibleLibrary]
+    [visibleLibrary],
   );
 
   const handleAddToWatchlist = (animeItem: Anime) => {
@@ -183,10 +181,7 @@ export function HomeDiscovery() {
     }
 
     const anime = "anime" in target ? (target.anime as Anime) : target;
-    const existingEntry =
-      "anime" in target
-        ? target
-        : (entryByAnimeId.get(target.id) ?? null);
+    const existingEntry = "anime" in target ? target : entryByAnimeId.get(target.id) ?? null;
 
     setDialog({
       isOpen: true,
@@ -195,6 +190,39 @@ export function HomeDiscovery() {
       initialStatus: existingEntry?.status ?? "watching",
     });
   };
+
+  // --- DISCOVERY FILTERS ---
+  const [statusFilter, setStatusFilter] = useState<"all" | "releasing" | "finished">("all");
+  const [eraFilter, setEraFilter] = useState<"all" | "2020s" | "2010s" | "classic">("all");
+
+  const filteredCollection = useMemo(() => {
+    return restOfTrending.filter((animeItem) => {
+      const normalizedStatus = animeItem.status?.toLowerCase().replaceAll("_", " ");
+      const releaseYear = animeItem.year ?? 0;
+
+      if (statusFilter === "releasing" && normalizedStatus !== "releasing") {
+        return false;
+      }
+
+      if (statusFilter === "finished" && normalizedStatus !== "finished") {
+        return false;
+      }
+
+      if (eraFilter === "2020s") {
+        return releaseYear >= 2020;
+      }
+
+      if (eraFilter === "2010s") {
+        return releaseYear >= 2010 && releaseYear < 2020;
+      }
+
+      if (eraFilter === "classic") {
+        return releaseYear > 0 && releaseYear < 2010;
+      }
+
+      return true;
+    });
+  }, [eraFilter, restOfTrending, statusFilter]);
 
   if (isTrendingLoading || (isAuthenticated && isLibraryLoading)) {
     return (
@@ -228,7 +256,10 @@ export function HomeDiscovery() {
       {watchingEntries.length > 0 && (
         <ScrollRow title="Active Archive" subtitle="Currently Logging">
           {watchingEntries.map((entry) => (
-            <div key={entry.id} className="w-[146px] shrink-0 snap-start transition-transform duration-500 hover:z-10 sm:w-[200px] md:w-[260px]">
+            <div
+              key={entry.id}
+              className="w-[146px] shrink-0 snap-start transition-transform duration-500 hover:z-10 sm:w-[200px] md:w-[260px]"
+            >
               <AnimeCard
                 anime={entry.anime}
                 currentEpisode={entry.currentEpisode}
@@ -242,18 +273,26 @@ export function HomeDiscovery() {
       )}
 
       {/* TOP 10 RANKING */}
-      <ScrollRow title="Top 10 Trending" subtitle="Global Trending Rankings" gap="gap-8 sm:gap-16 md:gap-24" padding="px-6 sm:px-16 md:px-24">
+      <ScrollRow
+        title="Top 10 Trending"
+        subtitle="Global Trending Rankings"
+        gap="gap-8 sm:gap-16 md:gap-24"
+        padding="px-6 sm:px-16 md:px-24"
+      >
         {topTen.map((animeItem, index) => {
           const entry = entryByAnimeId.get(animeItem.id);
           return (
-            <div key={animeItem.id} className="relative flex shrink-0 snap-start items-end pl-10 pt-3 transition-all duration-500 hover:z-20 sm:pl-16 sm:pt-6 md:pl-24 md:pt-8">
-              <span 
+            <div
+              key={animeItem.id}
+              className="relative flex shrink-0 snap-start items-end pl-10 pt-3 transition-all duration-500 hover:z-20 sm:pl-16 sm:pt-6 md:pl-24 md:pt-8"
+            >
+              <span
                 className="pointer-events-none absolute left-0 bottom-1 z-0 select-none font-display text-[132px] font-black leading-[0.58] text-transparent transition-colors sm:text-[200px] md:bottom-2 md:text-[300px]"
                 style={{ WebkitTextStroke: "2.25px rgba(255,255,255,0.16)" }}
               >
                 {index + 1}
               </span>
-            
+
               <div className="relative z-10 w-[146px] sm:w-[200px] md:w-[260px]">
                 <AnimeCard
                   anime={animeItem}
@@ -271,7 +310,7 @@ export function HomeDiscovery() {
 
       {/* COLLECTION GRID */}
       <section className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
-        <div className="mb-6 flex items-end justify-between border-b border-white/5 pb-4 md:mb-10 md:pb-6">
+        <div className="mb-6 flex flex-col gap-4 border-b border-white/5 pb-4 md:mb-10 md:flex-row md:items-end md:justify-between md:pb-6">
           <div className="space-y-2">
             <h2 className="font-display text-4xl font-black uppercase leading-none tracking-tighter sm:text-5xl md:text-8xl">
               Collection
@@ -280,12 +319,74 @@ export function HomeDiscovery() {
               Curated Discovery
             </p>
           </div>
+
+          {/* FILTERS */}
+          <div className="w-full md:w-auto">
+            <div className="rounded-2xl border border-white/12 bg-black/45 px-2.5 py-2 backdrop-blur-2xl sm:px-3 sm:py-2.5 md:min-w-[460px]">
+              <div className="space-y-2 sm:space-y-2.5">
+                <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
+                  <span className="shrink-0 text-[9px] font-black uppercase tracking-[0.2em] text-white/45 sm:w-16">
+                    Status
+                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {([
+                      ["all", "All"],
+                      ["releasing", "Releasing"],
+                      ["finished", "Finished"],
+                    ] as const).map(([value, label]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        className={cn(
+                          "h-7 rounded-full border border-transparent px-2.5 text-[9px] font-black uppercase tracking-[0.14em] text-white/60 transition-colors hover:bg-white/10 hover:text-white",
+                          statusFilter === value && "bg-white text-black hover:bg-white hover:text-black",
+                        )}
+                        onClick={() => setStatusFilter(value)}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
+                  <span className="shrink-0 text-[9px] font-black uppercase tracking-[0.2em] text-white/45 sm:w-16">
+                    Era
+                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {([
+                      ["all", "All"],
+                      ["2020s", "2020s"],
+                      ["2010s", "2010s"],
+                      ["classic", "Classic"],
+                    ] as const).map(([value, label]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        className={cn(
+                          "h-7 rounded-full border border-transparent px-2.5 text-[9px] font-black uppercase tracking-[0.14em] text-white/60 transition-colors hover:bg-white/10 hover:text-white",
+                          eraFilter === value && "bg-white text-black hover:bg-white hover:text-black",
+                        )}
+                        onClick={() => setEraFilter(value)}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
         <div className="grid grid-cols-2 gap-4 sm:gap-6 md:gap-8 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-          {restOfTrending.map((animeItem) => {
+          {filteredCollection.map((animeItem) => {
             const entry = entryByAnimeId.get(animeItem.id);
             return (
-              <div key={animeItem.id} className="min-w-0 transition-transform duration-500 hover:z-10 md:hover:-translate-y-2">
+              <div
+                key={animeItem.id}
+                className="min-w-0 transition-transform duration-500 hover:z-10 md:hover:-translate-y-2"
+              >
                 <AnimeCard
                   anime={animeItem}
                   loggedStatus={entry?.status}
