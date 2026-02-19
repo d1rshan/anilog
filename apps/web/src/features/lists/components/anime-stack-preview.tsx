@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { AnimeCard } from "@/features/anime/components/anime-card";
 
 type StackEntry = {
@@ -27,6 +28,8 @@ export function AnimeStackPreview({
   entries,
   maxVisible = 6,
 }: AnimeStackPreviewProps) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const isStackExpanded = hoveredIndex !== null;
   const visibleEntries = entries.slice(0, maxVisible);
   const remaining = Math.max(entries.length - visibleEntries.length, 0);
 
@@ -36,10 +39,15 @@ export function AnimeStackPreview({
         {visibleEntries.map((entry, index) => (
           <div
             key={entry.id}
-            className="w-[13rem] shrink-0 transition-transform duration-300"
+            className="w-[13rem] shrink-0 transition-[margin-left,transform] duration-300"
+            onMouseEnter={() => setHoveredIndex(index)}
+            onMouseLeave={() => setHoveredIndex((current) => (current === index ? null : current))}
             style={{
-              zIndex: visibleEntries.length - index,
-              marginLeft: index === 0 ? "0" : "-5rem",
+              zIndex:
+                hoveredIndex === index
+                  ? visibleEntries.length + 20
+                  : visibleEntries.length - index,
+              marginLeft: index === 0 ? "0" : isStackExpanded ? "-4.25rem" : "-5rem",
             }}
           >
             <div className="origin-bottom transition-transform duration-300 hover:-translate-y-2">
