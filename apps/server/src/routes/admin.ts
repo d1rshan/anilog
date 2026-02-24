@@ -113,7 +113,7 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
     },
     {
       params: t.Object({
-        id: t.Integer(),
+        id: t.Numeric(),
       }),
       body: t.Object({
         videoId: t.String(),
