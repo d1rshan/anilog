@@ -1,6 +1,6 @@
 import { db } from "@anilog/db";
-import { anime, trendingAnime, userAnime } from "@anilog/db/schema/anilog";
-import { and, desc, eq, getTableColumns, ilike, notInArray, or } from "drizzle-orm";
+import { anime, heroCuration, trendingAnime, userAnime } from "@anilog/db/schema/anilog";
+import { and, asc, desc, eq, getTableColumns, ilike, notInArray, or } from "drizzle-orm";
 
 
 const ANILIST_API = "https://graphql.anilist.co";
@@ -42,6 +42,91 @@ type AniListPageResponse = {
 };
 
 export class AnimeService {
+  static async getHeroCurationsForAdmin() {
+    return db
+      .select({
+        ...getTableColumns(heroCuration),
+      })
+      .from(heroCuration)
+      .orderBy(asc(heroCuration.sortOrder), asc(heroCuration.id));
+  }
+
+  static async getHeroCurations() {
+    return db
+      .select({
+        ...getTableColumns(heroCuration),
+      })
+      .from(heroCuration)
+      .where(eq(heroCuration.isActive, true))
+      .orderBy(asc(heroCuration.sortOrder), asc(heroCuration.id));
+  }
+
+  static async updateHeroCuration(
+    id: number,
+    payload: {
+      videoId: string;
+      start: number;
+      stop: number;
+      title: string;
+      subtitle: string;
+      description: string;
+      tag: string;
+      sortOrder: number;
+      isActive: boolean;
+    },
+  ) {
+    if (payload.start < 0) {
+      throw new Error("Start timestamp must be zero or greater");
+    }
+
+    if (payload.stop <= payload.start) {
+      throw new Error("Stop timestamp must be greater than start timestamp");
+    }
+
+    const requiredTextFields = [
+      { value: payload.videoId, name: "videoId" },
+      { value: payload.title, name: "title" },
+      { value: payload.subtitle, name: "subtitle" },
+      { value: payload.description, name: "description" },
+      { value: payload.tag, name: "tag" },
+    ];
+
+    for (const field of requiredTextFields) {
+      if (!field.value.trim()) {
+        throw new Error(`${field.name} is required`);
+      }
+    }
+
+    if (payload.sortOrder < 0) {
+      throw new Error("sortOrder must be zero or greater");
+    }
+
+    const [updated] = await db
+      .update(heroCuration)
+      .set({
+        videoId: payload.videoId.trim(),
+        start: payload.start,
+        stop: payload.stop,
+        title: payload.title.trim(),
+        subtitle: payload.subtitle.trim(),
+        description: payload.description.trim(),
+        tag: payload.tag.trim(),
+        sortOrder: payload.sortOrder,
+        isActive: payload.isActive,
+        updatedAt: new Date(),
+      })
+      .where(eq(heroCuration.id, id))
+      .returning({
+        ...getTableColumns(heroCuration),
+      });
+
+    if (!updated) {
+      throw new Error("Hero curation not found");
+    }
+
+    return updated;
+  }
+
   private static getMatchScore(animeItem: typeof anime.$inferSelect, query: string) {
     const normalizedQuery = query.toLowerCase();
     const titles = [animeItem.title, animeItem.titleJapanese].filter((title): title is string => Boolean(title));

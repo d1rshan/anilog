@@ -11,6 +11,9 @@ function isCronAuthorized(request: Request) {
 }
 
 export const animeRoutes = new Elysia({ prefix: "/anime" })
+  .get("/hero-curations", async () => {
+    return AnimeService.getHeroCurations();
+  })
   .get("/trending", async () => {
     const anime = await AnimeService.getTrendingAnime();
     return anime;

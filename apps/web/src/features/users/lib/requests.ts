@@ -7,6 +7,7 @@ export type UserWithProfile = {
   username: string | null;
   email: string;
   image: string | null;
+  isAdmin?: boolean;
   profile: UserProfile | null;
   followerCount: number;
   followingCount: number;
@@ -118,6 +119,16 @@ export async function getMyProfile(): Promise<UserWithProfile> {
   }
 
   return res.data;
+}
+
+export async function getMyAdminStatus(): Promise<{ isAdmin: boolean }> {
+  const res = await api.users.me["admin-status"].get();
+
+  if (res.error) {
+    throw res.error;
+  }
+
+  return res.data as { isAdmin: boolean };
 }
 
 export type UpdateProfileData = {

@@ -126,6 +126,10 @@ export const userRoutes = new Elysia({ prefix: "/users" })
     }
     return profile;
   })
+  .get("/me/admin-status", async ({ userId }) => {
+    const isAdmin = await UserService.getAdminStatus(userId);
+    return { isAdmin };
+  })
   .put(
     "/me/profile",
     async ({ body, userId }) => {

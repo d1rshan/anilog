@@ -1,9 +1,15 @@
 import { queryOptions } from "@tanstack/react-query";
 
-import { getTrendingAnime, searchAnime, searchArchive } from "@/features/anime/lib/requests";
+import {
+  getAdminHeroCurations,
+  getAdminStats,
+  getAdminUsers,
+} from "@/features/admin/lib/requests";
+import { getHeroCurations, getTrendingAnime, searchAnime, searchArchive } from "@/features/anime/lib/requests";
 import { getMyLibrary } from "@/features/lists/lib/requests";
 import {
   checkIsFollowing,
+  getMyAdminStatus,
   getMyFollowing,
   getMyProfile,
   getUserByUsername,
@@ -11,7 +17,7 @@ import {
   getUserPublicLibrary,
   searchUsers,
 } from "@/features/users/lib/requests";
-import { animeKeys, libraryKeys, userKeys } from "@/lib/query-keys";
+import { adminKeys, animeKeys, libraryKeys, userKeys } from "@/lib/query-keys";
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
@@ -21,6 +27,13 @@ export const trendingAnimeQueryOptions = () =>
     queryKey: animeKeys.trending(),
     queryFn: getTrendingAnime,
     staleTime: 5 * MINUTE,
+  });
+
+export const heroCurationsQueryOptions = () =>
+  queryOptions({
+    queryKey: animeKeys.heroCurations(),
+    queryFn: getHeroCurations,
+    staleTime: 10 * MINUTE,
   });
 
 export const searchAnimeQueryOptions = (query: string) =>
@@ -94,4 +107,32 @@ export const myProfileQueryOptions = () =>
     queryKey: userKeys.meProfile(),
     queryFn: getMyProfile,
     staleTime: 1 * MINUTE,
+  });
+
+export const myAdminStatusQueryOptions = () =>
+  queryOptions({
+    queryKey: userKeys.meAdminStatus(),
+    queryFn: getMyAdminStatus,
+    staleTime: 30 * SECOND,
+  });
+
+export const adminStatsQueryOptions = () =>
+  queryOptions({
+    queryKey: adminKeys.stats(),
+    queryFn: getAdminStats,
+    staleTime: 30 * SECOND,
+  });
+
+export const adminUsersQueryOptions = (query: string, limit: number, offset: number) =>
+  queryOptions({
+    queryKey: adminKeys.users(query, limit, offset),
+    queryFn: () => getAdminUsers({ query, limit, offset }),
+    staleTime: 30 * SECOND,
+  });
+
+export const adminHeroCurationsQueryOptions = () =>
+  queryOptions({
+    queryKey: adminKeys.heroCurations(),
+    queryFn: getAdminHeroCurations,
+    staleTime: 30 * SECOND,
   });
