@@ -14,14 +14,6 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
   .get("/hero-curations", async () => {
     return AnimeService.getHeroCurations();
   })
-  .post("/hero-curations/seed", async ({ request, set }) => {
-    if (!isCronAuthorized(request)) {
-      set.status = 401;
-      return { success: false, error: "Unauthorized" };
-    }
-
-    return AnimeService.seedHeroCurations();
-  })
   .get("/trending", async () => {
     const anime = await AnimeService.getTrendingAnime();
     return anime;
