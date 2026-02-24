@@ -8,6 +8,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { UserMenu } from "@/features/auth/components/user-menu";
 import { useAuth, useLogout } from "@/features/auth/lib/hooks";
+import { useMyAdminStatus } from "@/features/users/lib/hooks";
 import { useRouteTransition } from "@/lib/route-transition";
 import { cn } from "@/lib/utils";
 
@@ -40,8 +41,10 @@ export const Navbar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { isAuthenticated, username, user } = useAuth();
-  const logout = useLogout();
   const isAuthedUser = isAuthenticated && !!username && !!user;
+  const { data: adminStatus } = useMyAdminStatus({ enabled: isAuthedUser });
+  const logout = useLogout();
+  const isAdmin = isAuthedUser && Boolean(adminStatus?.isAdmin);
   const { startNavigation } = useRouteTransition();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [optimisticPath, setOptimisticPath] = useState<string | null>(null);
@@ -83,7 +86,10 @@ export const Navbar = () => {
     if (profilePath) {
       router.prefetch(profilePath);
     }
-  }, [router, profilePath]);
+    if (isAdmin) {
+      router.prefetch("/admin");
+    }
+  }, [isAdmin, router, profilePath]);
 
   useEffect(() => {
     const onSearchState = (event: Event) => {
@@ -105,6 +111,9 @@ export const Navbar = () => {
     { href: "/users" as Route, label: "Community", activePath: "/users" as Route },
     ...(userProfilePath
       ? [{ href: userProfilePath, label: "Archive", activePath: userProfilePath }]
+      : []),
+    ...(isAdmin
+      ? [{ href: "/admin" as Route, label: "Admin", activePath: "/admin" as Route }]
       : []),
   ];
 

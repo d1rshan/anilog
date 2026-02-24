@@ -1,7 +1,7 @@
 import { db } from "@anilog/db";
 import { userFollow, userProfile, userAnime, anime, type LibraryStatus } from "@anilog/db/schema/anilog";
 import { user } from "@anilog/db/schema/auth";
-import { eq, getTableColumns, count, and, ilike, asc } from "drizzle-orm";
+import { eq, getTableColumns, count, and, ilike, asc, or } from "drizzle-orm";
 import type { UserProfile } from "@anilog/db/schema/anilog";
 
 export type ProfileData = {
@@ -21,10 +21,18 @@ export type UserWithProfile = {
   name: string;
   username: string | null;
   email: string;
+  isAdmin: boolean;
   image: string | null;
   profile: UserProfile | null;
   followerCount: number;
   followingCount: number;
+};
+
+export type AdminUserListResult = {
+  users: UserWithProfile[];
+  total: number;
+  limit: number;
+  offset: number;
 };
 
 export type PublicUserLibrary = {
@@ -78,6 +86,7 @@ export class UserService {
         name: user.name,
         username: user.username,
         email: user.email,
+        isAdmin: user.isAdmin,
         image: user.image,
         profile: getTableColumns(userProfile),
       })
@@ -99,6 +108,7 @@ export class UserService {
       name: userData.name,
       username: userData.username,
       email: userData.email,
+      isAdmin: userData.isAdmin,
       image: userData.image,
       profile: userData.profile,
       followerCount,
@@ -113,6 +123,7 @@ export class UserService {
         name: user.name,
         username: user.username,
         email: user.email,
+        isAdmin: user.isAdmin,
         image: user.image,
         profile: getTableColumns(userProfile),
       })
@@ -134,6 +145,7 @@ export class UserService {
       name: userData.name,
       username: userData.username,
       email: userData.email,
+      isAdmin: userData.isAdmin,
       image: userData.image,
       profile: userData.profile,
       followerCount,
@@ -221,6 +233,7 @@ export class UserService {
         name: user.name,
         username: user.username,
         email: user.email,
+        isAdmin: user.isAdmin,
         image: user.image,
         profile: getTableColumns(userProfile),
       })
@@ -235,6 +248,7 @@ export class UserService {
         name: f.name,
         username: f.username,
         email: f.email,
+        isAdmin: f.isAdmin,
         image: f.image,
         profile: f.profile,
         followerCount: await this.getFollowerCount(f.id),
@@ -250,6 +264,7 @@ export class UserService {
         name: user.name,
         username: user.username,
         email: user.email,
+        isAdmin: user.isAdmin,
         image: user.image,
         profile: getTableColumns(userProfile),
       })
@@ -264,6 +279,7 @@ export class UserService {
         name: f.name,
         username: f.username,
         email: f.email,
+        isAdmin: f.isAdmin,
         image: f.image,
         profile: f.profile,
         followerCount: await this.getFollowerCount(f.id),
@@ -335,6 +351,7 @@ export class UserService {
         name: user.name,
         username: user.username,
         email: user.email,
+        isAdmin: user.isAdmin,
         image: user.image,
         profile: getTableColumns(userProfile),
       })
@@ -349,11 +366,113 @@ export class UserService {
         name: u.name,
         username: u.username,
         email: u.email,
+        isAdmin: u.isAdmin,
         image: u.image,
         profile: u.profile,
         followerCount: await this.getFollowerCount(u.id),
         followingCount: await this.getFollowingCount(u.id),
       })),
     );
+  }
+
+  static async getAdminStats(): Promise<{ totalUsers: number }> {
+    const [result] = await db.select({ count: count() }).from(user);
+    return { totalUsers: result?.count ?? 0 };
+  }
+
+  static async getAdminStatus(userId: string): Promise<boolean> {
+    const found = await db.query.user.findFirst({
+      where: eq(user.id, userId),
+      columns: { isAdmin: true },
+    });
+    return found?.isAdmin ?? false;
+  }
+
+  static async searchUsersForAdmin(
+    query: string,
+    options: { limit?: number; offset?: number } = {},
+  ): Promise<AdminUserListResult> {
+    const limit = Math.min(Math.max(options.limit ?? 20, 1), 100);
+    const offset = Math.max(options.offset ?? 0, 0);
+    const normalized = query.trim();
+
+    const whereClause = normalized
+      ? or(
+          ilike(user.name, `%${normalized}%`),
+          ilike(user.username, `%${normalized}%`),
+          ilike(user.email, `%${normalized}%`),
+        )
+      : undefined;
+
+    const rows = await db
+      .select({
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        image: user.image,
+        profile: getTableColumns(userProfile),
+      })
+      .from(user)
+      .leftJoin(userProfile, eq(user.id, userProfile.userId))
+      .where(whereClause)
+      .orderBy(asc(user.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    const [totalResult] = await db
+      .select({ count: count() })
+      .from(user)
+      .where(whereClause);
+
+    const users = await Promise.all(
+      rows.map(async (entry) => ({
+        id: entry.id,
+        name: entry.name,
+        username: entry.username,
+        email: entry.email,
+        isAdmin: entry.isAdmin,
+        image: entry.image,
+        profile: entry.profile,
+        followerCount: await this.getFollowerCount(entry.id),
+        followingCount: await this.getFollowingCount(entry.id),
+      })),
+    );
+
+    return {
+      users,
+      total: totalResult?.count ?? 0,
+      limit,
+      offset,
+    };
+  }
+
+  static async setUserAdminStatus(
+    targetUserId: string,
+    isAdmin: boolean,
+    actorUserId?: string,
+  ): Promise<{ id: string; isAdmin: boolean }> {
+    if (actorUserId && actorUserId === targetUserId && !isAdmin) {
+      throw new Error("You cannot remove your own admin access");
+    }
+
+    const [updated] = await db
+      .update(user)
+      .set({
+        isAdmin,
+        updatedAt: new Date(),
+      })
+      .where(eq(user.id, targetUserId))
+      .returning({
+        id: user.id,
+        isAdmin: user.isAdmin,
+      });
+
+    if (!updated) {
+      throw new Error("User not found");
+    }
+
+    return updated;
   }
 }

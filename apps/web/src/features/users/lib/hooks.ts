@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import {
   isFollowingQueryOptions,
   myFollowingQueryOptions,
+  myAdminStatusQueryOptions,
   myProfileQueryOptions,
   userByUsernameQueryOptions,
   userProfileQueryOptions,
@@ -109,6 +110,13 @@ export const useMyFollowing = () => {
 
 export const useMyProfile = () => {
   return useQuery(myProfileQueryOptions());
+};
+
+export const useMyAdminStatus = (options?: { enabled?: boolean }) => {
+  return useQuery({
+    ...myAdminStatusQueryOptions(),
+    enabled: options?.enabled ?? true,
+  });
 };
 
 export const useUpdateMyProfile = () => {

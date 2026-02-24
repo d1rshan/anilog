@@ -120,6 +120,16 @@ export async function getMyProfile(): Promise<UserWithProfile> {
   return res.data;
 }
 
+export async function getMyAdminStatus(): Promise<{ isAdmin: boolean }> {
+  const res = await api.users.me["admin-status"].get();
+
+  if (res.error) {
+    throw res.error;
+  }
+
+  return res.data as { isAdmin: boolean };
+}
+
 export type UpdateProfileData = {
   bio?: string | null;
   displayName?: string | null;

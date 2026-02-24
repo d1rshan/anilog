@@ -12,6 +12,14 @@ export const libraryKeys = {
   publicByUserId: (userId: string) => ["users", "library", userId] as const,
 };
 
+export const adminKeys = {
+  all: ["admin"] as const,
+  stats: () => [...adminKeys.all, "stats"] as const,
+  users: (query: string, limit: number, offset: number) =>
+    [...adminKeys.all, "users", query, limit, offset] as const,
+  heroCurations: () => [...adminKeys.all, "hero-curations"] as const,
+};
+
 export const userKeys = {
   all: ["users"] as const,
   searchRoot: () => [...userKeys.all, "search"] as const,
@@ -23,4 +31,5 @@ export const userKeys = {
   isFollowing: (userId: string) => [...userKeys.all, "is-following", userId] as const,
   following: () => [...userKeys.all, "following"] as const,
   meProfile: () => [...userKeys.all, "me", "profile"] as const,
+  meAdminStatus: () => [...userKeys.all, "me", "admin-status"] as const,
 };

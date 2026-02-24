@@ -5,6 +5,7 @@ import { auth } from "@anilog/auth";
 import { animeRoutes } from "./routes/anime";
 import { userRoutes } from "./routes/users";
 import { libraryRoutes } from "./routes/library";
+import { adminRoutes } from "./routes/admin";
 
 const allowedOrigins = process.env.CORS_ORIGIN || "http://localhost:3001"
 
@@ -26,7 +27,7 @@ const app = new Elysia()
     }
     return status(405);
   })
-  .group("/api", (app) => app.use(animeRoutes).use(libraryRoutes).use(userRoutes))
+  .group("/api", (app) => app.use(animeRoutes).use(libraryRoutes).use(userRoutes).use(adminRoutes))
   .get("/", () => "OK")
   .listen(port, () => {
     console.log(`Server is running on port ${port}`);
