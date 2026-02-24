@@ -2,7 +2,9 @@ import { Elysia, t } from "elysia";
 import { AnimeService, UserService } from "@anilog/api";
 import { auth } from "@anilog/auth";
 
-async function requireAdmin(request: Request, set: { status: number }) {
+type RouteSet = { status?: number | string };
+
+async function requireAdmin(request: Request, set: RouteSet) {
   const session = await auth.api.getSession({ headers: request.headers });
   if (!session?.user?.id) {
     set.status = 401;

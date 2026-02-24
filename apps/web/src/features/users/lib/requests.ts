@@ -7,6 +7,7 @@ export type UserWithProfile = {
   username: string | null;
   email: string;
   image: string | null;
+  isAdmin?: boolean;
   profile: UserProfile | null;
   followerCount: number;
   followingCount: number;
