@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 
-import { getTrendingAnime, searchAnime, searchArchive } from "@/features/anime/lib/requests";
+import { getHeroCurations, getTrendingAnime, searchAnime, searchArchive } from "@/features/anime/lib/requests";
 import { getMyLibrary } from "@/features/lists/lib/requests";
 import {
   checkIsFollowing,
@@ -21,6 +21,13 @@ export const trendingAnimeQueryOptions = () =>
     queryKey: animeKeys.trending(),
     queryFn: getTrendingAnime,
     staleTime: 5 * MINUTE,
+  });
+
+export const heroCurationsQueryOptions = () =>
+  queryOptions({
+    queryKey: animeKeys.heroCurations(),
+    queryFn: getHeroCurations,
+    staleTime: 10 * MINUTE,
   });
 
 export const searchAnimeQueryOptions = (query: string) =>

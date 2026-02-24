@@ -5,9 +5,13 @@ import YouTube, { type YouTubeProps, YouTubePlayer } from "react-youtube";
 import { AnimeSearch } from "./anime-search";
 import { Volume2, VolumeX, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useHeroCurations } from "../lib/hooks";
+import type { HeroCuration } from "../lib/requests";
 
-// --- MONTHLY CURATION CONFIG ---
-const CURATIONS = [
+const FALLBACK_CURATIONS: Array<Pick<
+  HeroCuration,
+  "videoId" | "start" | "stop" | "title" | "subtitle" | "description" | "tag"
+>> = [
   {
     videoId: "cszyD9FxsP0",
     start: 0,
@@ -36,7 +40,7 @@ const CURATIONS = [
     subtitle: "Chaos & Catharsis",
     description:
       "A wild collage of experimental endings and high-energy sequences that defined a new era of anime openings.",
-    tag: "Editor’s Pick",
+    tag: "Editor's Pick",
   },
 ];
 
@@ -46,12 +50,20 @@ interface HomeHeroVideoProps {
 }
 
 export function HomeHeroVideo({ searchValue, onSearchChange }: HomeHeroVideoProps) {
+  const { data } = useHeroCurations();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const playerRef = useRef<YouTubePlayer | null>(null);
 
-  const current = CURATIONS[currentIndex];
+  const curations = data && data.length > 0 ? data : FALLBACK_CURATIONS;
+  const current = curations[currentIndex] ?? curations[0];
+
+  useEffect(() => {
+    if (currentIndex >= curations.length) {
+      setCurrentIndex(0);
+    }
+  }, [currentIndex, curations.length]);
 
   // --- AUTO-CYCLE LOGIC ---
   // If muted: Auto-cycle every 15s.
@@ -63,20 +75,22 @@ export function HomeHeroVideo({ searchValue, onSearchChange }: HomeHeroVideoProp
       handleNext();
     }, 15000);
     return () => clearInterval(interval);
-  }, [currentIndex, isMuted]);
+  }, [currentIndex, isMuted, curations.length]);
 
   const handleNext = () => {
+    if (curations.length < 2) return;
     setIsTransitioning(true);
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % CURATIONS.length);
+      setCurrentIndex((prev) => (prev + 1) % curations.length);
       setIsTransitioning(false);
     }, 600);
   };
 
   const handlePrev = () => {
+    if (curations.length < 2) return;
     setIsTransitioning(true);
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev - 1 + CURATIONS.length) % CURATIONS.length);
+      setCurrentIndex((prev) => (prev - 1 + curations.length) % curations.length);
       setIsTransitioning(false);
     }, 600);
   };
@@ -225,7 +239,7 @@ export function HomeHeroVideo({ searchValue, onSearchChange }: HomeHeroVideoProp
       {/* 3. Interactive Controls */}
       <div className="absolute bottom-6 right-4 z-30 flex items-center gap-3 sm:bottom-8 sm:right-6 sm:gap-4 md:bottom-12 md:right-12 md:gap-8">
         <div className="hidden items-center gap-3 md:flex">
-          {CURATIONS.map((_, idx) => (
+          {curations.map((_, idx) => (
             <button
               key={idx}
               onClick={() => {

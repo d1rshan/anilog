@@ -4,13 +4,22 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { archiveSearchQueryOptions, searchAnimeQueryOptions, trendingAnimeQueryOptions } from "@/lib/query-options";
+import {
+  archiveSearchQueryOptions,
+  heroCurationsQueryOptions,
+  searchAnimeQueryOptions,
+  trendingAnimeQueryOptions,
+} from "@/lib/query-options";
 import { animeKeys } from "@/lib/query-keys";
 
 import { upsertAnime } from "./requests";
 
 export function useTrendingAnime() {
   return useQuery(trendingAnimeQueryOptions());
+}
+
+export function useHeroCurations() {
+  return useQuery(heroCurationsQueryOptions());
 }
 
 export function useSearchAnime(query: string) {

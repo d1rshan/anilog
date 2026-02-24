@@ -1,6 +1,6 @@
 import { db } from "@anilog/db";
-import { anime, trendingAnime, userAnime } from "@anilog/db/schema/anilog";
-import { and, desc, eq, getTableColumns, ilike, notInArray, or } from "drizzle-orm";
+import { anime, heroCuration, trendingAnime, userAnime } from "@anilog/db/schema/anilog";
+import { and, asc, desc, eq, getTableColumns, ilike, notInArray, or } from "drizzle-orm";
 
 
 const ANILIST_API = "https://graphql.anilist.co";
@@ -19,6 +19,45 @@ type AniListCacheValue = {
 
 const archiveSearchCache = new Map<string, SearchCacheValue>();
 const anilistSearchCache = new Map<string, AniListCacheValue>();
+
+const DEFAULT_HERO_CURATIONS = [
+  {
+    key: "one-piece-egghead",
+    videoId: "cszyD9FxsP0",
+    start: 0,
+    stop: 60,
+    title: "ONE PIECE",
+    subtitle: "Egghead Arc Selection",
+    description:
+      "Witness the pinnacle of modern animation as the Straw Hats reach the island of the future and the truth of the world begins to unravel.",
+    tag: "Series Spotlight",
+    sortOrder: 0,
+  },
+  {
+    key: "jujutsu-visual-poetry",
+    videoId: "GrLh_7ykWRk",
+    start: 140,
+    stop: 177,
+    title: "Jujutsu Kaisen",
+    subtitle: "Visual Poetry",
+    description:
+      "A kinetic blend of sorcery, cursed energy, and choreography that pushes modern action animation into overdrive.",
+    tag: "Action Showcase",
+    sortOrder: 1,
+  },
+  {
+    key: "chainsaw-chaos-catharsis",
+    videoId: "IZ9yPVlwgzE",
+    start: 0,
+    stop: 11,
+    title: "Chainsaw Man",
+    subtitle: "Chaos & Catharsis",
+    description:
+      "A wild collage of experimental endings and high-energy sequences that defined a new era of anime openings.",
+    tag: "Editor's Pick",
+    sortOrder: 2,
+  },
+] as const;
 
 type AniListMedia = {
   id: number;
@@ -42,6 +81,38 @@ type AniListPageResponse = {
 };
 
 export class AnimeService {
+  static async getHeroCurations() {
+    return db
+      .select({
+        ...getTableColumns(heroCuration),
+      })
+      .from(heroCuration)
+      .where(eq(heroCuration.isActive, true))
+      .orderBy(asc(heroCuration.sortOrder), asc(heroCuration.id));
+  }
+
+  static async seedHeroCurations() {
+    for (const item of DEFAULT_HERO_CURATIONS) {
+      await db.insert(heroCuration).values(item).onConflictDoUpdate({
+        target: heroCuration.key,
+        set: {
+          videoId: item.videoId,
+          start: item.start,
+          stop: item.stop,
+          title: item.title,
+          subtitle: item.subtitle,
+          description: item.description,
+          tag: item.tag,
+          sortOrder: item.sortOrder,
+          isActive: true,
+          updatedAt: new Date(),
+        },
+      });
+    }
+
+    return { success: true, count: DEFAULT_HERO_CURATIONS.length };
+  }
+
   private static getMatchScore(animeItem: typeof anime.$inferSelect, query: string) {
     const normalizedQuery = query.toLowerCase();
     const titles = [animeItem.title, animeItem.titleJapanese].filter((title): title is string => Boolean(title));

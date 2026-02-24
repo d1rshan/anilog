@@ -6,6 +6,22 @@ export type ArchiveSearchResponse = {
   archive: Anime[];
 };
 
+export type HeroCuration = {
+  id: number;
+  key: string;
+  videoId: string;
+  start: number;
+  stop: number;
+  title: string;
+  subtitle: string;
+  description: string;
+  tag: string;
+  sortOrder: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export async function getTrendingAnime(): Promise<Anime[]> {
   const res = await api.anime.trending.get();
 
@@ -14,6 +30,16 @@ export async function getTrendingAnime(): Promise<Anime[]> {
   }
 
   return res.data as Anime[];
+}
+
+export async function getHeroCurations(): Promise<HeroCuration[]> {
+  const res = await api.anime["hero-curations"].get();
+
+  if (res.error) {
+    throw res.error;
+  }
+
+  return res.data as HeroCuration[];
 }
 
 export async function searchAnime(query: string): Promise<Anime[]> {
