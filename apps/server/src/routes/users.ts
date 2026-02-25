@@ -1,8 +1,15 @@
 import { Elysia, t } from "elysia";
 import { UserService } from "@anilog/api";
 import { auth } from "@anilog/auth";
-
-type UpdateUserProfileInput = Parameters<typeof UserService.updateUserProfile>[1];
+import {
+  adminStatusSchema,
+  errorResponseSchema,
+  followActionResultSchema,
+  profileUpdateInputSchema,
+  publicUserLibraryEntrySchema,
+  userProfileSchema,
+  userWithProfileSchema,
+} from "./schemas";
 
 const authMiddleware = (app: Elysia) =>
   app.derive(async ({ request }) => {
@@ -14,147 +21,172 @@ const authMiddleware = (app: Elysia) =>
   });
 
 export const userRoutes = new Elysia({ prefix: "/users" })
-  // Public routes
   .get(
     "/search",
     async ({ query }) => {
-      const users = await UserService.searchUsers(query.q || "", 20);
-      return users;
+      return UserService.searchUsers(query.q || "", 20);
     },
     {
-      query: t.Object({
-        q: t.String(),
-      }),
+      query: t.Object({ q: t.String() }),
+      response: {
+        200: t.Array(userWithProfileSchema),
+      },
     },
   )
   .get(
     "/:id",
     async ({ params }) => {
-      const user = await UserService.getUserProfile(params.id);
-      if (!user) {
+      const foundUser = await UserService.getUserProfile(params.id);
+      if (!foundUser) {
         throw new Error("User not found");
       }
-      return user;
+      return foundUser;
     },
     {
-      params: t.Object({
-        id: t.String(),
-      }),
+      params: t.Object({ id: t.String() }),
+      response: {
+        200: userWithProfileSchema,
+      },
     },
   )
   .get(
     "/username/:username",
     async ({ params }) => {
-      const user = await UserService.getUserByUsername(params.username);
-      if (!user) {
+      const foundUser = await UserService.getUserByUsername(params.username);
+      if (!foundUser) {
         throw new Error("User not found");
       }
-      return user;
+      return foundUser;
     },
     {
-      params: t.Object({
-        username: t.String(),
-      }),
+      params: t.Object({ username: t.String() }),
+      response: {
+        200: userWithProfileSchema,
+      },
     },
   )
   .get(
     "/:id/library",
     async ({ params }) => {
-      const lists = await UserService.getPublicUserLibrary(params.id);
-      return lists;
+      return UserService.getPublicUserLibrary(params.id);
     },
     {
-      params: t.Object({
-        id: t.String(),
-      }),
+      params: t.Object({ id: t.String() }),
+      response: {
+        200: t.Array(publicUserLibraryEntrySchema),
+      },
     },
   )
   .get(
     "/:id/followers",
     async ({ params }) => {
-      const followers = await UserService.getFollowers(params.id);
-      return followers;
+      return UserService.getFollowers(params.id);
     },
     {
-      params: t.Object({
-        id: t.String(),
-      }),
+      params: t.Object({ id: t.String() }),
+      response: {
+        200: t.Array(userWithProfileSchema),
+      },
     },
   )
   .get(
     "/:id/following",
     async ({ params }) => {
-      const following = await UserService.getFollowing(params.id);
-      return following;
+      return UserService.getFollowing(params.id);
     },
     {
-      params: t.Object({
-        id: t.String(),
-      }),
+      params: t.Object({ id: t.String() }),
+      response: {
+        200: t.Array(userWithProfileSchema),
+      },
     },
   )
-  // Authenticated routes
   .use(authMiddleware)
   .post(
     "/:id/follow",
     async ({ params, userId }) => {
-      const result = await UserService.followUser(userId, params.id);
-      return result;
+      return UserService.followUser(userId, params.id);
     },
     {
-      params: t.Object({
-        id: t.String(),
-      }),
+      params: t.Object({ id: t.String() }),
+      response: {
+        200: followActionResultSchema,
+      },
     },
   )
   .delete(
     "/:id/follow",
     async ({ params, userId }) => {
-      const result = await UserService.unfollowUser(userId, params.id);
-      return result;
+      return UserService.unfollowUser(userId, params.id);
     },
     {
-      params: t.Object({
-        id: t.String(),
-      }),
+      params: t.Object({ id: t.String() }),
+      response: {
+        200: followActionResultSchema,
+      },
     },
   )
-  .get("/me/profile", async ({ userId }) => {
-    const profile = await UserService.getUserProfile(userId);
-    if (!profile) {
-      throw new Error("Profile not found");
-    }
-    return profile;
-  })
-  .get("/me/admin-status", async ({ userId }) => {
-    const isAdmin = await UserService.getAdminStatus(userId);
-    return { isAdmin };
-  })
-  .put(
+  .get(
     "/me/profile",
-    async ({ body, userId }) => {
-      const profile = await UserService.updateUserProfile(userId, body as UpdateUserProfileInput);
+    async ({ userId }) => {
+      const profile = await UserService.getUserProfile(userId);
+      if (!profile) {
+        throw new Error("Profile not found");
+      }
       return profile;
     },
     {
-      body: t.Object({
-        bio: t.Optional(t.Nullable(t.String())),
-        displayName: t.Optional(t.Nullable(t.String())),
-        website: t.Optional(t.Nullable(t.String())),
-        location: t.Optional(t.Nullable(t.String())),
-        twitterUrl: t.Optional(t.Nullable(t.String())),
-        discordUrl: t.Optional(t.Nullable(t.String())),
-        githubUrl: t.Optional(t.Nullable(t.String())),
-        instagramUrl: t.Optional(t.Nullable(t.String())),
-        isPublic: t.Optional(t.Boolean()),
-      }),
+      response: {
+        200: userWithProfileSchema,
+      },
     },
   )
-  .get("/me/following", async ({ userId }) => {
-    const following = await UserService.getFollowing(userId);
-    return following;
-  })
-  .get("/me/check-follow/:id", async ({ params, userId }) => {
-    const isFollowing = await UserService.isFollowing(userId, params.id);
-    return { isFollowing };
-  });
+  .get(
+    "/me/admin-status",
+    async ({ userId }) => {
+      const isAdmin = await UserService.getAdminStatus(userId);
+      return { isAdmin };
+    },
+    {
+      response: {
+        200: adminStatusSchema,
+      },
+    },
+  )
+  .put(
+    "/me/profile",
+    async ({ body, userId }) => {
+      return UserService.updateUserProfile(userId, body);
+    },
+    {
+      body: profileUpdateInputSchema,
+      response: {
+        200: userProfileSchema,
+        400: errorResponseSchema,
+      },
+    },
+  )
+  .get(
+    "/me/following",
+    async ({ userId }) => {
+      return UserService.getFollowing(userId);
+    },
+    {
+      response: {
+        200: t.Array(userWithProfileSchema),
+      },
+    },
+  )
+  .get(
+    "/me/check-follow/:id",
+    async ({ params, userId }) => {
+      const isFollowing = await UserService.isFollowing(userId, params.id);
+      return { isFollowing };
+    },
+    {
+      params: t.Object({ id: t.String() }),
+      response: {
+        200: t.Object({ isFollowing: t.Boolean() }),
+      },
+    },
+  );
