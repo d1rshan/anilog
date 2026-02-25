@@ -92,7 +92,9 @@ function ScrollRow({ title, subtitle, children, gap = "gap-6", padding = "px-4" 
           <h2 className="font-display text-4xl font-black uppercase leading-none tracking-tighter sm:text-5xl md:text-8xl">
             {title}
           </h2>
-          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/40">{subtitle}</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/40">
+            {subtitle}
+          </p>
         </div>
       </div>
 
@@ -181,7 +183,7 @@ export function HomeDiscovery() {
     }
 
     const anime = "anime" in target ? (target.anime as Anime) : target;
-    const existingEntry = "anime" in target ? target : entryByAnimeId.get(target.id) ?? null;
+    const existingEntry = "anime" in target ? target : (entryByAnimeId.get(target.id) ?? null);
 
     setDialog({
       isOpen: true,
@@ -232,7 +234,10 @@ export function HomeDiscovery() {
             <div className="h-16 w-64 animate-pulse rounded bg-white/5" />
             <div className="flex gap-8 overflow-hidden">
               {[1, 2, 3, 4, 5, 6].map((j) => (
-                <div key={j} className="aspect-[3/4.2] w-[240px] shrink-0 animate-pulse rounded-lg bg-white/5" />
+                <div
+                  key={j}
+                  className="aspect-[3/4.2] w-[240px] shrink-0 animate-pulse rounded-lg bg-white/5"
+                />
               ))}
             </div>
           </div>
@@ -245,7 +250,9 @@ export function HomeDiscovery() {
     <div className="space-y-16 pb-24 md:space-y-32 md:pb-40">
       {!isAuthenticated && (
         <section className="rounded-2xl border border-white/10 bg-black/40 p-5 backdrop-blur-xl md:p-7">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">Guest Mode</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">
+            Guest Mode
+          </p>
           <p className="mt-2 text-sm font-semibold text-white/80 md:text-base">
             Sign in to unlock your archive, logging, and personalized discovery.
           </p>
@@ -329,17 +336,20 @@ export function HomeDiscovery() {
                     Status
                   </span>
                   <div className="flex flex-wrap gap-1">
-                    {([
-                      ["all", "All"],
-                      ["releasing", "Releasing"],
-                      ["finished", "Finished"],
-                    ] as const).map(([value, label]) => (
+                    {(
+                      [
+                        ["all", "All"],
+                        ["releasing", "Releasing"],
+                        ["finished", "Finished"],
+                      ] as const
+                    ).map(([value, label]) => (
                       <button
                         key={value}
                         type="button"
                         className={cn(
                           "h-7 rounded-full border border-transparent px-2.5 text-[9px] font-black uppercase tracking-[0.14em] text-white/60 transition-colors hover:bg-white/10 hover:text-white",
-                          statusFilter === value && "bg-white text-black hover:bg-white hover:text-black",
+                          statusFilter === value &&
+                            "bg-white text-black hover:bg-white hover:text-black",
                         )}
                         onClick={() => setStatusFilter(value)}
                       >
@@ -354,18 +364,21 @@ export function HomeDiscovery() {
                     Era
                   </span>
                   <div className="flex flex-wrap gap-1">
-                    {([
-                      ["all", "All"],
-                      ["2020s", "2020s"],
-                      ["2010s", "2010s"],
-                      ["classic", "Classic"],
-                    ] as const).map(([value, label]) => (
+                    {(
+                      [
+                        ["all", "All"],
+                        ["2020s", "2020s"],
+                        ["2010s", "2010s"],
+                        ["classic", "Classic"],
+                      ] as const
+                    ).map(([value, label]) => (
                       <button
                         key={value}
                         type="button"
                         className={cn(
                           "h-7 rounded-full border border-transparent px-2.5 text-[9px] font-black uppercase tracking-[0.14em] text-white/60 transition-colors hover:bg-white/10 hover:text-white",
-                          eraFilter === value && "bg-white text-black hover:bg-white hover:text-black",
+                          eraFilter === value &&
+                            "bg-white text-black hover:bg-white hover:text-black",
                         )}
                         onClick={() => setEraFilter(value)}
                       >

@@ -53,7 +53,12 @@ export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
               {!isOwnProfile ? (
                 <FollowButton userId={user.id} size="lg" />
               ) : (
-                <Button variant="outline" size="sm" className="h-9 font-bold uppercase tracking-widest text-[10px]" onClick={() => setIsEditDialogOpen(true)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 font-bold uppercase tracking-widest text-[10px]"
+                  onClick={() => setIsEditDialogOpen(true)}
+                >
                   <Settings className="mr-2 h-3 w-3" />
                   EDIT PROFILE
                 </Button>
@@ -80,9 +85,7 @@ export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
                 {user.profile.bio}
               </p>
             ) : (
-              <p className="text-sm italic text-muted-foreground">
-                No bio provided.
-              </p>
+              <p className="text-sm italic text-muted-foreground">No bio provided.</p>
             )}
           </div>
 
@@ -107,11 +110,7 @@ export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
         </div>
       </div>
 
-      <EditProfileDialog
-        user={user}
-        isOpen={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-      />
+      <EditProfileDialog user={user} isOpen={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} />
     </>
   );
 }

@@ -4,10 +4,7 @@ import { useMemo, useState } from "react";
 import { type Anime, type LibraryStatus } from "@anilog/db/schema/anilog";
 
 import { useAuth, useRequireAuth } from "@/features/auth/lib/hooks";
-import {
-  useLogAnime,
-  useMyLibrary,
-} from "@/features/lists/lib/hooks";
+import { useLogAnime, useMyLibrary } from "@/features/lists/lib/hooks";
 import { type LibraryEntryWithAnime } from "@/features/lists/lib/requests";
 import { useTrendingAnime } from "../lib/hooks";
 import { AnimeCard } from "./anime-card";
@@ -91,8 +88,12 @@ export function AnimeGrid() {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <p className="mb-2 text-sm font-black uppercase tracking-widest text-muted-foreground">ERROR</p>
-        <p className="text-xl font-bold">{error instanceof Error ? error.message : "Failed to load anime"}</p>
+        <p className="mb-2 text-sm font-black uppercase tracking-widest text-muted-foreground">
+          ERROR
+        </p>
+        <p className="text-xl font-bold">
+          {error instanceof Error ? error.message : "Failed to load anime"}
+        </p>
       </div>
     );
   }

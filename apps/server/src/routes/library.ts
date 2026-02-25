@@ -3,11 +3,14 @@ import { LibraryService } from "@anilog/api";
 import { auth } from "@anilog/auth";
 
 type LogAnimeInput = Parameters<typeof LibraryService.logAnime>[1];
+
 type UpdateStatusInput = {
   status: Parameters<typeof LibraryService.updateStatus>[2];
   currentEpisode?: Parameters<typeof LibraryService.updateStatus>[3];
 };
+
 type UpdateProgressInput = Parameters<typeof LibraryService.updateProgress>[2];
+
 type UpdateRatingInput = {
   rating: Parameters<typeof LibraryService.updateRating>[2];
 };
@@ -62,7 +65,12 @@ export const libraryRoutes = new Elysia({ prefix: "/library" })
     "/me/:animeId/status",
     async ({ userId, params, body }) => {
       const payload = body as UpdateStatusInput;
-      return await LibraryService.updateStatus(userId, Number(params.animeId), payload.status, payload.currentEpisode);
+      return await LibraryService.updateStatus(
+        userId,
+        Number(params.animeId),
+        payload.status,
+        payload.currentEpisode,
+      );
     },
     {
       params: t.Object({ animeId: t.Integer() }),
@@ -75,7 +83,11 @@ export const libraryRoutes = new Elysia({ prefix: "/library" })
   .patch(
     "/me/:animeId/progress",
     async ({ userId, params, body }) => {
-      return await LibraryService.updateProgress(userId, Number(params.animeId), body as UpdateProgressInput);
+      return await LibraryService.updateProgress(
+        userId,
+        Number(params.animeId),
+        body as UpdateProgressInput,
+      );
     },
     {
       params: t.Object({ animeId: t.Integer() }),

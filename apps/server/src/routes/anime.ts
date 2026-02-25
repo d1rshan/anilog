@@ -34,43 +34,55 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
     const result = await AnimeService.syncAllAnime();
     return result;
   })
-  .get("/search/:query", async ({ params }) => {
-    const result = await AnimeService.searchAnime(params.query);
-    return result;
-  }, {
-    params: t.Object({ query: t.String() })
-  })
-  .get("/archive-search", async ({ request, query, set }) => {
-    const session = await auth.api.getSession({ headers: request.headers });
-    if (!session?.user?.id) {
-      set.status = 401;
-      return { error: "User not authenticated" };
-    }
+  .get(
+    "/search/:query",
+    async ({ params }) => {
+      const result = await AnimeService.searchAnime(params.query);
+      return result;
+    },
+    {
+      params: t.Object({ query: t.String() }),
+    },
+  )
+  .get(
+    "/archive-search",
+    async ({ request, query, set }) => {
+      const session = await auth.api.getSession({ headers: request.headers });
+      if (!session?.user?.id) {
+        set.status = 401;
+        return { error: "User not authenticated" };
+      }
 
-    const q = query.q?.trim() ?? "";
-    const limit = query.limit ?? 12;
+      const q = query.q?.trim() ?? "";
+      const limit = query.limit ?? 12;
 
-    return await AnimeService.searchArchive(session.user.id, q, limit);
-  }, {
-    query: t.Object({
-      q: t.String(),
-      limit: t.Optional(t.Integer({ minimum: 1, maximum: 50 })),
-    }),
-  })
-  .post("/upsert", async ({ body }) => {
-    const result = await AnimeService.upsertAnime(body as UpsertAnimeInput);
-    return result;
-  }, {
-    body: t.Object({
-      id: t.Integer(),
-      title: t.String(),
-      titleJapanese: t.Optional(t.Nullable(t.String())),
-      description: t.Optional(t.Nullable(t.String())),
-      episodes: t.Optional(t.Nullable(t.Integer())),
-      status: t.Optional(t.Nullable(t.String())),
-      genres: t.Optional(t.Nullable(t.Array(t.String()))),
-      imageUrl: t.String(),
-      year: t.Optional(t.Nullable(t.Integer())),
-      rating: t.Optional(t.Nullable(t.Integer()))
-    })
-  });
+      return await AnimeService.searchArchive(session.user.id, q, limit);
+    },
+    {
+      query: t.Object({
+        q: t.String(),
+        limit: t.Optional(t.Integer({ minimum: 1, maximum: 50 })),
+      }),
+    },
+  )
+  .post(
+    "/upsert",
+    async ({ body }) => {
+      const result = await AnimeService.upsertAnime(body as UpsertAnimeInput);
+      return result;
+    },
+    {
+      body: t.Object({
+        id: t.Integer(),
+        title: t.String(),
+        titleJapanese: t.Optional(t.Nullable(t.String())),
+        description: t.Optional(t.Nullable(t.String())),
+        episodes: t.Optional(t.Nullable(t.Integer())),
+        status: t.Optional(t.Nullable(t.String())),
+        genres: t.Optional(t.Nullable(t.Array(t.String()))),
+        imageUrl: t.String(),
+        year: t.Optional(t.Nullable(t.Integer())),
+        rating: t.Optional(t.Nullable(t.Integer())),
+      }),
+    },
+  );

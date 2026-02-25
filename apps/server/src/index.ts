@@ -7,7 +7,7 @@ import { userRoutes } from "./routes/users";
 import { libraryRoutes } from "./routes/library";
 import { adminRoutes } from "./routes/admin";
 
-const allowedOrigins = process.env.CORS_ORIGIN || "http://localhost:3001"
+const allowedOrigins = process.env.CORS_ORIGIN || "http://localhost:3001";
 
 const port = Number(process.env.PORT || 3000);
 

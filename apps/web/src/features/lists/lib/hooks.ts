@@ -24,7 +24,10 @@ type MutationContext = {
   currentUserId?: string;
 };
 
-function upsertLibraryEntryInCache(queryClient: ReturnType<typeof useQueryClient>, entry: LibraryEntryWithAnime) {
+function upsertLibraryEntryInCache(
+  queryClient: ReturnType<typeof useQueryClient>,
+  entry: LibraryEntryWithAnime,
+) {
   queryClient.setQueryData<LibraryEntryWithAnime[]>(libraryKeys.me(), (current = []) => {
     const index = current.findIndex((item) => item.animeId === entry.animeId);
 
@@ -91,16 +94,13 @@ function removePublicLibraryEntryFromCache(
   userId: string,
   animeId: number,
 ) {
-  queryClient.setQueryData<PublicUserLibrary>(
-    libraryKeys.publicByUserId(userId),
-    (current) => {
-      if (!current) {
-        return current;
-      }
+  queryClient.setQueryData<PublicUserLibrary>(libraryKeys.publicByUserId(userId), (current) => {
+    if (!current) {
+      return current;
+    }
 
-      return current.filter((entry) => entry.animeId !== animeId);
-    },
-  );
+    return current.filter((entry) => entry.animeId !== animeId);
+  });
 }
 
 export const useMyLibrary = (options?: { enabled?: boolean }) => {
@@ -161,7 +161,8 @@ export const useLogAnime = () => {
       upsertLibraryEntryInCache(queryClient, data);
       upsertPublicLibraryEntryInCache(queryClient, data);
 
-      const existedBefore = context?.previous?.some((entry) => entry.animeId === payload.anime.id) ?? false;
+      const existedBefore =
+        context?.previous?.some((entry) => entry.animeId === payload.anime.id) ?? false;
       if (payload.status === "planned" && !existedBefore) {
         toast.success(`Added ${data.anime.title} to watchlist.`);
         return;
@@ -293,8 +294,13 @@ export const useRemoveFromLibrary = () => {
       toast.error(error.message || "Failed to remove anime");
     },
     onSuccess: (_data, animeId, context: MutationContext | undefined) => {
-      const removedTitle = context?.previous?.find((entry) => entry.animeId === animeId)?.anime.title;
-      toast.success(removedTitle ? `Removed ${removedTitle} from your library.` : "Removed anime from your library.");
+      const removedTitle = context?.previous?.find((entry) => entry.animeId === animeId)?.anime
+        .title;
+      toast.success(
+        removedTitle
+          ? `Removed ${removedTitle} from your library.`
+          : "Removed anime from your library.",
+      );
     },
     onSettled: (_data, _error, animeId, context) => {
       queryClient.invalidateQueries({ queryKey: libraryKeys.me() });
@@ -329,7 +335,16 @@ export function groupLibraryByStatus(
 export function buildLogPayload(
   anime: Pick<
     Anime,
-    "id" | "title" | "titleJapanese" | "description" | "episodes" | "status" | "genres" | "imageUrl" | "year" | "rating"
+    | "id"
+    | "title"
+    | "titleJapanese"
+    | "description"
+    | "episodes"
+    | "status"
+    | "genres"
+    | "imageUrl"
+    | "year"
+    | "rating"
   >,
   status: LibraryStatus,
   currentEpisode?: number,

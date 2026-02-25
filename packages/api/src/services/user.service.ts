@@ -1,5 +1,11 @@
 import { db } from "@anilog/db";
-import { userFollow, userProfile, userAnime, anime, type LibraryStatus } from "@anilog/db/schema/anilog";
+import {
+  userFollow,
+  userProfile,
+  userAnime,
+  anime,
+  type LibraryStatus,
+} from "@anilog/db/schema/anilog";
 import { user } from "@anilog/db/schema/auth";
 import { eq, getTableColumns, count, and, ilike, asc, or } from "drizzle-orm";
 import type { UserProfile } from "@anilog/db/schema/anilog";
@@ -289,18 +295,26 @@ export class UserService {
   }
 
   static async getFollowerCount(userId: string): Promise<number> {
-    const result = await db.select({ count: count() }).from(userFollow).where(eq(userFollow.followingId, userId));
+    const result = await db
+      .select({ count: count() })
+      .from(userFollow)
+      .where(eq(userFollow.followingId, userId));
 
     return result[0]?.count || 0;
   }
 
   static async getFollowingCount(userId: string): Promise<number> {
-    const result = await db.select({ count: count() }).from(userFollow).where(eq(userFollow.followerId, userId));
+    const result = await db
+      .select({ count: count() })
+      .from(userFollow)
+      .where(eq(userFollow.followerId, userId));
 
     return result[0]?.count || 0;
   }
 
-  static async getFollowCounts(userId: string): Promise<{ followerCount: number; followingCount: number }> {
+  static async getFollowCounts(
+    userId: string,
+  ): Promise<{ followerCount: number; followingCount: number }> {
     const [followerResult, followingResult] = await Promise.all([
       db.select({ count: count() }).from(userFollow).where(eq(userFollow.followingId, userId)),
       db.select({ count: count() }).from(userFollow).where(eq(userFollow.followerId, userId)),
@@ -421,10 +435,7 @@ export class UserService {
       .limit(limit)
       .offset(offset);
 
-    const [totalResult] = await db
-      .select({ count: count() })
-      .from(user)
-      .where(whereClause);
+    const [totalResult] = await db.select({ count: count() }).from(user).where(whereClause);
 
     const users = await Promise.all(
       rows.map(async (entry) => ({

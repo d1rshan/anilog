@@ -12,11 +12,7 @@ interface FollowButtonProps {
   variant?: "default" | "secondary" | "outline" | "ghost";
 }
 
-export function FollowButton({
-  userId,
-  size = "sm",
-  variant = "default",
-}: FollowButtonProps) {
+export function FollowButton({ userId, size = "sm", variant = "default" }: FollowButtonProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { isAuthenticated } = useAuth();
@@ -31,7 +27,8 @@ export function FollowButton({
   const unfollowMutation = useUnfollowUser();
 
   const isFollowing = followStatus?.isFollowing ?? false;
-  const isLoading = (isAuthenticated && isChecking) || followMutation.isPending || unfollowMutation.isPending;
+  const isLoading =
+    (isAuthenticated && isChecking) || followMutation.isPending || unfollowMutation.isPending;
 
   const handleClick = () => {
     if (!requireAuth()) {

@@ -25,7 +25,15 @@ import {
 
 type HeroDraft = Pick<
   HeroCuration,
-  "videoId" | "start" | "stop" | "title" | "subtitle" | "description" | "tag" | "sortOrder" | "isActive"
+  | "videoId"
+  | "start"
+  | "stop"
+  | "title"
+  | "subtitle"
+  | "description"
+  | "tag"
+  | "sortOrder"
+  | "isActive"
 >;
 
 function AdminForbiddenState() {
@@ -95,8 +103,16 @@ export function AdminDashboard() {
   }, [heroCurationsQuery.data]);
 
   const isLoading = useMemo(
-    () => isCheckingAdmin || (isAdmin && (statsQuery.isLoading || heroCurationsQuery.isLoading || usersQuery.isLoading)),
-    [heroCurationsQuery.isLoading, isAdmin, isCheckingAdmin, statsQuery.isLoading, usersQuery.isLoading],
+    () =>
+      isCheckingAdmin ||
+      (isAdmin && (statsQuery.isLoading || heroCurationsQuery.isLoading || usersQuery.isLoading)),
+    [
+      heroCurationsQuery.isLoading,
+      isAdmin,
+      isCheckingAdmin,
+      statsQuery.isLoading,
+      usersQuery.isLoading,
+    ],
   );
 
   if (isCheckingAdmin) {
@@ -160,7 +176,10 @@ export function AdminDashboard() {
                 if (!draft) return null;
 
                 return (
-                  <div key={curation.id} className="space-y-3 rounded-xl border border-white/10 p-4">
+                  <div
+                    key={curation.id}
+                    className="space-y-3 rounded-xl border border-white/10 p-4"
+                  >
                     <div className="grid gap-3 md:grid-cols-2">
                       <Input
                         value={draft.title}
@@ -211,7 +230,10 @@ export function AdminDashboard() {
                         onChange={(e) =>
                           setDrafts((prev) => ({
                             ...prev,
-                            [curation.id]: { ...prev[curation.id], start: Number(e.target.value) || 0 },
+                            [curation.id]: {
+                              ...prev[curation.id],
+                              start: Number(e.target.value) || 0,
+                            },
                           }))
                         }
                         placeholder="Start"
@@ -222,7 +244,10 @@ export function AdminDashboard() {
                         onChange={(e) =>
                           setDrafts((prev) => ({
                             ...prev,
-                            [curation.id]: { ...prev[curation.id], stop: Number(e.target.value) || 0 },
+                            [curation.id]: {
+                              ...prev[curation.id],
+                              stop: Number(e.target.value) || 0,
+                            },
                           }))
                         }
                         placeholder="Stop"
@@ -233,7 +258,10 @@ export function AdminDashboard() {
                         onChange={(e) =>
                           setDrafts((prev) => ({
                             ...prev,
-                            [curation.id]: { ...prev[curation.id], sortOrder: Number(e.target.value) || 0 },
+                            [curation.id]: {
+                              ...prev[curation.id],
+                              sortOrder: Number(e.target.value) || 0,
+                            },
                           }))
                         }
                         placeholder="Sort Order"
@@ -309,10 +337,7 @@ export function AdminDashboard() {
                 const actionText = entry.isAdmin ? "Remove Admin" : "Make Admin";
 
                 return (
-                  <div
-                    key={entry.id}
-                    className="space-y-3 rounded-xl border border-white/10 p-3"
-                  >
+                  <div key={entry.id} className="space-y-3 rounded-xl border border-white/10 p-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 space-y-1">
                         <p className="truncate text-sm font-bold text-foreground">{entry.name}</p>
@@ -326,7 +351,10 @@ export function AdminDashboard() {
                           Admin
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="gap-1.5 border-white/20 text-muted-foreground">
+                        <Badge
+                          variant="outline"
+                          className="gap-1.5 border-white/20 text-muted-foreground"
+                        >
                           <Shield className="h-3 w-3" />
                           User
                         </Badge>

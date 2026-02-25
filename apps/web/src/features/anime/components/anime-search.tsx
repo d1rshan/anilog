@@ -22,7 +22,10 @@ export function AnimeSearch({
 }: AnimeSearchProps) {
   const [internalValue, setInternalValue] = useState("");
   const isControlled = typeof value === "string";
-  const inputValue = useMemo(() => (isControlled ? value : internalValue), [internalValue, isControlled, value]);
+  const inputValue = useMemo(
+    () => (isControlled ? value : internalValue),
+    [internalValue, isControlled, value],
+  );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;

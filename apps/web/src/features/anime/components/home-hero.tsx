@@ -5,12 +5,9 @@ import { useEffect, useRef, useState } from "react";
 
 import { AnimeSearch } from "./anime-search";
 
-const HomeHeroVideo = dynamic(
-  () => import("./home-hero-video").then((mod) => mod.HomeHeroVideo),
-  {
-    ssr: false,
-  },
-);
+const HomeHeroVideo = dynamic(() => import("./home-hero-video").then((mod) => mod.HomeHeroVideo), {
+  ssr: false,
+});
 
 interface HomeHeroProps {
   searchValue?: string;

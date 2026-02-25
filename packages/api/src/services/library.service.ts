@@ -3,7 +3,10 @@ import { anime, userAnime, type Anime, type LibraryStatus } from "@anilog/db/sch
 import { and, asc, eq, getTableColumns } from "drizzle-orm";
 
 export type LibraryEntryWithAnime = typeof userAnime.$inferSelect & {
-  anime: Pick<Anime, "id" | "title" | "titleJapanese" | "imageUrl" | "year" | "episodes" | "status">;
+  anime: Pick<
+    Anime,
+    "id" | "title" | "titleJapanese" | "imageUrl" | "year" | "episodes" | "status"
+  >;
 };
 
 export type LogAnimeInput = {
@@ -82,7 +85,10 @@ export class LibraryService {
     return rows as LibraryEntryWithAnime[];
   }
 
-  private static async getLibraryEntry(userId: string, animeId: number): Promise<LibraryEntryWithAnime | null> {
+  private static async getLibraryEntry(
+    userId: string,
+    animeId: number,
+  ): Promise<LibraryEntryWithAnime | null> {
     const result = await db
       .select({
         ...getTableColumns(userAnime),
@@ -189,7 +195,7 @@ export class LibraryService {
     const resolvedEpisode =
       status === "completed" && existing.anime.episodes && existing.anime.episodes > 0
         ? existing.anime.episodes
-        : currentEpisode ?? existing.currentEpisode;
+        : (currentEpisode ?? existing.currentEpisode);
 
     validateStatusRules({
       status,
@@ -256,7 +262,11 @@ export class LibraryService {
     return updated;
   }
 
-  static async updateRating(userId: string, animeId: number, rating: number | null): Promise<LibraryEntryWithAnime> {
+  static async updateRating(
+    userId: string,
+    animeId: number,
+    rating: number | null,
+  ): Promise<LibraryEntryWithAnime> {
     const existing = await this.getLibraryEntry(userId, animeId);
     if (!existing) {
       throw new Error("Anime not found in your library");

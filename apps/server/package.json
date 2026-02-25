@@ -1,7 +1,7 @@
 {
   "name": "server",
-  "main": "src/index.ts",
   "type": "module",
+  "main": "src/index.ts",
   "scripts": {
     "build": "tsdown",
     "check-types": "tsc -b",
@@ -10,19 +10,19 @@
     "start": "bun run dist/index.mjs"
   },
   "dependencies": {
-    "elysia": "^1.3.21",
+    "@anilog/api": "workspace:*",
+    "@anilog/auth": "workspace:*",
+    "@anilog/db": "workspace:*",
     "@elysiajs/cors": "^1.3.3",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
-    "zod": "catalog:",
-    "@anilog/auth": "workspace:*",
-    "@anilog/db": "workspace:*",
-    "@anilog/api": "workspace:*"
+    "elysia": "^1.3.21",
+    "zod": "catalog:"
   },
   "devDependencies": {
+    "@anilog/config": "workspace:*",
     "@types/bun": "catalog:",
-    "typescript": "catalog:",
     "tsdown": "^0.16.5",
-    "@anilog/config": "workspace:*"
+    "typescript": "catalog:"
   }
 }

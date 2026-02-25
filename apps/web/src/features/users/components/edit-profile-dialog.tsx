@@ -29,27 +29,65 @@ interface EditProfileDialogProps {
 }
 
 const profileSchema = z.object({
-  displayName: z.string().min(2, "Display name must be at least 2 characters").max(50, "Display name must be at most 50 characters"),
+  displayName: z
+    .string()
+    .min(2, "Display name must be at least 2 characters")
+    .max(50, "Display name must be at most 50 characters"),
   bio: z.string().max(500, "Bio must be at most 500 characters").optional().nullable(),
   location: z.string().max(100, "Location must be at most 100 characters").optional().nullable(),
-  website: z.union([z.string().url("Please enter a valid URL"), z.literal("")]).optional().nullable(),
-  twitterUrl: z.union([z.string().url("Please enter a valid URL"), z.literal("")]).optional().nullable(),
-  discordUrl: z.union([z.string().url("Please enter a valid URL"), z.literal("")]).optional().nullable(),
-  githubUrl: z.union([z.string().url("Please enter a valid URL"), z.literal("")]).optional().nullable(),
-  instagramUrl: z.union([z.string().url("Please enter a valid URL"), z.literal("")]).optional().nullable(),
+  website: z
+    .union([z.string().url("Please enter a valid URL"), z.literal("")])
+    .optional()
+    .nullable(),
+  twitterUrl: z
+    .union([z.string().url("Please enter a valid URL"), z.literal("")])
+    .optional()
+    .nullable(),
+  discordUrl: z
+    .union([z.string().url("Please enter a valid URL"), z.literal("")])
+    .optional()
+    .nullable(),
+  githubUrl: z
+    .union([z.string().url("Please enter a valid URL"), z.literal("")])
+    .optional()
+    .nullable(),
+  instagramUrl: z
+    .union([z.string().url("Please enter a valid URL"), z.literal("")])
+    .optional()
+    .nullable(),
   isPublic: z.boolean(),
 });
 
 type FormData = z.infer<typeof profileSchema>;
 
 const socialPlatforms = [
-  { key: "twitterUrl", icon: Twitter, label: "Twitter/X", placeholder: "https://twitter.com/username" },
-  { key: "discordUrl", icon: MessageCircle, label: "Discord", placeholder: "https://discord.gg/invite" },
+  {
+    key: "twitterUrl",
+    icon: Twitter,
+    label: "Twitter/X",
+    placeholder: "https://twitter.com/username",
+  },
+  {
+    key: "discordUrl",
+    icon: MessageCircle,
+    label: "Discord",
+    placeholder: "https://discord.gg/invite",
+  },
   { key: "githubUrl", icon: Github, label: "GitHub", placeholder: "https://github.com/username" },
-  { key: "instagramUrl", icon: Instagram, label: "Instagram", placeholder: "https://instagram.com/username" },
+  {
+    key: "instagramUrl",
+    icon: Instagram,
+    label: "Instagram",
+    placeholder: "https://instagram.com/username",
+  },
 ] as const;
 
-export function EditProfileDialog({ user, isOpen, onOpenChange, onSuccess }: EditProfileDialogProps) {
+export function EditProfileDialog({
+  user,
+  isOpen,
+  onOpenChange,
+  onSuccess,
+}: EditProfileDialogProps) {
   const updateProfile = useUpdateMyProfile();
   const [activeSocialInput, setActiveSocialInput] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -200,7 +238,9 @@ export function EditProfileDialog({ user, isOpen, onOpenChange, onSuccess }: Edi
         >
           <CustomDialogHeader className="space-y-2 border-b border-white/10 px-5 pb-4 pt-3 text-left sm:px-8 sm:pb-6 sm:pt-6">
             <div className="mx-auto mb-1 h-1.5 w-14 rounded-full bg-white/20 sm:hidden" />
-            <p className="text-[10px] font-black uppercase tracking-[0.32em] text-white/40">Archive Console</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.32em] text-white/40">
+              Archive Console
+            </p>
             <CustomDialogTitle className="text-3xl font-black uppercase leading-[0.9] tracking-tight text-white sm:text-4xl">
               Edit Profile
             </CustomDialogTitle>
@@ -212,10 +252,15 @@ export function EditProfileDialog({ user, isOpen, onOpenChange, onSuccess }: Edi
           <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto px-5 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-6">
             <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-5">
               <section className="rounded-2xl border border-white/10 bg-black p-5 sm:p-6 lg:col-span-5">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">Identity</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">
+                  Identity
+                </p>
                 <div className="mt-4 grid gap-5">
                   <div className="grid gap-2">
-                    <Label htmlFor="displayName" className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">
+                    <Label
+                      htmlFor="displayName"
+                      className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45"
+                    >
                       Display Name
                     </Label>
                     <Input
@@ -226,12 +271,17 @@ export function EditProfileDialog({ user, isOpen, onOpenChange, onSuccess }: Edi
                       className="h-12 border border-white/10 bg-black px-4 font-bold text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/30"
                     />
                     {errors.displayName && (
-                      <p className="text-[10px] font-bold uppercase text-destructive">{errors.displayName}</p>
+                      <p className="text-[10px] font-bold uppercase text-destructive">
+                        {errors.displayName}
+                      </p>
                     )}
                   </div>
 
                   <div className="grid gap-2">
-                    <Label htmlFor="bio" className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">
+                    <Label
+                      htmlFor="bio"
+                      className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45"
+                    >
                       Bio
                     </Label>
                     <Textarea
@@ -242,7 +292,9 @@ export function EditProfileDialog({ user, isOpen, onOpenChange, onSuccess }: Edi
                       className="min-h-[150px] border border-white/10 bg-black px-4 py-3 font-medium text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/30"
                     />
                     <div className="flex items-center justify-between">
-                      <p className="text-[10px] font-bold uppercase text-destructive">{errors.bio}</p>
+                      <p className="text-[10px] font-bold uppercase text-destructive">
+                        {errors.bio}
+                      </p>
                       <p
                         className={cn(
                           "text-[10px] font-black uppercase tracking-widest",
@@ -257,10 +309,15 @@ export function EditProfileDialog({ user, isOpen, onOpenChange, onSuccess }: Edi
               </section>
 
               <section className="rounded-2xl border border-white/10 bg-black p-5 sm:p-6 lg:col-span-2">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">Links</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">
+                  Links
+                </p>
                 <div className="mt-4 grid grid-cols-1 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="location" className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">
+                    <Label
+                      htmlFor="location"
+                      className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45"
+                    >
                       Location
                     </Label>
                     <Input
@@ -273,7 +330,10 @@ export function EditProfileDialog({ user, isOpen, onOpenChange, onSuccess }: Edi
                   </div>
 
                   <div className="grid gap-2">
-                    <Label htmlFor="website" className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">
+                    <Label
+                      htmlFor="website"
+                      className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45"
+                    >
                       Website
                     </Label>
                     <Input
@@ -284,12 +344,19 @@ export function EditProfileDialog({ user, isOpen, onOpenChange, onSuccess }: Edi
                       placeholder="https://yourwebsite.com"
                       className="h-12 border border-white/10 bg-black px-4 font-bold text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/30"
                     />
-                    {errors.website && <p className="text-[10px] font-bold uppercase text-destructive">{errors.website}</p>}
+                    {errors.website && (
+                      <p className="text-[10px] font-bold uppercase text-destructive">
+                        {errors.website}
+                      </p>
+                    )}
                   </div>
 
                   <div className="mt-1 flex items-center justify-between rounded-xl border border-white/10 bg-black px-4 py-3">
                     <div className="space-y-1">
-                      <Label htmlFor="isPublic" className="text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                      <Label
+                        htmlFor="isPublic"
+                        className="text-[10px] font-black uppercase tracking-[0.2em] text-white"
+                      >
                         Public Profile
                       </Label>
                       <p className="text-[10px] font-bold uppercase tracking-widest text-white/45">
@@ -306,7 +373,9 @@ export function EditProfileDialog({ user, isOpen, onOpenChange, onSuccess }: Edi
               </section>
 
               <section className="rounded-2xl border border-white/10 bg-black p-5 sm:p-6 lg:col-span-3">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">Social Links</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">
+                  Social Links
+                </p>
                 <div className="mt-4 flex flex-wrap gap-3">
                   {socialPlatforms.map((platform) => {
                     const Icon = platform.icon;
@@ -343,12 +412,18 @@ export function EditProfileDialog({ user, isOpen, onOpenChange, onSuccess }: Edi
                               id={p.key}
                               type="url"
                               value={(formData[p.key as keyof FormData] as string) || ""}
-                              onChange={(e) => handleInputChange(p.key as keyof FormData, e.target.value)}
+                              onChange={(e) =>
+                                handleInputChange(p.key as keyof FormData, e.target.value)
+                              }
                               placeholder={p.placeholder}
                               className="h-12 border border-white/10 bg-black px-4 font-bold text-white placeholder:text-white/30 focus-visible:ring-1 focus-visible:ring-white/30"
                               autoFocus
                             />
-                            {errors[p.key] && <p className="text-[10px] font-bold uppercase text-destructive">{errors[p.key]}</p>}
+                            {errors[p.key] && (
+                              <p className="text-[10px] font-bold uppercase text-destructive">
+                                {errors[p.key]}
+                              </p>
+                            )}
                           </div>
                         ),
                     )}

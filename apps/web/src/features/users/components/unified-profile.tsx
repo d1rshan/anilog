@@ -35,13 +35,9 @@ export function UnifiedProfile({ username, userId, isOwnProfile }: UnifiedProfil
     <div className="min-h-screen">
       <div className="container mx-auto px-4 pb-16 pt-20 md:py-24">
         <ProfileHeader user={user} isOwnProfile={isOwnProfile} />
-        
+
         <div className="mt-12 md:mt-20">
-          {isOwnProfile ? (
-            <EditableLists />
-          ) : (
-            <UserListsPublic userId={userId} />
-          )}
+          {isOwnProfile ? <EditableLists /> : <UserListsPublic userId={userId} />}
         </div>
       </div>
     </div>

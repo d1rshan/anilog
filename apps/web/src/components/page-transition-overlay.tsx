@@ -10,7 +10,7 @@ export function PageTransitionOverlay() {
   return (
     <AnimatePresence>
       {isActive && (
-        <motion.div 
+        <motion.div
           className="pointer-events-none fixed inset-0 z-40 bg-black/20 backdrop-blur-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

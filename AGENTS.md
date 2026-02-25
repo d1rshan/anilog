@@ -1,6 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
+
 This repository is a Bun + Turborepo monorepo.
 
 - `apps/web`: Next.js frontend (`src/app`, `src/features`, `src/components`)
@@ -13,6 +14,7 @@ This repository is a Bun + Turborepo monorepo.
 Keep feature code close to its domain (`apps/web/src/features/<domain>`), and keep shared cross-app logic in `packages/*`.
 
 ## Build, Test, and Development Commands
+
 Run from the repository root:
 
 - `bun install`: install workspace dependencies
@@ -24,6 +26,7 @@ Run from the repository root:
 - `bun run db:push` / `bun run db:migrate` / `bun run db:studio`: manage Drizzle database schema
 
 ## Coding Style & Naming Conventions
+
 - Language: TypeScript (strict mode enabled via `packages/config/tsconfig.base.json`).
 - Indentation: 2 spaces; use semantically clear names over abbreviations.
 - File naming:
@@ -33,6 +36,7 @@ Run from the repository root:
 - Run `bun run check-types` before opening a PR.
 
 ## Testing Guidelines
+
 There is currently no standardized unit/integration test runner configured. The required quality gate is:
 
 1. `bun run check-types`
@@ -42,6 +46,7 @@ There is currently no standardized unit/integration test runner configured. The 
 When adding tests, place them near the feature (for example, `src/features/users/__tests__`) and wire them into Turbo scripts.
 
 ## Commit & Pull Request Guidelines
+
 Follow the commit style visible in history:
 
 - `feat(web): ...`

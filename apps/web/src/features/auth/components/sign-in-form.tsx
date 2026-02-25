@@ -101,7 +101,10 @@ export const SignInForm = ({
           <form.Field name="email">
             {(field) => (
               <div className="grid gap-1.5">
-                <Label htmlFor={field.name} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                <Label
+                  htmlFor={field.name}
+                  className="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
+                >
                   Email or Username
                 </Label>
                 <Input
@@ -114,7 +117,10 @@ export const SignInForm = ({
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
                 {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-[10px] font-bold uppercase text-destructive">
+                  <p
+                    key={error?.message}
+                    className="text-[10px] font-bold uppercase text-destructive"
+                  >
                     {error?.message}
                   </p>
                 ))}
@@ -125,7 +131,10 @@ export const SignInForm = ({
           <form.Field name="password">
             {(field) => (
               <div className="grid gap-1.5">
-                <Label htmlFor={field.name} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                <Label
+                  htmlFor={field.name}
+                  className="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
+                >
                   Password
                 </Label>
                 <Input
@@ -138,7 +147,10 @@ export const SignInForm = ({
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
                 {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-[10px] font-bold uppercase text-destructive">
+                  <p
+                    key={error?.message}
+                    className="text-[10px] font-bold uppercase text-destructive"
+                  >
                     {error?.message}
                   </p>
                 ))}

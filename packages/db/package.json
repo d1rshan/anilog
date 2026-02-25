@@ -15,17 +15,17 @@
     "db:studio": "drizzle-kit studio",
     "db:migrate": "drizzle-kit migrate"
   },
-  "devDependencies": {
-    "drizzle-kit": "^0.31.8",
-    "@types/ws": "^8.18.1",
-    "typescript": "catalog:",
-    "@anilog/config": "workspace:*"
-  },
   "dependencies": {
-    "drizzle-orm": "^0.45.1",
     "@neondatabase/serverless": "^1.0.2",
-    "ws": "^8.18.3",
     "dotenv": "catalog:",
+    "drizzle-orm": "^0.45.1",
+    "ws": "^8.18.3",
     "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@anilog/config": "workspace:*",
+    "@types/ws": "^8.18.1",
+    "drizzle-kit": "^0.31.8",
+    "typescript": "catalog:"
   }
 }

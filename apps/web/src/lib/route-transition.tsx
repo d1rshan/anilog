@@ -91,7 +91,9 @@ export function RouteTransitionProvider({ children }: { children: React.ReactNod
     [phase, pendingPath, startNavigation],
   );
 
-  return <RouteTransitionContext.Provider value={value}>{children}</RouteTransitionContext.Provider>;
+  return (
+    <RouteTransitionContext.Provider value={value}>{children}</RouteTransitionContext.Provider>
+  );
 }
 
 export function useRouteTransition() {

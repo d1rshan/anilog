@@ -10,10 +10,7 @@ import {
 } from "@/lib/query-options";
 import { adminKeys, animeKeys } from "@/lib/query-keys";
 
-import {
-  setAdminStatus,
-  updateAdminHeroCuration,
-} from "./requests";
+import { setAdminStatus, updateAdminHeroCuration } from "./requests";
 
 export function useAdminStats(options?: { enabled?: boolean }) {
   return useQuery({

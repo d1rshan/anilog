@@ -9,13 +9,8 @@
   "orm": "drizzle",
   "backend": "elysia",
   "runtime": "bun",
-  "frontend": [
-    "next"
-  ],
-  "addons": [
-    "husky",
-    "turborepo"
-  ],
+  "frontend": ["next"],
+  "addons": ["husky", "turborepo"],
   "examples": [],
   "auth": "better-auth",
   "payments": "none",
@@ -23,5 +18,5 @@
   "dbSetup": "neon",
   "api": "none",
   "webDeploy": "none",
-  "serverDeploy": "none"
+  "serverDeploy": "none",
 }

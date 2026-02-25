@@ -39,7 +39,12 @@ export const anime = pgTable(
 export type Anime = typeof anime.$inferSelect;
 export type NewAnime = typeof anime.$inferInsert;
 
-export const libraryStatusEnum = pgEnum("library_status", ["watching", "completed", "planned", "dropped"]);
+export const libraryStatusEnum = pgEnum("library_status", [
+  "watching",
+  "completed",
+  "planned",
+  "dropped",
+]);
 
 export const userAnime = pgTable(
   "user_anime",
@@ -75,7 +80,10 @@ export type LibraryStatus = (typeof libraryStatusEnum.enumValues)[number];
 export const trendingAnime = pgTable(
   "trending_anime",
   {
-    animeId: integer("anime_id").references(() => anime.id, { onDelete: "cascade" }).notNull().primaryKey(),
+    animeId: integer("anime_id")
+      .references(() => anime.id, { onDelete: "cascade" })
+      .notNull()
+      .primaryKey(),
     rank: integer("rank").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },

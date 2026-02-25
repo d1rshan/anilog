@@ -24,8 +24,8 @@ export function UserCard({ user }: UserCardProps) {
   };
 
   return (
-    <div 
-      className="group relative flex cursor-pointer items-center gap-4 rounded-md border border-border/50 bg-card p-4 transition-all hover:border-foreground/20 hover:shadow-lg" 
+    <div
+      className="group relative flex cursor-pointer items-center gap-4 rounded-md border border-border/50 bg-card p-4 transition-all hover:border-foreground/20 hover:shadow-lg"
       onClick={handleNavigate}
     >
       <Avatar className="h-16 w-16 border-2 border-background shadow-sm ring-1 ring-border">
@@ -49,11 +49,9 @@ export function UserCard({ user }: UserCardProps) {
             <FollowButton userId={user.id} size="sm" />
           </div>
         </div>
-        
+
         {bio && (
-          <p className="mt-2 line-clamp-1 text-xs font-medium text-muted-foreground">
-            {bio}
-          </p>
+          <p className="mt-2 line-clamp-1 text-xs font-medium text-muted-foreground">{bio}</p>
         )}
       </div>
     </div>

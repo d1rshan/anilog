@@ -1,10 +1,6 @@
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
-import {
-  HydrationBoundary,
-  QueryClient,
-  dehydrate,
-} from "@tanstack/react-query";
+import { HydrationBoundary, QueryClient, dehydrate } from "@tanstack/react-query";
 
 import { getCurrentUser } from "@/features/auth/lib/server";
 import {
@@ -55,11 +51,7 @@ export const UserProfilePage = async ({ params }: UserProfilePageProps) => {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <UnifiedProfile
-        username={username}
-        userId={user.id}
-        isOwnProfile={isOwnProfile}
-      />
+      <UnifiedProfile username={username} userId={user.id} isOwnProfile={isOwnProfile} />
     </HydrationBoundary>
   );
 };

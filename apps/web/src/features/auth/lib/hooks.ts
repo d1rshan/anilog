@@ -27,10 +27,7 @@ interface UseRequireAuthOptions {
 }
 
 export function useRequireAuth(options: UseRequireAuthOptions = {}) {
-  const {
-    toastMessage = "Please sign in to continue",
-    onUnauthenticated,
-  } = options;
+  const { toastMessage = "Please sign in to continue", onUnauthenticated } = options;
   const auth = useAuth();
 
   const requireAuth = useCallback(() => {

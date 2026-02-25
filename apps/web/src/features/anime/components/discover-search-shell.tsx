@@ -112,7 +112,9 @@ export function DiscoverSearchShell() {
             <SearchResults query={normalizedQuery} />
           ) : (
             <div className="rounded-2xl border border-white/10 bg-black/45 p-8 text-center backdrop-blur-2xl md:p-12">
-              <p className="text-[10px] font-black uppercase tracking-[0.34em] text-white/45">Search Workspace</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.34em] text-white/45">
+                Search Workspace
+              </p>
               <p className="mt-3 text-sm font-semibold text-white/75 md:text-base">
                 Start typing at least 2 characters to see live results.
               </p>
@@ -129,7 +131,9 @@ export function DiscoverSearchShell() {
                   className="pointer-events-auto w-full rounded-xl border border-white/10 bg-black/55 p-3 shadow-2xl backdrop-blur-2xl md:p-4"
                 >
                   <div className="mb-3 flex items-center justify-between">
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">Live Search</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">
+                      Live Search
+                    </p>
                     <div className="flex items-center gap-2">
                       <Button
                         type="button"
@@ -158,7 +162,13 @@ export function DiscoverSearchShell() {
                     </div>
                   </div>
 
-                  <AnimeSearch value={query} onChange={handleSearchChange} placeholder="SEARCH ANIME..." autoFocus variant="dock" />
+                  <AnimeSearch
+                    value={query}
+                    onChange={handleSearchChange}
+                    placeholder="SEARCH ANIME..."
+                    autoFocus
+                    variant="dock"
+                  />
                 </div>
               </div>
             </div>,
