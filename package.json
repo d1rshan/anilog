@@ -19,6 +19,11 @@
     "prepare": "husky",
     "dev": "turbo dev",
     "build": "turbo build",
+    "test": "bunx turbo run quality check-types build",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
+    "format": "oxfmt --check .",
+    "format:fix": "oxfmt .",
     "check-types": "turbo check-types",
     "dev:native": "turbo -F native dev",
     "dev:web": "turbo -F web dev",
@@ -33,14 +38,21 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "turbo": "^2.6.3",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@types/bun": "catalog:",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
-    "typescript": "catalog:",
-    "@types/bun": "catalog:"
+    "oxfmt": "^0.35.0",
+    "oxlint": "^1.50.0",
+    "turbo": "^2.6.3",
+    "typescript": "catalog:"
   },
   "lint-staged": {
-    "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": ""
+    "*.{js,mjs,cjs,jsx,ts,mts,cts,tsx}": [
+      "oxfmt",
+      "oxlint --fix"
+    ]
   },
   "packageManager": "bun@1.2.23"
 }

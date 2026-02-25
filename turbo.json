@@ -2,6 +2,20 @@
 	"$schema": "https://turbo.build/schema.json",
 	"ui": "tui",
 	"tasks": {
+		"//#quality": {
+			"dependsOn": ["//#lint", "//#format"]
+		},
+		"//#quality:fix": {
+			"dependsOn": ["//#lint:fix", "//#format:fix"]
+		},
+		"//#lint": {},
+		"//#lint:fix": {
+			"cache": false
+		},
+		"//#format": {},
+		"//#format:fix": {
+			"cache": false
+		},
 		"build": {
 			"dependsOn": ["^build"],
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],

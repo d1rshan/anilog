@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Quality (lint + format)
+        run: bunx turbo run quality
+
       - name: Type check
         run: bun run check-types
 
