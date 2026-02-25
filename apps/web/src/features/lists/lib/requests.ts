@@ -1,121 +1,68 @@
 import { api } from "@/lib/api";
-import type { Anime, LibraryStatus, UserAnime } from "@anilog/db/schema/anilog";
+import { unwrapEdenResponse } from "@/lib/eden";
+import type {
+  LibraryEntryWithAnime,
+  LogAnimeInput,
+  UpdateProgressInput,
+  UpdateRatingInput,
+  UpdateStatusInput,
+} from "@anilog/api";
 
 export const LIBRARY_STATUSES = ["watching", "completed", "planned", "dropped"] as const;
 
-export type LibraryEntryWithAnime = UserAnime & {
-  anime: Pick<
-    Anime,
-    "id" | "title" | "titleJapanese" | "imageUrl" | "year" | "episodes" | "status"
-  >;
-};
-
-export type LogAnimeData = {
-  anime: Pick<
-    Anime,
-    | "id"
-    | "title"
-    | "titleJapanese"
-    | "description"
-    | "episodes"
-    | "status"
-    | "genres"
-    | "imageUrl"
-    | "year"
-    | "rating"
-  >;
-  status: LibraryStatus;
-  currentEpisode?: number;
-  rating?: number | null;
-};
+export type LogAnimeData = LogAnimeInput;
 
 export type UpdateLibraryStatusData = {
   animeId: number;
-  status: LibraryStatus;
-  currentEpisode?: number;
-};
+} & UpdateStatusInput;
 
 export type UpdateLibraryProgressData = {
   animeId: number;
-  currentEpisode?: number;
-  delta?: number;
-};
+} & UpdateProgressInput;
 
 export type UpdateLibraryRatingData = {
   animeId: number;
-  rating: number | null;
-};
+} & UpdateRatingInput;
 
-export async function getMyLibrary(): Promise<LibraryEntryWithAnime[]> {
+export async function getMyLibrary() {
   const res = await api.library.me.get();
-
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data;
+  return unwrapEdenResponse(res);
 }
 
-export async function logAnime(data: LogAnimeData): Promise<LibraryEntryWithAnime> {
+export async function logAnime(data: LogAnimeData) {
   const res = await api.library.me.log.post(data);
-
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data;
+  return unwrapEdenResponse(res);
 }
 
-export async function updateLibraryStatus(
-  data: UpdateLibraryStatusData,
-): Promise<LibraryEntryWithAnime> {
+export async function updateLibraryStatus(data: UpdateLibraryStatusData) {
   const res = await api.library.me({ animeId: data.animeId }).status.patch({
     status: data.status,
     currentEpisode: data.currentEpisode,
   });
 
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data;
+  return unwrapEdenResponse(res);
 }
 
-export async function updateLibraryProgress(
-  data: UpdateLibraryProgressData,
-): Promise<LibraryEntryWithAnime> {
+export async function updateLibraryProgress(data: UpdateLibraryProgressData) {
   const res = await api.library.me({ animeId: data.animeId }).progress.patch({
     currentEpisode: data.currentEpisode,
     delta: data.delta,
   });
 
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data;
+  return unwrapEdenResponse(res);
 }
 
-export async function updateLibraryRating(
-  data: UpdateLibraryRatingData,
-): Promise<LibraryEntryWithAnime> {
+export async function updateLibraryRating(data: UpdateLibraryRatingData) {
   const res = await api.library.me({ animeId: data.animeId }).rating.patch({
     rating: data.rating,
   });
 
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data;
+  return unwrapEdenResponse(res);
 }
 
-export async function removeFromLibrary(animeId: number): Promise<boolean> {
+export async function removeFromLibrary(animeId: number) {
   const res = await api.library.me({ animeId }).delete();
-
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data;
+  return unwrapEdenResponse(res);
 }
+
+export type { LibraryEntryWithAnime };

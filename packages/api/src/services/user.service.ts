@@ -1,63 +1,15 @@
 import { db } from "@anilog/db";
-import {
-  userFollow,
-  userProfile,
-  userAnime,
-  anime,
-  type LibraryStatus,
-} from "@anilog/db/schema/anilog";
+import { userFollow, userProfile, userAnime, anime } from "@anilog/db/schema/anilog";
 import { user } from "@anilog/db/schema/auth";
 import { eq, getTableColumns, count, and, ilike, asc, or } from "drizzle-orm";
 import type { UserProfile } from "@anilog/db/schema/anilog";
-
-export type ProfileData = {
-  bio?: string | null;
-  displayName?: string | null;
-  website?: string | null;
-  location?: string | null;
-  twitterUrl?: string | null;
-  discordUrl?: string | null;
-  githubUrl?: string | null;
-  instagramUrl?: string | null;
-  isPublic?: boolean;
-};
-
-export type UserWithProfile = {
-  id: string;
-  name: string;
-  username: string | null;
-  email: string;
-  isAdmin: boolean;
-  image: string | null;
-  profile: UserProfile | null;
-  followerCount: number;
-  followingCount: number;
-};
-
-export type AdminUserListResult = {
-  users: UserWithProfile[];
-  total: number;
-  limit: number;
-  offset: number;
-};
-
-export type PublicUserLibrary = {
-  id: string;
-  animeId: number;
-  status: LibraryStatus;
-  currentEpisode: number;
-  rating: number | null;
-  createdAt: Date;
-  anime: {
-    id: number;
-    title: string;
-    titleJapanese: string | null;
-    imageUrl: string;
-    year: number | null;
-    episodes: number | null;
-    status: string | null;
-  };
-}[];
+import type {
+  AdminUserListResult,
+  FollowActionResult,
+  ProfileData,
+  PublicUserLibrary,
+  UserWithProfile,
+} from "../contracts/users";
 
 export class UserService {
   static async createUserProfile(userId: string): Promise<UserProfile> {
@@ -176,10 +128,7 @@ export class UserService {
     return updatedProfile;
   }
 
-  static async followUser(
-    followerId: string,
-    followingId: string,
-  ): Promise<{ success: boolean; message: string }> {
+  static async followUser(followerId: string, followingId: string): Promise<FollowActionResult> {
     if (followerId === followingId) {
       throw new Error("Cannot follow yourself");
     }
@@ -206,10 +155,7 @@ export class UserService {
     }
   }
 
-  static async unfollowUser(
-    followerId: string,
-    followingId: string,
-  ): Promise<{ success: boolean; message: string }> {
+  static async unfollowUser(followerId: string, followingId: string): Promise<FollowActionResult> {
     const result = await db
       .delete(userFollow)
       .where(and(eq(userFollow.followerId, followerId), eq(userFollow.followingId, followingId)))

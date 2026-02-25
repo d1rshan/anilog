@@ -1,31 +1,7 @@
 import { db } from "@anilog/db";
-import { anime, userAnime, type Anime, type LibraryStatus } from "@anilog/db/schema/anilog";
+import { anime, userAnime, type LibraryStatus } from "@anilog/db/schema/anilog";
 import { and, asc, eq, getTableColumns } from "drizzle-orm";
-
-export type LibraryEntryWithAnime = typeof userAnime.$inferSelect & {
-  anime: Pick<
-    Anime,
-    "id" | "title" | "titleJapanese" | "imageUrl" | "year" | "episodes" | "status"
-  >;
-};
-
-export type LogAnimeInput = {
-  anime: {
-    id: number;
-    title: string;
-    titleJapanese?: string | null;
-    description?: string | null;
-    episodes?: number | null;
-    status?: string | null;
-    genres?: string[] | null;
-    imageUrl: string;
-    year?: number | null;
-    rating?: number | null;
-  };
-  status: LibraryStatus;
-  currentEpisode?: number;
-  rating?: number | null;
-};
+import type { LibraryEntryWithAnime, LogAnimeInput } from "../contracts/library";
 
 const STATUS_COMPLETION_BLOCKLIST = new Set(["RELEASING", "NOT_YET_RELEASED"]);
 
@@ -82,7 +58,7 @@ export class LibraryService {
       .where(eq(userAnime.userId, userId))
       .orderBy(asc(userAnime.createdAt));
 
-    return rows as LibraryEntryWithAnime[];
+    return rows;
   }
 
   private static async getLibraryEntry(
@@ -107,7 +83,7 @@ export class LibraryService {
       .where(and(eq(userAnime.userId, userId), eq(userAnime.animeId, animeId)))
       .limit(1);
 
-    return (result[0] as LibraryEntryWithAnime | undefined) ?? null;
+    return result[0] ?? null;
   }
 
   static async logAnime(userId: string, input: LogAnimeInput): Promise<LibraryEntryWithAnime> {

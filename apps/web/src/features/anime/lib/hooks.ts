@@ -3,6 +3,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import type { ApiClientError } from "@/lib/eden";
+import { getApiErrorMessage } from "@/lib/eden";
 
 import {
   archiveSearchQueryOptions,
@@ -66,8 +68,8 @@ export function useUpsertAnime() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: animeKeys.trending() });
     },
-    onError: (error) => {
-      toast.error(error.message || "Failed to add anime");
+    onError: (error: ApiClientError) => {
+      toast.error(getApiErrorMessage(error, "Failed to add anime"));
     },
   });
 }

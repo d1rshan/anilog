@@ -3,6 +3,7 @@ import { HydrationBoundary, QueryClient, dehydrate } from "@tanstack/react-query
 
 import { getCurrentUser } from "@/features/auth/lib/server";
 import { myLibraryQueryOptions, trendingAnimeQueryOptions } from "@/lib/query-options";
+
 import { DiscoverSearchShell } from "../components/discover-search-shell";
 
 export const HomePage = async () => {

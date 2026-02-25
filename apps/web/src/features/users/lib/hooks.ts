@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import type { ApiClientError } from "@/lib/eden";
+import { getApiErrorMessage } from "@/lib/eden";
 
 import {
   isFollowingQueryOptions,
@@ -70,8 +72,8 @@ export const useFollowUser = () => {
       queryClient.invalidateQueries({ queryKey: userKeys.following() });
       toast.success("Successfully followed user!");
     },
-    onError: (error) => {
-      toast.error(error.message);
+    onError: (error: ApiClientError) => {
+      toast.error(getApiErrorMessage(error, "Failed to follow user"));
     },
   });
 };
@@ -90,8 +92,8 @@ export const useUnfollowUser = () => {
       queryClient.invalidateQueries({ queryKey: userKeys.following() });
       toast.success("Successfully unfollowed user");
     },
-    onError: (error) => {
-      toast.error(error.message);
+    onError: (error: ApiClientError) => {
+      toast.error(getApiErrorMessage(error, "Failed to unfollow user"));
     },
   });
 };
@@ -122,8 +124,8 @@ export const useUpdateMyProfile = () => {
       queryClient.invalidateQueries({ queryKey: userKeys.searchRoot() });
       toast.success("Profile updated successfully!");
     },
-    onError: (error) => {
-      toast.error(error.message);
+    onError: (error: ApiClientError) => {
+      toast.error(getApiErrorMessage(error, "Failed to update profile"));
     },
   });
 };

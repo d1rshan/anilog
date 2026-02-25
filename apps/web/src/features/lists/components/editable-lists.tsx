@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ChevronUp, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnimeCard } from "@/features/anime/components/anime-card";
@@ -8,7 +8,8 @@ import { AddToListDialog } from "@/features/anime/components/add-to-list-dialog"
 import { AnimeStackPreview } from "./anime-stack-preview";
 import { useMyLibrary, groupLibraryByStatus } from "../lib/hooks";
 import { LIBRARY_STATUSES, type LibraryEntryWithAnime } from "../lib/requests";
-import type { LibraryStatus, Anime } from "@anilog/db/schema/anilog";
+import type { LogAnimeInput } from "@anilog/api";
+import type { LibraryStatus } from "@anilog/db/schema/anilog";
 
 const STATUS_LABELS: Record<LibraryStatus, string> = {
   watching: "Watching",
@@ -19,7 +20,7 @@ const STATUS_LABELS: Record<LibraryStatus, string> = {
 
 type DialogState = {
   isOpen: boolean;
-  anime: Anime | null;
+  anime: LogAnimeInput["anime"] | null;
   initialStatus?: LibraryStatus;
   entry?: LibraryEntryWithAnime | null;
 };
@@ -47,7 +48,7 @@ export function EditableLists() {
   const openEditor = (entry: LibraryEntryWithAnime) => {
     setDialog({
       isOpen: true,
-      anime: entry.anime as unknown as Anime,
+      anime: entry.anime,
       entry: entry,
       initialStatus: entry.status,
     });

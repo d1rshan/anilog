@@ -1,19 +1,14 @@
 import { Elysia, t } from "elysia";
 import { LibraryService } from "@anilog/api";
 import { auth } from "@anilog/auth";
-
-type LogAnimeInput = Parameters<typeof LibraryService.logAnime>[1];
-
-type UpdateStatusInput = {
-  status: Parameters<typeof LibraryService.updateStatus>[2];
-  currentEpisode?: Parameters<typeof LibraryService.updateStatus>[3];
-};
-
-type UpdateProgressInput = Parameters<typeof LibraryService.updateProgress>[2];
-
-type UpdateRatingInput = {
-  rating: Parameters<typeof LibraryService.updateRating>[2];
-};
+import {
+  errorResponseSchema,
+  libraryEntrySchema,
+  logAnimeInputSchema,
+  updateProgressInputSchema,
+  updateRatingInputSchema,
+  updateStatusInputSchema,
+} from "./schemas";
 
 const authMiddleware = (app: Elysia) =>
   app.derive(async ({ request }) => {
@@ -24,98 +19,83 @@ const authMiddleware = (app: Elysia) =>
     return { userId: session.user.id };
   });
 
-const libraryStatus = t.Union([
-  t.Literal("watching"),
-  t.Literal("completed"),
-  t.Literal("planned"),
-  t.Literal("dropped"),
-]);
-
 export const libraryRoutes = new Elysia({ prefix: "/library" })
   .use(authMiddleware)
-  .get("/me", async ({ userId }) => {
-    return await LibraryService.getUserLibrary(userId);
-  })
+  .get(
+    "/me",
+    async ({ userId }) => {
+      return LibraryService.getUserLibrary(userId);
+    },
+    {
+      response: {
+        200: t.Array(libraryEntrySchema),
+      },
+    },
+  )
   .post(
     "/me/log",
     async ({ userId, body }) => {
-      return await LibraryService.logAnime(userId, body as LogAnimeInput);
+      return LibraryService.logAnime(userId, body);
     },
     {
-      body: t.Object({
-        anime: t.Object({
-          id: t.Integer(),
-          title: t.String(),
-          titleJapanese: t.Optional(t.Nullable(t.String())),
-          description: t.Optional(t.Nullable(t.String())),
-          episodes: t.Optional(t.Nullable(t.Integer())),
-          status: t.Optional(t.Nullable(t.String())),
-          genres: t.Optional(t.Nullable(t.Array(t.String()))),
-          imageUrl: t.String(),
-          year: t.Optional(t.Nullable(t.Integer())),
-          rating: t.Optional(t.Nullable(t.Integer())),
-        }),
-        status: libraryStatus,
-        currentEpisode: t.Optional(t.Integer({ minimum: 0 })),
-        rating: t.Optional(t.Nullable(t.Integer({ minimum: 1, maximum: 5 }))),
-      }),
+      body: logAnimeInputSchema,
+      response: {
+        200: libraryEntrySchema,
+        400: errorResponseSchema,
+      },
     },
   )
   .patch(
     "/me/:animeId/status",
     async ({ userId, params, body }) => {
-      const payload = body as UpdateStatusInput;
-      return await LibraryService.updateStatus(
-        userId,
-        Number(params.animeId),
-        payload.status,
-        payload.currentEpisode,
-      );
+      return LibraryService.updateStatus(userId, params.animeId, body.status, body.currentEpisode);
     },
     {
       params: t.Object({ animeId: t.Integer() }),
-      body: t.Object({
-        status: libraryStatus,
-        currentEpisode: t.Optional(t.Integer({ minimum: 0 })),
-      }),
+      body: updateStatusInputSchema,
+      response: {
+        200: libraryEntrySchema,
+        400: errorResponseSchema,
+      },
     },
   )
   .patch(
     "/me/:animeId/progress",
     async ({ userId, params, body }) => {
-      return await LibraryService.updateProgress(
-        userId,
-        Number(params.animeId),
-        body as UpdateProgressInput,
-      );
+      return LibraryService.updateProgress(userId, params.animeId, body);
     },
     {
       params: t.Object({ animeId: t.Integer() }),
-      body: t.Object({
-        currentEpisode: t.Optional(t.Integer({ minimum: 1 })),
-        delta: t.Optional(t.Integer()),
-      }),
+      body: updateProgressInputSchema,
+      response: {
+        200: libraryEntrySchema,
+        400: errorResponseSchema,
+      },
     },
   )
   .patch(
     "/me/:animeId/rating",
     async ({ userId, params, body }) => {
-      const payload = body as UpdateRatingInput;
-      return await LibraryService.updateRating(userId, Number(params.animeId), payload.rating);
+      return LibraryService.updateRating(userId, params.animeId, body.rating);
     },
     {
       params: t.Object({ animeId: t.Integer() }),
-      body: t.Object({
-        rating: t.Nullable(t.Integer({ minimum: 1, maximum: 5 })),
-      }),
+      body: updateRatingInputSchema,
+      response: {
+        200: libraryEntrySchema,
+        400: errorResponseSchema,
+      },
     },
   )
   .delete(
     "/me/:animeId",
     async ({ userId, params }) => {
-      return await LibraryService.removeFromLibrary(userId, Number(params.animeId));
+      return LibraryService.removeFromLibrary(userId, params.animeId);
     },
     {
       params: t.Object({ animeId: t.Integer() }),
+      response: {
+        200: t.Boolean(),
+      },
     },
   );

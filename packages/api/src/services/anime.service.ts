@@ -1,6 +1,7 @@
 import { db } from "@anilog/db";
 import { anime, heroCuration, trendingAnime, userAnime } from "@anilog/db/schema/anilog";
 import { and, asc, desc, eq, getTableColumns, ilike, notInArray, or } from "drizzle-orm";
+import type { HeroCurationUpdateInput, SyncResult, UpsertAnimeInput } from "../contracts/anime";
 
 const ANILIST_API = "https://graphql.anilist.co";
 const SEARCH_CACHE_TTL_MS = 30_000;
@@ -20,16 +21,16 @@ const archiveSearchCache = new Map<string, SearchCacheValue>();
 const anilistSearchCache = new Map<string, AniListCacheValue>();
 
 type AniListMedia = {
-  id: number;
-  title: { english: string | null; native: string | null };
-  description: string | null;
-  episodes: number | null;
-  status: string | null;
-  genres: string[];
-  coverImage: { extraLarge: string; large: string };
-  bannerImage: string | null;
-  seasonYear: number | null;
-  averageScore: number | null;
+  id?: number;
+  title?: { english?: string | null; native?: string | null };
+  description?: string | null;
+  episodes?: number | null;
+  status?: string | null;
+  genres?: string[] | null;
+  coverImage?: { extraLarge?: string | null; large?: string | null } | null;
+  bannerImage?: string | null;
+  seasonYear?: number | null;
+  averageScore?: number | null;
 };
 
 type AniListPageResponse = {
@@ -38,7 +39,33 @@ type AniListPageResponse = {
       media?: AniListMedia[];
     };
   };
+  errors?: Array<{ message?: string }>;
 };
+
+function mapAniListMediaToAnime(media: AniListMedia) {
+  if (typeof media.id !== "number") {
+    return null;
+  }
+
+  const fallbackTitle = media.title?.native ?? "Unknown";
+  const englishTitle = media.title?.english;
+
+  return {
+    id: media.id,
+    title: englishTitle ?? fallbackTitle,
+    titleJapanese: media.title?.native ?? null,
+    description: media.description ?? null,
+    episodes: media.episodes ?? null,
+    status: media.status ?? null,
+    genres: media.genres ?? [],
+    imageUrl: media.coverImage?.extraLarge ?? media.coverImage?.large ?? "",
+    bannerImage: media.bannerImage ?? null,
+    year: media.seasonYear ?? null,
+    rating: media.averageScore ?? null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+}
 
 export class AnimeService {
   static async getHeroCurationsForAdmin() {
@@ -60,20 +87,7 @@ export class AnimeService {
       .orderBy(asc(heroCuration.sortOrder), asc(heroCuration.id));
   }
 
-  static async updateHeroCuration(
-    id: number,
-    payload: {
-      videoId: string;
-      start: number;
-      stop: number;
-      title: string;
-      subtitle: string;
-      description: string;
-      tag: string;
-      sortOrder: number;
-      isActive: boolean;
-    },
-  ) {
+  static async updateHeroCuration(id: number, payload: HeroCurationUpdateInput) {
     if (payload.start < 0) {
       throw new Error("Start timestamp must be zero or greater");
     }
@@ -250,7 +264,7 @@ export class AnimeService {
     return value;
   }
 
-  static async syncAllAnime(): Promise<{ success: boolean; count: number }> {
+  static async syncAllAnime(): Promise<SyncResult> {
     const allAnime = await db.select({ id: anime.id }).from(anime);
     const ids = allAnime.map((a) => a.id);
 
@@ -293,20 +307,21 @@ export class AnimeService {
 
       if (!mediaList) continue;
 
-      const animeInserts = mediaList.map((media) => ({
-        id: media.id,
-        title: media.title.english ?? media.title.native ?? "UNKNOWN",
-        titleJapanese: media.title.native,
-        description: media.description,
-        episodes: media.episodes,
-        status: media.status,
-        genres: media.genres,
-        imageUrl: media.coverImage?.extraLarge ?? media.coverImage?.large,
-        bannerImage: media.bannerImage,
-        year: media.seasonYear,
-        rating: media.averageScore,
-        updatedAt: new Date(),
-      }));
+      const mappedAnime = mediaList.map((media) => {
+        const mapped = mapAniListMediaToAnime(media);
+        if (!mapped || !mapped.imageUrl) {
+          return null;
+        }
+        return {
+          ...mapped,
+          title: mapped.title || "UNKNOWN",
+          updatedAt: new Date(),
+        };
+      });
+
+      const animeInserts = mappedAnime.filter((item): item is NonNullable<typeof item> =>
+        Boolean(item),
+      );
 
       for (const item of animeInserts) {
         await db.insert(anime).values(item).onConflictDoUpdate({
@@ -321,7 +336,7 @@ export class AnimeService {
     return { success: true, count };
   }
 
-  static async syncTrendingAnime(): Promise<{ success: boolean; count: number }> {
+  static async syncTrendingAnime(): Promise<SyncResult> {
     const query = `
       query TrendingAnime {
         Page(page: 1, perPage: 100) {
@@ -385,19 +400,13 @@ export class AnimeService {
 
     const json = (await res.json()) as TrendingAnimeResponse;
 
-    const animeInserts = json.data.Page.media.map((media) => ({
-      id: media.id,
-      title: media.title.english ?? media.title.native ?? "UNKNOWN",
-      titleJapanese: media.title.native,
-      description: media.description,
-      episodes: media.episodes,
-      status: media.status,
-      genres: media.genres,
-      imageUrl: media.coverImage?.extraLarge ?? media.coverImage?.large,
-      bannerImage: media.bannerImage,
-      year: media.seasonYear,
-      rating: media.averageScore,
-    }));
+    const animeInserts = json.data.Page.media
+      .map((media) => mapAniListMediaToAnime(media))
+      .filter((item): item is NonNullable<typeof item> => Boolean(item && item.imageUrl))
+      .map((item) => ({
+        ...item,
+        title: item.title || "UNKNOWN",
+      }));
 
     // Upsert anime data
     await db
@@ -484,26 +493,16 @@ export class AnimeService {
         }),
       });
 
-      const json: any = await res.json();
+      const json = (await res.json()) as AniListPageResponse;
 
-      if (json.errors) {
-        throw new Error(json.errors[0].message);
+      if (json.errors?.length) {
+        throw new Error(json.errors[0]?.message ?? "AniList returned an error");
       }
 
-      // Transform AniList response to match Anime type
-      const result = json.data.Page.media.map((media: any) => ({
-        id: media.id,
-        title: media.title.english ?? media.title.native ?? "Unknown",
-        titleJapanese: media.title.native,
-        description: media.description,
-        episodes: media.episodes,
-        status: media.status,
-        genres: media.genres,
-        imageUrl: media.coverImage?.extraLarge ?? media.coverImage?.large,
-        bannerImage: media.bannerImage,
-        year: media.seasonYear,
-        rating: media.averageScore,
-      }));
+      const media = json.data?.Page?.media ?? [];
+      const result = media
+        .map((entry) => mapAniListMediaToAnime(entry))
+        .filter((item): item is NonNullable<typeof item> => Boolean(item && item.imageUrl));
 
       anilistSearchCache.set(normalizedQuery, {
         expiresAt: Date.now() + ANILIST_CACHE_TTL_MS,
@@ -516,19 +515,7 @@ export class AnimeService {
     }
   }
 
-  static async upsertAnime(animeData: {
-    id: number;
-    title: string;
-    titleJapanese?: string | null;
-    description?: string | null;
-    episodes?: number | null;
-    status?: string | null;
-    genres?: string[] | null;
-    imageUrl: string;
-    bannerImage?: string | null;
-    year?: number | null;
-    rating?: number | null;
-  }) {
+  static async upsertAnime(animeData: UpsertAnimeInput) {
     try {
       await db
         .insert(anime)

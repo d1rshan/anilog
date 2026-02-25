@@ -1,6 +1,15 @@
 import { Elysia, t } from "elysia";
 import { AnimeService, UserService } from "@anilog/api";
 import { auth } from "@anilog/auth";
+import {
+  adminStatsSchema,
+  adminUsersResultSchema,
+  errorResponseSchema,
+  heroCurationSchema,
+  setAdminStatusInputSchema,
+  setAdminStatusResultSchema,
+  updateHeroCurationInputSchema,
+} from "./schemas";
 
 type RouteSet = { status?: number | string };
 
@@ -21,13 +30,23 @@ async function requireAdmin(request: Request, set: RouteSet) {
 }
 
 export const adminRoutes = new Elysia({ prefix: "/admin" })
-  .get("/stats", async ({ request, set }) => {
-    const admin = await requireAdmin(request, set);
-    if (!admin) {
-      return { error: "Forbidden" };
-    }
-    return UserService.getAdminStats();
-  })
+  .get(
+    "/stats",
+    async ({ request, set }) => {
+      const admin = await requireAdmin(request, set);
+      if (!admin) {
+        return { error: "Forbidden" };
+      }
+      return UserService.getAdminStats();
+    },
+    {
+      response: {
+        200: adminStatsSchema,
+        401: errorResponseSchema,
+        403: errorResponseSchema,
+      },
+    },
+  )
   .get(
     "/users",
     async ({ request, set, query }) => {
@@ -48,6 +67,11 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
         limit: t.Optional(t.Integer({ minimum: 1, maximum: 100 })),
         offset: t.Optional(t.Integer({ minimum: 0 })),
       }),
+      response: {
+        200: adminUsersResultSchema,
+        401: errorResponseSchema,
+        403: errorResponseSchema,
+      },
     },
   )
   .patch(
@@ -72,22 +96,36 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
       }
     },
     {
-      params: t.Object({
-        id: t.String(),
-      }),
-      body: t.Object({
-        isAdmin: t.Boolean(),
-      }),
+      params: t.Object({ id: t.String() }),
+      body: setAdminStatusInputSchema,
+      response: {
+        200: setAdminStatusResultSchema,
+        400: errorResponseSchema,
+        401: errorResponseSchema,
+        403: errorResponseSchema,
+        404: errorResponseSchema,
+        500: errorResponseSchema,
+      },
     },
   )
-  .get("/hero-curations", async ({ request, set }) => {
-    const admin = await requireAdmin(request, set);
-    if (!admin) {
-      return { error: "Forbidden" };
-    }
+  .get(
+    "/hero-curations",
+    async ({ request, set }) => {
+      const admin = await requireAdmin(request, set);
+      if (!admin) {
+        return { error: "Forbidden" };
+      }
 
-    return AnimeService.getHeroCurationsForAdmin();
-  })
+      return AnimeService.getHeroCurationsForAdmin();
+    },
+    {
+      response: {
+        200: t.Array(heroCurationSchema),
+        401: errorResponseSchema,
+        403: errorResponseSchema,
+      },
+    },
+  )
   .patch(
     "/hero-curations/:id",
     async ({ request, params, body, set }) => {
@@ -112,19 +150,15 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
       }
     },
     {
-      params: t.Object({
-        id: t.Numeric(),
-      }),
-      body: t.Object({
-        videoId: t.String(),
-        start: t.Integer({ minimum: 0 }),
-        stop: t.Integer({ minimum: 1 }),
-        title: t.String(),
-        subtitle: t.String(),
-        description: t.String(),
-        tag: t.String(),
-        sortOrder: t.Integer({ minimum: 0 }),
-        isActive: t.Boolean(),
-      }),
+      params: t.Object({ id: t.Numeric() }),
+      body: updateHeroCurationInputSchema,
+      response: {
+        200: heroCurationSchema,
+        400: errorResponseSchema,
+        401: errorResponseSchema,
+        403: errorResponseSchema,
+        404: errorResponseSchema,
+        500: errorResponseSchema,
+      },
     },
   );
