@@ -38,22 +38,23 @@ export const SignUpForm = ({
         username: value.username,
       };
 
-      await authClient.signUp.email(
-        payload,
-        {
-          onSuccess: () => {
-            router.push(redirectPath);
-            toast.success("Sign up successful");
-          },
-          onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
-          },
+      await authClient.signUp.email(payload, {
+        onSuccess: () => {
+          router.push(redirectPath);
+          toast.success("Sign up successful");
         },
-      );
+        onError: (error) => {
+          toast.error(error.error.message || error.error.statusText);
+        },
+      });
     },
     validators: {
       onSubmit: z.object({
-        username: z.string().min(3, "Username must be at least 3 characters").max(20, "Username must be at most 20 characters").regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
+        username: z
+          .string()
+          .min(3, "Username must be at least 3 characters")
+          .max(20, "Username must be at most 20 characters")
+          .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
         email: z.email("Invalid email address"),
         password: z.string().min(8, "Password must be at least 8 characters"),
       }),
@@ -85,7 +86,10 @@ export const SignUpForm = ({
           <form.Field name="username">
             {(field) => (
               <div className="grid gap-1.5">
-                <Label htmlFor={field.name} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                <Label
+                  htmlFor={field.name}
+                  className="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
+                >
                   Username
                 </Label>
                 <Input
@@ -98,7 +102,10 @@ export const SignUpForm = ({
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
                 {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-[10px] font-bold uppercase text-destructive">
+                  <p
+                    key={error?.message}
+                    className="text-[10px] font-bold uppercase text-destructive"
+                  >
                     {error?.message}
                   </p>
                 ))}
@@ -109,7 +116,10 @@ export const SignUpForm = ({
           <form.Field name="email">
             {(field) => (
               <div className="grid gap-1.5">
-                <Label htmlFor={field.name} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                <Label
+                  htmlFor={field.name}
+                  className="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
+                >
                   Email
                 </Label>
                 <Input
@@ -123,7 +133,10 @@ export const SignUpForm = ({
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
                 {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-[10px] font-bold uppercase text-destructive">
+                  <p
+                    key={error?.message}
+                    className="text-[10px] font-bold uppercase text-destructive"
+                  >
                     {error?.message}
                   </p>
                 ))}
@@ -134,7 +147,10 @@ export const SignUpForm = ({
           <form.Field name="password">
             {(field) => (
               <div className="grid gap-1.5">
-                <Label htmlFor={field.name} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                <Label
+                  htmlFor={field.name}
+                  className="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
+                >
                   Password
                 </Label>
                 <Input
@@ -147,7 +163,10 @@ export const SignUpForm = ({
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
                 {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-[10px] font-bold uppercase text-destructive">
+                  <p
+                    key={error?.message}
+                    className="text-[10px] font-bold uppercase text-destructive"
+                  >
                     {error?.message}
                   </p>
                 ))}

@@ -58,7 +58,13 @@ function allowedStatusesForAnime(animeStatus?: string | null): LibraryStatus[] {
   return [...LIBRARY_STATUSES];
 }
 
-export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialStatus }: AddToListDialogProps) {
+export function AddToListDialog({
+  anime,
+  entry,
+  isOpen,
+  onOpenChange,
+  initialStatus,
+}: AddToListDialogProps) {
   const logAnime = useLogAnime();
   const removeAnime = useRemoveFromLibrary();
 
@@ -210,62 +216,67 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
             "sm:max-h-[88svh] sm:rounded-2xl",
           )}
         >
-        <div className="relative border-b border-white/10 px-5 pb-4 pt-3 sm:px-8 sm:pb-6 sm:pt-6">
-          <div className="mx-auto mb-3 h-1.5 w-14 rounded-full bg-white/20 sm:hidden" />
-          <CustomDialogHeader className="space-y-2 text-left">
-            <p className="text-[10px] font-black uppercase tracking-[0.32em] text-white/40">
-              Archive Console
-            </p>
-            <CustomDialogTitle className="pr-9 font-display text-2xl font-black uppercase leading-[0.9] tracking-tight text-white sm:text-4xl">
-              {title}
-            </CustomDialogTitle>
-          </CustomDialogHeader>
-        </div>
-
-        <div className="flex flex-1 flex-col overflow-hidden px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-5 sm:px-8 sm:pb-7 sm:pt-6">
-          <div className="mb-5 grid grid-cols-2 gap-2.5 sm:mb-6 sm:grid-cols-4">
-            {allowedStatuses.map((item) => {
-              const selected = status === item;
-              const Icon = STATUS_CONFIG[item].icon;
-
-              return (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => handleStatusChange(item)}
-                  className={cn(
-                    "relative isolate overflow-hidden rounded-xl border px-3 py-3 transition-all active:scale-[0.99]",
-                    selected
-                      ? "border-white/35 bg-white text-black"
-                      : "border-white/10 bg-white/5 text-white/75 hover:border-white/20 hover:bg-white/10",
-                  )}
-                >
-                  <span className="flex items-center justify-center gap-2.5">
-                    <Icon className={cn("h-4 w-4", selected ? "text-black" : "text-white/55")} />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">
-                      {STATUS_CONFIG[item].label}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
+          <div className="relative border-b border-white/10 px-5 pb-4 pt-3 sm:px-8 sm:pb-6 sm:pt-6">
+            <div className="mx-auto mb-3 h-1.5 w-14 rounded-full bg-white/20 sm:hidden" />
+            <CustomDialogHeader className="space-y-2 text-left">
+              <p className="text-[10px] font-black uppercase tracking-[0.32em] text-white/40">
+                Archive Console
+              </p>
+              <CustomDialogTitle className="pr-9 font-display text-2xl font-black uppercase leading-[0.9] tracking-tight text-white sm:text-4xl">
+                {title}
+              </CustomDialogTitle>
+            </CustomDialogHeader>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
-            {isPlanned ? (
-              <div className="space-y-4">
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">Watchlist Mode</p>
-                  <p className="mt-3 text-sm font-semibold text-white/85">
-                    Save this title to your watchlist now. You can switch to watching or completed later.
-                  </p>
+          <div className="flex flex-1 flex-col overflow-hidden px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-5 sm:px-8 sm:pb-7 sm:pt-6">
+            <div className="mb-5 grid grid-cols-2 gap-2.5 sm:mb-6 sm:grid-cols-4">
+              {allowedStatuses.map((item) => {
+                const selected = status === item;
+                const Icon = STATUS_CONFIG[item].icon;
+
+                return (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => handleStatusChange(item)}
+                    className={cn(
+                      "relative isolate overflow-hidden rounded-xl border px-3 py-3 transition-all active:scale-[0.99]",
+                      selected
+                        ? "border-white/35 bg-white text-black"
+                        : "border-white/10 bg-white/5 text-white/75 hover:border-white/20 hover:bg-white/10",
+                    )}
+                  >
+                    <span className="flex items-center justify-center gap-2.5">
+                      <Icon className={cn("h-4 w-4", selected ? "text-black" : "text-white/55")} />
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                        {STATUS_CONFIG[item].label}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
+              {isPlanned ? (
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">
+                      Watchlist Mode
+                    </p>
+                    <p className="mt-3 text-sm font-semibold text-white/85">
+                      Save this title to your watchlist now. You can switch to watching or completed
+                      later.
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5">
+              ) : (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5">
                     <div className="mb-4 flex items-center justify-between">
-                      <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">Progress</Label>
+                      <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">
+                        Progress
+                      </Label>
                       {maxEpisodes && (
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/35">
                           {currentEpisode}/{maxEpisodes}
@@ -352,39 +363,43 @@ export function AddToListDialog({ anime, entry, isOpen, onOpenChange, initialSta
                     </div>
                   </div>
                 </div>
-            )}
-          </div>
+              )}
+            </div>
 
-          <div className="mt-5 flex flex-col gap-3 border-t border-white/10 pt-4 sm:mt-6 sm:flex-row sm:items-center sm:justify-between">
-            {entry ? (
-              <button
-                onClick={handleRemove}
-                disabled={removeAnime.isPending}
-                className={cn(
-                  "group inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] transition-colors",
-                  removeAnime.isPending
-                    ? "cursor-not-allowed text-white/25"
-                    : "text-white/38 hover:text-rose-400",
-                )}
+            <div className="mt-5 flex flex-col gap-3 border-t border-white/10 pt-4 sm:mt-6 sm:flex-row sm:items-center sm:justify-between">
+              {entry ? (
+                <button
+                  onClick={handleRemove}
+                  disabled={removeAnime.isPending}
+                  className={cn(
+                    "group inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] transition-colors",
+                    removeAnime.isPending
+                      ? "cursor-not-allowed text-white/25"
+                      : "text-white/38 hover:text-rose-400",
+                  )}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>{removeAnime.isPending ? "Removing..." : "Remove Entry"}</span>
+                </button>
+              ) : (
+                <span className="hidden sm:inline-block" />
+              )}
+
+              <Button
+                size="lg"
+                className="h-12 w-full rounded-full border border-white/20 bg-white px-6 text-[11px] font-black uppercase tracking-[0.24em] text-black transition-all hover:scale-[1.01] hover:bg-white active:scale-95 sm:w-auto"
+                onClick={handleSubmit}
+                disabled={logAnime.isPending}
               >
-                <Trash2 className="h-3.5 w-3.5" />
-                <span>{removeAnime.isPending ? "Removing..." : "Remove Entry"}</span>
-              </button>
-            ) : (
-              <span className="hidden sm:inline-block" />
-            )}
-
-            <Button
-              size="lg"
-              className="h-12 w-full rounded-full border border-white/20 bg-white px-6 text-[11px] font-black uppercase tracking-[0.24em] text-black transition-all hover:scale-[1.01] hover:bg-white active:scale-95 sm:w-auto"
-              onClick={handleSubmit}
-              disabled={logAnime.isPending}
-            >
-              {logAnime.isPending ? "Saving..." : isPlanned ? "Save to Watchlist" : "Save Changes"}
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </Button>
+                {logAnime.isPending
+                  ? "Saving..."
+                  : isPlanned
+                    ? "Save to Watchlist"
+                    : "Save Changes"}
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
           </div>
-        </div>
         </motion.div>
       </CustomDialogContent>
     </CustomDialog>

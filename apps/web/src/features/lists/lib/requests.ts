@@ -4,13 +4,25 @@ import type { Anime, LibraryStatus, UserAnime } from "@anilog/db/schema/anilog";
 export const LIBRARY_STATUSES = ["watching", "completed", "planned", "dropped"] as const;
 
 export type LibraryEntryWithAnime = UserAnime & {
-  anime: Pick<Anime, "id" | "title" | "titleJapanese" | "imageUrl" | "year" | "episodes" | "status">;
+  anime: Pick<
+    Anime,
+    "id" | "title" | "titleJapanese" | "imageUrl" | "year" | "episodes" | "status"
+  >;
 };
 
 export type LogAnimeData = {
   anime: Pick<
     Anime,
-    "id" | "title" | "titleJapanese" | "description" | "episodes" | "status" | "genres" | "imageUrl" | "year" | "rating"
+    | "id"
+    | "title"
+    | "titleJapanese"
+    | "description"
+    | "episodes"
+    | "status"
+    | "genres"
+    | "imageUrl"
+    | "year"
+    | "rating"
   >;
   status: LibraryStatus;
   currentEpisode?: number;
@@ -54,7 +66,9 @@ export async function logAnime(data: LogAnimeData): Promise<LibraryEntryWithAnim
   return res.data;
 }
 
-export async function updateLibraryStatus(data: UpdateLibraryStatusData): Promise<LibraryEntryWithAnime> {
+export async function updateLibraryStatus(
+  data: UpdateLibraryStatusData,
+): Promise<LibraryEntryWithAnime> {
   const res = await api.library.me({ animeId: data.animeId }).status.patch({
     status: data.status,
     currentEpisode: data.currentEpisode,
@@ -67,7 +81,9 @@ export async function updateLibraryStatus(data: UpdateLibraryStatusData): Promis
   return res.data;
 }
 
-export async function updateLibraryProgress(data: UpdateLibraryProgressData): Promise<LibraryEntryWithAnime> {
+export async function updateLibraryProgress(
+  data: UpdateLibraryProgressData,
+): Promise<LibraryEntryWithAnime> {
   const res = await api.library.me({ animeId: data.animeId }).progress.patch({
     currentEpisode: data.currentEpisode,
     delta: data.delta,
@@ -80,7 +96,9 @@ export async function updateLibraryProgress(data: UpdateLibraryProgressData): Pr
   return res.data;
 }
 
-export async function updateLibraryRating(data: UpdateLibraryRatingData): Promise<LibraryEntryWithAnime> {
+export async function updateLibraryRating(
+  data: UpdateLibraryRatingData,
+): Promise<LibraryEntryWithAnime> {
   const res = await api.library.me({ animeId: data.animeId }).rating.patch({
     rating: data.rating,
   });

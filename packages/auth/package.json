@@ -1,5 +1,6 @@
 {
   "name": "@anilog/auth",
+  "type": "module",
   "exports": {
     ".": {
       "default": "./src/index.ts"
@@ -8,17 +9,16 @@
       "default": "./src/*.ts"
     }
   },
-  "type": "module",
   "scripts": {},
-  "devDependencies": {
-    "typescript": "catalog:",
-    "@anilog/config": "workspace:*"
-  },
   "dependencies": {
+    "@anilog/api": "workspace:*",
+    "@anilog/db": "workspace:*",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
-    "zod": "catalog:",
-    "@anilog/db": "workspace:*",
-    "@anilog/api": "workspace:*"
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@anilog/config": "workspace:*",
+    "typescript": "catalog:"
   }
 }

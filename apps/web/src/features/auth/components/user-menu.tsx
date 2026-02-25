@@ -27,9 +27,9 @@ export const UserMenu = () => {
           <User className="h-4 w-4 text-muted-foreground" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        className="w-56 border border-white/10 bg-black/80 p-2 shadow-2xl backdrop-blur-2xl rounded-lg md:w-64" 
-        align="end" 
+      <DropdownMenuContent
+        className="w-56 border border-white/10 bg-black/80 p-2 shadow-2xl backdrop-blur-2xl rounded-lg md:w-64"
+        align="end"
         sideOffset={16}
       >
         <div className="px-3 py-4">
@@ -38,8 +38,12 @@ export const UserMenu = () => {
               <User className="h-5 w-5 text-muted-foreground" />
             </div>
             <div className="flex flex-col min-w-0">
-              <p className="truncate text-[10px] font-black uppercase tracking-tight">{user.name}</p>
-              <p className="truncate text-[10px] font-bold text-muted-foreground/60">{user.email}</p>
+              <p className="truncate text-[10px] font-black uppercase tracking-tight">
+                {user.name}
+              </p>
+              <p className="truncate text-[10px] font-bold text-muted-foreground/60">
+                {user.email}
+              </p>
             </div>
           </div>
         </div>
@@ -52,9 +56,7 @@ export const UserMenu = () => {
             <Shield className="mr-2 h-3.5 w-3.5" />
             Profile Archive
           </DropdownMenuItem>
-          <DropdownMenuItem
-            className="cursor-pointer rounded-xl py-2 px-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground focus:bg-white/5 focus:text-foreground transition-colors"
-          >
+          <DropdownMenuItem className="cursor-pointer rounded-xl py-2 px-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground focus:bg-white/5 focus:text-foreground transition-colors">
             <Settings className="mr-2 h-3.5 w-3.5" />
             Settings
           </DropdownMenuItem>

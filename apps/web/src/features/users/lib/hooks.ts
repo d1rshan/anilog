@@ -62,12 +62,8 @@ export const useFollowUser = () => {
     mutationFn: followUser,
     onSuccess: (_, userId) => {
       queryClient.setQueryData(userKeys.isFollowing(userId), { isFollowing: true });
-      queryClient.setQueryData<UserWithProfile>(
-        userKeys.profile(userId),
-        (current) =>
-          current
-            ? { ...current, followerCount: current.followerCount + 1 }
-            : current,
+      queryClient.setQueryData<UserWithProfile>(userKeys.profile(userId), (current) =>
+        current ? { ...current, followerCount: current.followerCount + 1 } : current,
       );
 
       queryClient.invalidateQueries({ queryKey: userKeys.byUsernameRoot() });
@@ -86,12 +82,8 @@ export const useUnfollowUser = () => {
     mutationFn: unfollowUser,
     onSuccess: (_, userId) => {
       queryClient.setQueryData(userKeys.isFollowing(userId), { isFollowing: false });
-      queryClient.setQueryData<UserWithProfile>(
-        userKeys.profile(userId),
-        (current) =>
-          current
-            ? { ...current, followerCount: Math.max(0, current.followerCount - 1) }
-            : current,
+      queryClient.setQueryData<UserWithProfile>(userKeys.profile(userId), (current) =>
+        current ? { ...current, followerCount: Math.max(0, current.followerCount - 1) } : current,
       );
 
       queryClient.invalidateQueries({ queryKey: userKeys.byUsernameRoot() });

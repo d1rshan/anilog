@@ -1,11 +1,12 @@
 import { queryOptions } from "@tanstack/react-query";
 
+import { getAdminHeroCurations, getAdminStats, getAdminUsers } from "@/features/admin/lib/requests";
 import {
-  getAdminHeroCurations,
-  getAdminStats,
-  getAdminUsers,
-} from "@/features/admin/lib/requests";
-import { getHeroCurations, getTrendingAnime, searchAnime, searchArchive } from "@/features/anime/lib/requests";
+  getHeroCurations,
+  getTrendingAnime,
+  searchAnime,
+  searchArchive,
+} from "@/features/anime/lib/requests";
 import { getMyLibrary } from "@/features/lists/lib/requests";
 import {
   checkIsFollowing,

@@ -1,7 +1,6 @@
 {
   "name": "anilog",
   "private": true,
-  "type": "module",
   "workspaces": {
     "packages": [
       "apps/*",
@@ -15,6 +14,7 @@
       "better-auth": "^1.4.7"
     }
   },
+  "type": "module",
   "scripts": {
     "prepare": "husky",
     "dev": "turbo dev",

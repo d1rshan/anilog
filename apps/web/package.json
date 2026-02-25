@@ -36,13 +36,13 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@anilog/config": "workspace:*",
     "@tailwindcss/postcss": "^4.1.10",
+    "@tanstack/react-query-devtools": "^5.91.1",
     "@types/node": "^20",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
     "tailwindcss": "^4.1.10",
-    "typescript": "catalog:",
-    "@tanstack/react-query-devtools": "^5.91.1",
-    "@anilog/config": "workspace:*"
+    "typescript": "catalog:"
   }
 }

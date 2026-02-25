@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 
 dotenv.config({
-	path: "../../apps/server/.env",
+  path: "../../apps/server/.env",
 });
 
 import * as schema from "./schema";

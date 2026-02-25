@@ -24,19 +24,36 @@ type DialogState = {
   entry?: LibraryEntryWithAnime | null;
 };
 
-function ResultSection({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
+function ResultSection({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  children: React.ReactNode;
+}) {
   return (
     <section className="space-y-5 md:space-y-6">
       <div className="space-y-2 border-b border-white/5 pb-4">
-        <p className="text-[10px] font-black uppercase tracking-[0.45em] text-muted-foreground/60">{subtitle}</p>
-        <h2 className="font-display text-2xl font-black uppercase tracking-tighter sm:text-3xl md:text-5xl">{title}</h2>
+        <p className="text-[10px] font-black uppercase tracking-[0.45em] text-muted-foreground/60">
+          {subtitle}
+        </p>
+        <h2 className="font-display text-2xl font-black uppercase tracking-tighter sm:text-3xl md:text-5xl">
+          {title}
+        </h2>
       </div>
       {children}
     </section>
   );
 }
 
-function AnimeGrid({ items, entryByAnimeId, onAddToWatchlist, onQuickAdd }: {
+function AnimeGrid({
+  items,
+  entryByAnimeId,
+  onAddToWatchlist,
+  onQuickAdd,
+}: {
   items: Anime[];
   entryByAnimeId: Map<number, LibraryEntryWithAnime>;
   onAddToWatchlist: (animeId: number) => void;
@@ -84,7 +101,12 @@ function LoadingGrid() {
 export function SearchResults({ query }: SearchResultsProps) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const { data: archiveResults, isLoading: isArchiveLoading, isError: isArchiveError, error: archiveError } = useArchiveSearch(query, {
+  const {
+    data: archiveResults,
+    isLoading: isArchiveLoading,
+    isError: isArchiveError,
+    error: archiveError,
+  } = useArchiveSearch(query, {
     enabled: isAuthenticated,
   });
   const {
@@ -160,17 +182,21 @@ export function SearchResults({ query }: SearchResultsProps) {
     logAnime.mutate({ anime: selectedAnime, status: "planned", currentEpisode: 0, rating: null });
   };
 
-  const hasArchiveMatches = isAuthenticated && ((archiveResults?.library.length ?? 0) > 0 || (archiveResults?.archive.length ?? 0) > 0);
+  const hasArchiveMatches =
+    isAuthenticated &&
+    ((archiveResults?.library.length ?? 0) > 0 || (archiveResults?.archive.length ?? 0) > 0);
   const hasAniListMatches = dedupedAniList.length > 0;
   const showAniListSection = query.trim().length >= 3;
 
   return (
     <>
       <div className="space-y-14 md:space-y-16">
-        <ResultSection title={`Results for \"${query}\"`} subtitle="From Your Archive">
+        <ResultSection title={`Results for "${query}"`} subtitle="From Your Archive">
           {!isAuthenticated ? (
             <div className="rounded-xl border border-white/10 bg-black/40 p-6 backdrop-blur-xl">
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">Sign In Required</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/45">
+                Sign In Required
+              </p>
               <p className="mt-2 text-sm font-semibold text-white/80">
                 Sign in to search your personal archive and library.
               </p>
@@ -179,14 +205,20 @@ export function SearchResults({ query }: SearchResultsProps) {
             <LoadingGrid />
           ) : isArchiveError ? (
             <p className="text-sm font-black uppercase tracking-widest text-destructive">
-              {archiveError instanceof Error ? archiveError.message : "Failed to search your archive"}
+              {archiveError instanceof Error
+                ? archiveError.message
+                : "Failed to search your archive"}
             </p>
           ) : !hasArchiveMatches ? (
-            <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">No archive matches yet.</p>
+            <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+              No archive matches yet.
+            </p>
           ) : (
             <div className="space-y-10">
               <div className="space-y-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/70">In your library</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/70">
+                  In your library
+                </p>
                 {(archiveResults?.library.length ?? 0) > 0 ? (
                   <AnimeGrid
                     items={archiveResults?.library ?? []}
@@ -195,12 +227,16 @@ export function SearchResults({ query }: SearchResultsProps) {
                     onQuickAdd={openEditor}
                   />
                 ) : (
-                  <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">No library matches.</p>
+                  <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                    No library matches.
+                  </p>
                 )}
               </div>
 
               <div className="space-y-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/70">In app archive</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/70">
+                  In app archive
+                </p>
                 {(archiveResults?.archive.length ?? 0) > 0 ? (
                   <AnimeGrid
                     items={archiveResults?.archive ?? []}
@@ -209,7 +245,9 @@ export function SearchResults({ query }: SearchResultsProps) {
                     onQuickAdd={openEditor}
                   />
                 ) : (
-                  <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">No additional archive matches.</p>
+                  <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                    No additional archive matches.
+                  </p>
                 )}
               </div>
             </div>
@@ -228,8 +266,15 @@ export function SearchResults({ query }: SearchResultsProps) {
               {aniListError instanceof Error ? aniListError.message : "AniList search failed"}
             </p>
           ) : !hasAniListMatches ? (
-            <p className={cn("text-xs font-black uppercase tracking-widest", hasArchiveMatches ? "text-muted-foreground" : "text-foreground")}>
-              {hasArchiveMatches ? "No additional AniList results." : `Nothing found for \"${query}\".`}
+            <p
+              className={cn(
+                "text-xs font-black uppercase tracking-widest",
+                hasArchiveMatches ? "text-muted-foreground" : "text-foreground",
+              )}
+            >
+              {hasArchiveMatches
+                ? "No additional AniList results."
+                : `Nothing found for "${query}".`}
             </p>
           ) : (
             <AnimeGrid

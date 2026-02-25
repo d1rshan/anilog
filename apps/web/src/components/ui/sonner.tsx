@@ -17,10 +17,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
         classNames: {
           toast:
             "anilog-toast group rounded-xl border border-white/10 bg-black/55 px-4 py-3 shadow-2xl backdrop-blur-2xl",
-          title:
-            "font-display text-[0.74rem] font-black uppercase tracking-[0.22em] text-white",
-          description:
-            "mt-1 text-[0.64rem] font-bold uppercase tracking-[0.16em] text-white/65",
+          title: "font-display text-[0.74rem] font-black uppercase tracking-[0.22em] text-white",
+          description: "mt-1 text-[0.64rem] font-bold uppercase tracking-[0.16em] text-white/65",
           icon: "mr-1.5 text-white/90",
           actionButton:
             "rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[0.6rem] font-black uppercase tracking-[0.2em] text-white transition hover:bg-white hover:text-black",

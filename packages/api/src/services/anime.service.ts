@@ -2,19 +2,18 @@ import { db } from "@anilog/db";
 import { anime, heroCuration, trendingAnime, userAnime } from "@anilog/db/schema/anilog";
 import { and, asc, desc, eq, getTableColumns, ilike, notInArray, or } from "drizzle-orm";
 
-
 const ANILIST_API = "https://graphql.anilist.co";
 const SEARCH_CACHE_TTL_MS = 30_000;
 const ANILIST_CACHE_TTL_MS = 60_000;
 
 type SearchCacheValue = {
   expiresAt: number;
-  value: { library: typeof anime.$inferSelect[]; archive: typeof anime.$inferSelect[] };
+  value: { library: (typeof anime.$inferSelect)[]; archive: (typeof anime.$inferSelect)[] };
 };
 
 type AniListCacheValue = {
   expiresAt: number;
-  value: typeof anime.$inferSelect[];
+  value: (typeof anime.$inferSelect)[];
 };
 
 const archiveSearchCache = new Map<string, SearchCacheValue>();
@@ -22,12 +21,12 @@ const anilistSearchCache = new Map<string, AniListCacheValue>();
 
 type AniListMedia = {
   id: number;
-  title: { english: string | null; native: string | null; };
+  title: { english: string | null; native: string | null };
   description: string | null;
   episodes: number | null;
   status: string | null;
   genres: string[];
-  coverImage: { extraLarge: string; large: string; };
+  coverImage: { extraLarge: string; large: string };
   bannerImage: string | null;
   seasonYear: number | null;
   averageScore: number | null;
@@ -129,7 +128,9 @@ export class AnimeService {
 
   private static getMatchScore(animeItem: typeof anime.$inferSelect, query: string) {
     const normalizedQuery = query.toLowerCase();
-    const titles = [animeItem.title, animeItem.titleJapanese].filter((title): title is string => Boolean(title));
+    const titles = [animeItem.title, animeItem.titleJapanese].filter((title): title is string =>
+      Boolean(title),
+    );
     let bestScore = 0;
 
     for (const title of titles) {
@@ -143,7 +144,9 @@ export class AnimeService {
         bestScore = Math.max(bestScore, 3);
       }
 
-      const wordBoundary = new RegExp(`(^|\\s|[-:()])${normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`);
+      const wordBoundary = new RegExp(
+        `(^|\\s|[-:()])${normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`,
+      );
       if (wordBoundary.test(normalizedTitle)) {
         bestScore = Math.max(bestScore, 2);
       }
@@ -156,7 +159,7 @@ export class AnimeService {
     return bestScore;
   }
 
-  private static rankMatches(items: typeof anime.$inferSelect[], query: string, limit: number) {
+  private static rankMatches(items: (typeof anime.$inferSelect)[], query: string, limit: number) {
     return items
       .map((item) => ({
         item,
@@ -177,10 +180,14 @@ export class AnimeService {
 
   static async getTrendingAnime() {
     try {
-      const result = await db.select({
-        ...getTableColumns(anime)
-      }).from(anime).innerJoin(trendingAnime, eq(anime.id, trendingAnime.animeId)).orderBy(trendingAnime.rank)
-      return result
+      const result = await db
+        .select({
+          ...getTableColumns(anime),
+        })
+        .from(anime)
+        .innerJoin(trendingAnime, eq(anime.id, trendingAnime.animeId))
+        .orderBy(trendingAnime.rank);
+      return result;
     } catch (error) {
       console.error("Error getting all anime:", error);
       throw new Error("Failed to fetch anime");
@@ -298,16 +305,16 @@ export class AnimeService {
         bannerImage: media.bannerImage,
         year: media.seasonYear,
         rating: media.averageScore,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       }));
 
       for (const item of animeInserts) {
         await db.insert(anime).values(item).onConflictDoUpdate({
           target: anime.id,
-          set: item
+          set: item,
         });
       }
-      
+
       count += animeInserts.length;
     }
 
@@ -348,9 +355,9 @@ export class AnimeService {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Accept": "application/json"
+        Accept: "application/json",
       },
-      body: JSON.stringify({ query })
+      body: JSON.stringify({ query }),
     });
 
     if (!res.ok) {
@@ -362,12 +369,12 @@ export class AnimeService {
         Page: {
           media: Array<{
             id: number;
-            title: { english: string | null; native: string | null; };
+            title: { english: string | null; native: string | null };
             description: string | null;
             episodes: number | null;
             status: string | null;
             genres: string[];
-            coverImage: { extraLarge: string; large: string; };
+            coverImage: { extraLarge: string; large: string };
             bannerImage: string | null;
             seasonYear: number | null;
             averageScore: number | null;
@@ -393,29 +400,32 @@ export class AnimeService {
     }));
 
     // Upsert anime data
-    await db.insert(anime).values(animeInserts).onConflictDoUpdate({
-      target: anime.id,
-      set: {
-        title: anime.title,
-        titleJapanese: anime.titleJapanese,
-        description: anime.description,
-        episodes: anime.episodes,
-        status: anime.status,
-        genres: anime.genres,
-        imageUrl: anime.imageUrl,
-        bannerImage: anime.bannerImage,
-        year: anime.year,
-        rating: anime.rating,
-        updatedAt: new Date()
-      }
-    });
+    await db
+      .insert(anime)
+      .values(animeInserts)
+      .onConflictDoUpdate({
+        target: anime.id,
+        set: {
+          title: anime.title,
+          titleJapanese: anime.titleJapanese,
+          description: anime.description,
+          episodes: anime.episodes,
+          status: anime.status,
+          genres: anime.genres,
+          imageUrl: anime.imageUrl,
+          bannerImage: anime.bannerImage,
+          year: anime.year,
+          rating: anime.rating,
+          updatedAt: new Date(),
+        },
+      });
 
     // Clear and insert trending rankings
     await db.delete(trendingAnime);
 
     const trendingInserts = json.data.Page.media.map((media, index) => ({
       animeId: media.id,
-      rank: index + 1
+      rank: index + 1,
     }));
 
     await db.insert(trendingAnime).values(trendingInserts);
@@ -464,14 +474,14 @@ export class AnimeService {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json"
+          Accept: "application/json",
         },
         body: JSON.stringify({
           query,
           variables: {
-            search: normalizedQuery
-          }
-        })
+            search: normalizedQuery,
+          },
+        }),
       });
 
       const json: any = await res.json();
@@ -520,21 +530,10 @@ export class AnimeService {
     rating?: number | null;
   }) {
     try {
-      await db.insert(anime).values({
-        id: animeData.id,
-        title: animeData.title,
-        titleJapanese: animeData.titleJapanese,
-        description: animeData.description,
-        episodes: animeData.episodes,
-        status: animeData.status,
-        genres: animeData.genres,
-        imageUrl: animeData.imageUrl,
-        bannerImage: animeData.bannerImage,
-        year: animeData.year,
-        rating: animeData.rating,
-      }).onConflictDoUpdate({
-        target: anime.id,
-        set: {
+      await db
+        .insert(anime)
+        .values({
+          id: animeData.id,
           title: animeData.title,
           titleJapanese: animeData.titleJapanese,
           description: animeData.description,
@@ -545,9 +544,23 @@ export class AnimeService {
           bannerImage: animeData.bannerImage,
           year: animeData.year,
           rating: animeData.rating,
-          updatedAt: new Date()
-        }
-      });
+        })
+        .onConflictDoUpdate({
+          target: anime.id,
+          set: {
+            title: animeData.title,
+            titleJapanese: animeData.titleJapanese,
+            description: animeData.description,
+            episodes: animeData.episodes,
+            status: animeData.status,
+            genres: animeData.genres,
+            imageUrl: animeData.imageUrl,
+            bannerImage: animeData.bannerImage,
+            year: animeData.year,
+            rating: animeData.rating,
+            updatedAt: new Date(),
+          },
+        });
 
       return { id: animeData.id, success: true };
     } catch (error) {

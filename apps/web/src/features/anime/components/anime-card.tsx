@@ -7,7 +7,9 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 interface AnimeCardProps {
-  anime: Pick<Anime, "id" | "title" | "imageUrl" | "year" | "episodes"> & { status?: string | null };
+  anime: Pick<Anime, "id" | "title" | "imageUrl" | "year" | "episodes"> & {
+    status?: string | null;
+  };
   disabled?: boolean;
   rating?: number | null;
   currentEpisode?: number;
@@ -129,7 +131,9 @@ export function AnimeCard({
               <div
                 className={cn(
                   "flex h-6 w-6 items-center justify-center rounded-full text-white backdrop-blur-md ring-1",
-                  isReleasing ? "bg-white/12 ring-white/30" : "bg-white/8 ring-white/20 text-white/85",
+                  isReleasing
+                    ? "bg-white/12 ring-white/30"
+                    : "bg-white/8 ring-white/20 text-white/85",
                 )}
                 title={isReleasing ? "Currently releasing" : "Release finished"}
                 aria-label={isReleasing ? "Currently releasing" : "Release finished"}
@@ -179,7 +183,11 @@ export function AnimeCard({
                         : "Planned"
                 }
               >
-                <svg className="absolute inset-0 h-full w-full -rotate-90" viewBox={`0 0 ${circleSize} ${circleSize}`} aria-hidden="true">
+                <svg
+                  className="absolute inset-0 h-full w-full -rotate-90"
+                  viewBox={`0 0 ${circleSize} ${circleSize}`}
+                  aria-hidden="true"
+                >
                   <circle
                     cx={circleSize / 2}
                     cy={circleSize / 2}
@@ -202,8 +210,12 @@ export function AnimeCard({
                 </svg>
                 {loggedStatus === "watching" ? (
                   <div className="relative flex h-full w-full flex-col items-center justify-center text-white">
-                    <span className="text-[9px] font-black leading-none">{currentEpisode ?? 0}</span>
-                    <span className="text-[6px] font-bold uppercase tracking-wide text-white/75">EP</span>
+                    <span className="text-[9px] font-black leading-none">
+                      {currentEpisode ?? 0}
+                    </span>
+                    <span className="text-[6px] font-bold uppercase tracking-wide text-white/75">
+                      EP
+                    </span>
                   </div>
                 ) : (
                   <div className="relative flex h-full w-full items-center justify-center text-white">
@@ -282,21 +294,22 @@ export function AnimeCard({
             </Button>
           )}
 
-          {onStartWatching && (loggedStatus === "planned" || loggedStatus === "dropped" || !loggedStatus) && (
-            <Button
-              size="icon"
-              variant="secondary"
-              className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-white backdrop-blur-xl md:h-10 md:w-10 md:hover:bg-white md:hover:text-black"
-              onClick={(e) => {
-                e.stopPropagation();
-                onStartWatching(anime.id);
-              }}
-              disabled={disabled}
-              title="Start Watching"
-            >
-              <Play className="h-5 w-5" />
-            </Button>
-          )}
+          {onStartWatching &&
+            (loggedStatus === "planned" || loggedStatus === "dropped" || !loggedStatus) && (
+              <Button
+                size="icon"
+                variant="secondary"
+                className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-white backdrop-blur-xl md:h-10 md:w-10 md:hover:bg-white md:hover:text-black"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onStartWatching(anime.id);
+                }}
+                disabled={disabled}
+                title="Start Watching"
+              >
+                <Play className="h-5 w-5" />
+              </Button>
+            )}
 
           {onIncrementEpisode && loggedStatus === "watching" && (
             <Button
@@ -368,7 +381,9 @@ export function AnimeCard({
       )}
 
       <div className="absolute bottom-0 left-0 right-0 translate-y-0 space-y-1.5 p-4 transition-transform duration-500 md:translate-y-2 md:space-y-2 md:p-5 md:group-hover:translate-y-0">
-        <h3 className="font-display line-clamp-2 text-lg font-bold uppercase leading-none tracking-tight text-white md:text-xl">{anime.title}</h3>
+        <h3 className="font-display line-clamp-2 text-lg font-bold uppercase leading-none tracking-tight text-white md:text-xl">
+          {anime.title}
+        </h3>
         <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/60">
           <span>{anime.year}</span>
           <span>•</span>

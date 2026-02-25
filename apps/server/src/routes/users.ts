@@ -25,7 +25,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       query: t.Object({
         q: t.String(),
       }),
-    }
+    },
   )
   .get(
     "/:id",
@@ -40,7 +40,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       params: t.Object({
         id: t.String(),
       }),
-    }
+    },
   )
   .get(
     "/username/:username",
@@ -55,7 +55,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       params: t.Object({
         username: t.String(),
       }),
-    }
+    },
   )
   .get(
     "/:id/library",
@@ -67,7 +67,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       params: t.Object({
         id: t.String(),
       }),
-    }
+    },
   )
   .get(
     "/:id/followers",
@@ -79,7 +79,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       params: t.Object({
         id: t.String(),
       }),
-    }
+    },
   )
   .get(
     "/:id/following",
@@ -91,7 +91,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       params: t.Object({
         id: t.String(),
       }),
-    }
+    },
   )
   // Authenticated routes
   .use(authMiddleware)
@@ -105,7 +105,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       params: t.Object({
         id: t.String(),
       }),
-    }
+    },
   )
   .delete(
     "/:id/follow",
@@ -117,7 +117,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       params: t.Object({
         id: t.String(),
       }),
-    }
+    },
   )
   .get("/me/profile", async ({ userId }) => {
     const profile = await UserService.getUserProfile(userId);
@@ -148,7 +148,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
         instagramUrl: t.Optional(t.Nullable(t.String())),
         isPublic: t.Optional(t.Boolean()),
       }),
-    }
+    },
   )
   .get("/me/following", async ({ userId }) => {
     const following = await UserService.getFollowing(userId);

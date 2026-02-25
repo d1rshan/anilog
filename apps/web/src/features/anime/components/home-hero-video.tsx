@@ -8,10 +8,9 @@ import { cn } from "@/lib/utils";
 import { useHeroCurations } from "../lib/hooks";
 import type { HeroCuration } from "../lib/requests";
 
-const FALLBACK_CURATIONS: Array<Pick<
-  HeroCuration,
-  "videoId" | "start" | "stop" | "title" | "subtitle" | "description" | "tag"
->> = [
+const FALLBACK_CURATIONS: Array<
+  Pick<HeroCuration, "videoId" | "start" | "stop" | "title" | "subtitle" | "description" | "tag">
+> = [
   {
     videoId: "cszyD9FxsP0",
     start: 0,

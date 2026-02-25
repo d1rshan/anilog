@@ -6,10 +6,7 @@ import { Button } from "@/components/ui/button";
 import { AnimeCard } from "@/features/anime/components/anime-card";
 import { AddToListDialog } from "@/features/anime/components/add-to-list-dialog";
 import { AnimeStackPreview } from "./anime-stack-preview";
-import {
-  useMyLibrary,
-  groupLibraryByStatus,
-} from "../lib/hooks";
+import { useMyLibrary, groupLibraryByStatus } from "../lib/hooks";
 import { LIBRARY_STATUSES, type LibraryEntryWithAnime } from "../lib/requests";
 import type { LibraryStatus, Anime } from "@anilog/db/schema/anilog";
 
@@ -29,7 +26,7 @@ type DialogState = {
 
 export function EditableLists() {
   const { data: library, isLoading } = useMyLibrary();
-  
+
   const grouped = groupLibraryByStatus(library);
   const [expandedStatuses, setExpandedStatuses] = useState<Record<LibraryStatus, boolean>>({
     watching: false,
@@ -70,7 +67,9 @@ export function EditableLists() {
     return (
       <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-dashed border-border text-center">
         <FolderOpen className="mb-4 h-10 w-10 text-muted-foreground/50" />
-        <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Start logging anime to build your library</p>
+        <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+          Start logging anime to build your library
+        </p>
       </div>
     );
   }
@@ -84,8 +83,12 @@ export function EditableLists() {
           <section key={status} className="space-y-6 md:space-y-8">
             <div className="flex items-end justify-between border-b border-white/10 pb-4">
               <div className="space-y-1">
-                <h3 className="font-display text-3xl font-bold uppercase leading-[0.9] tracking-tight sm:text-4xl md:text-5xl">{STATUS_LABELS[status]}</h3>
-                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">{entries.length} Titles</p>
+                <h3 className="font-display text-3xl font-bold uppercase leading-[0.9] tracking-tight sm:text-4xl md:text-5xl">
+                  {STATUS_LABELS[status]}
+                </h3>
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">
+                  {entries.length} Titles
+                </p>
               </div>
               {expandedStatuses[status] && (
                 <Button
@@ -102,7 +105,9 @@ export function EditableLists() {
 
             {entries.length === 0 ? (
               <div className="flex h-32 items-center justify-center rounded-md border border-dashed border-border text-center">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">No anime logged in this status</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  No anime logged in this status
+                </p>
               </div>
             ) : !expandedStatuses[status] ? (
               <button

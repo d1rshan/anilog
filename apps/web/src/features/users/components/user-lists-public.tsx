@@ -50,7 +50,9 @@ export function UserListsPublic({ userId }: UserListsPublicProps) {
     return (
       <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-dashed border-border text-center">
         <FolderOpen className="mb-4 h-10 w-10 text-muted-foreground/50" />
-        <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">No public library entries found</p>
+        <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+          No public library entries found
+        </p>
       </div>
     );
   }
@@ -64,8 +66,12 @@ export function UserListsPublic({ userId }: UserListsPublicProps) {
           <section key={status} className="space-y-6 md:space-y-8">
             <div className="flex items-end justify-between border-b border-white/10 pb-4">
               <div className="space-y-1">
-                <h3 className="font-display text-3xl font-bold uppercase leading-[0.9] tracking-tight sm:text-4xl md:text-5xl">{STATUS_LABELS[status]}</h3>
-                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">{sectionEntries.length} Titles</p>
+                <h3 className="font-display text-3xl font-bold uppercase leading-[0.9] tracking-tight sm:text-4xl md:text-5xl">
+                  {STATUS_LABELS[status]}
+                </h3>
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">
+                  {sectionEntries.length} Titles
+                </p>
               </div>
               {expandedStatuses[status] && (
                 <Button
@@ -82,7 +88,9 @@ export function UserListsPublic({ userId }: UserListsPublicProps) {
 
             {sectionEntries.length === 0 ? (
               <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-border text-center">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">No anime in this status</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  No anime in this status
+                </p>
               </div>
             ) : !expandedStatuses[status] ? (
               <button

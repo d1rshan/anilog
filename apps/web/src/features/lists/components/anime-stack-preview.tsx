@@ -24,10 +24,7 @@ interface AnimeStackPreviewProps {
   maxVisible?: number;
 }
 
-export function AnimeStackPreview({
-  entries,
-  maxVisible = 6,
-}: AnimeStackPreviewProps) {
+export function AnimeStackPreview({ entries, maxVisible = 6 }: AnimeStackPreviewProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const isStackExpanded = hoveredIndex !== null;
   const visibleEntries = entries.slice(0, maxVisible);
@@ -44,9 +41,7 @@ export function AnimeStackPreview({
             onMouseLeave={() => setHoveredIndex((current) => (current === index ? null : current))}
             style={{
               zIndex:
-                hoveredIndex === index
-                  ? visibleEntries.length + 20
-                  : visibleEntries.length - index,
+                hoveredIndex === index ? visibleEntries.length + 20 : visibleEntries.length - index,
               marginLeft: index === 0 ? "0" : isStackExpanded ? "-4.25rem" : "-5rem",
             }}
           >
