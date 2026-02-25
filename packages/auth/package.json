@@ -13,9 +13,7 @@
   "dependencies": {
     "@anilog/api": "workspace:*",
     "@anilog/db": "workspace:*",
-    "better-auth": "catalog:",
-    "dotenv": "catalog:",
-    "zod": "catalog:"
+    "better-auth": "catalog:"
   },
   "devDependencies": {
     "@anilog/config": "workspace:*",
