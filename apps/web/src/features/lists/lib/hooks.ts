@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { Anime, LibraryStatus } from "@anilog/db/schema/anilog";
+import type { ApiClientError } from "@/lib/eden";
+import { getApiErrorMessage } from "@/lib/eden";
 
 import { myLibraryQueryOptions } from "@/lib/query-options";
 import { libraryKeys } from "@/lib/query-keys";
@@ -151,11 +153,11 @@ export const useLogAnime = () => {
         currentUserId: previous?.[0]?.userId,
       };
     },
-    onError: (error, _payload, context: MutationContext | undefined) => {
+    onError: (error: ApiClientError, _payload, context: MutationContext | undefined) => {
       if (context?.previous) {
         queryClient.setQueryData(libraryKeys.me(), context.previous);
       }
-      toast.error(error.message || "Failed to log anime");
+      toast.error(getApiErrorMessage(error, "Failed to log anime"));
     },
     onSuccess: (data, payload, context: MutationContext | undefined) => {
       upsertLibraryEntryInCache(queryClient, data);
@@ -187,8 +189,8 @@ export const useUpdateLibraryStatus = () => {
 
   return useMutation({
     mutationFn: updateLibraryStatus,
-    onError: (error) => {
-      toast.error(error.message || "Failed to update status");
+    onError: (error: ApiClientError) => {
+      toast.error(getApiErrorMessage(error, "Failed to update status"));
     },
     onSuccess: (data) => {
       upsertLibraryEntryInCache(queryClient, data);
@@ -227,11 +229,11 @@ export const useUpdateLibraryProgress = () => {
 
       return { previous, currentUserId: previous?.[0]?.userId };
     },
-    onError: (error, _payload, context: MutationContext | undefined) => {
+    onError: (error: ApiClientError, _payload, context: MutationContext | undefined) => {
       if (context?.previous) {
         queryClient.setQueryData(libraryKeys.me(), context.previous);
       }
-      toast.error(error.message || "Failed to update progress");
+      toast.error(getApiErrorMessage(error, "Failed to update progress"));
     },
     onSuccess: (data) => {
       upsertLibraryEntryInCache(queryClient, data);
@@ -255,8 +257,8 @@ export const useUpdateLibraryRating = () => {
 
   return useMutation({
     mutationFn: updateLibraryRating,
-    onError: (error) => {
-      toast.error(error.message || "Failed to update rating");
+    onError: (error: ApiClientError) => {
+      toast.error(getApiErrorMessage(error, "Failed to update rating"));
     },
     onSuccess: (data) => {
       upsertLibraryEntryInCache(queryClient, data);
@@ -287,11 +289,11 @@ export const useRemoveFromLibrary = () => {
 
       return { previous, currentUserId: previous?.[0]?.userId };
     },
-    onError: (error, _animeId, context: MutationContext | undefined) => {
+    onError: (error: ApiClientError, _animeId, context: MutationContext | undefined) => {
       if (context?.previous) {
         queryClient.setQueryData(libraryKeys.me(), context.previous);
       }
-      toast.error(error.message || "Failed to remove anime");
+      toast.error(getApiErrorMessage(error, "Failed to remove anime"));
     },
     onSuccess: (_data, animeId, context: MutationContext | undefined) => {
       const removedTitle = context?.previous?.find((entry) => entry.animeId === animeId)?.anime

@@ -1,154 +1,63 @@
 import { api } from "@/lib/api";
-import type { UserProfile, LibraryStatus } from "@anilog/db/schema/anilog";
+import { unwrapEdenResponse } from "@/lib/eden";
+import type { ProfileData, PublicUserLibrary, UserWithProfile } from "@anilog/api";
 
-export type UserWithProfile = {
-  id: string;
-  name: string;
-  username: string | null;
-  email: string;
-  image: string | null;
-  isAdmin?: boolean;
-  profile: UserProfile | null;
-  followerCount: number;
-  followingCount: number;
-};
-
-export type PublicUserLibrary = {
-  id: string;
-  animeId: number;
-  status: LibraryStatus;
-  createdAt: Date;
-  currentEpisode: number;
-  rating: number | null;
-  anime: {
-    id: number;
-    title: string;
-    titleJapanese: string | null;
-    imageUrl: string;
-    year: number | null;
-    episodes: number | null;
-    status?: string | null;
-  };
-}[];
-
-export async function searchUsers(query: string): Promise<UserWithProfile[]> {
+export async function searchUsers(query: string) {
   const res = await api.users.search.get({ query: { q: query } });
-
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data;
+  return unwrapEdenResponse(res);
 }
 
-export async function getUserProfile(userId: string): Promise<UserWithProfile> {
+export async function getUserProfile(userId: string) {
   const res = await api.users({ id: userId }).get();
-
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data;
+  return unwrapEdenResponse(res);
 }
 
-export async function getUserByUsername(username: string): Promise<UserWithProfile> {
+export async function getUserByUsername(username: string) {
   const res = await api.users.username({ username }).get();
-
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data;
+  return unwrapEdenResponse(res);
 }
 
-export async function getUserPublicLibrary(userId: string): Promise<PublicUserLibrary> {
+export async function getUserPublicLibrary(userId: string) {
   const res = await api.users({ id: userId }).library.get();
-
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data;
+  return unwrapEdenResponse(res);
 }
 
 export async function followUser(userId: string) {
   const res = await api.users({ id: userId }).follow.post();
-
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data;
+  return unwrapEdenResponse(res);
 }
 
 export async function unfollowUser(userId: string) {
   const res = await api.users({ id: userId }).follow.delete();
-
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data;
+  return unwrapEdenResponse(res);
 }
 
-export async function checkIsFollowing(userId: string): Promise<boolean> {
+export async function checkIsFollowing(userId: string) {
   const res = await api.users.me["check-follow"]({ id: userId }).get();
-
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data.isFollowing;
+  const data = unwrapEdenResponse(res);
+  return data.isFollowing;
 }
 
-export async function getMyFollowing(): Promise<UserWithProfile[]> {
+export async function getMyFollowing() {
   const res = await api.users.me.following.get();
-
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data;
+  return unwrapEdenResponse(res);
 }
 
-export async function getMyProfile(): Promise<UserWithProfile> {
+export async function getMyProfile() {
   const res = await api.users.me.profile.get();
-
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data;
+  return unwrapEdenResponse(res);
 }
 
-export async function getMyAdminStatus(): Promise<{ isAdmin: boolean }> {
+export async function getMyAdminStatus() {
   const res = await api.users.me["admin-status"].get();
-
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data as { isAdmin: boolean };
+  return unwrapEdenResponse(res);
 }
 
-export type UpdateProfileData = {
-  bio?: string | null;
-  displayName?: string | null;
-  website?: string | null;
-  location?: string | null;
-  twitterUrl?: string | null;
-  discordUrl?: string | null;
-  githubUrl?: string | null;
-  instagramUrl?: string | null;
-  isPublic?: boolean;
-};
+export type UpdateProfileData = ProfileData;
 
-export async function updateMyProfile(data: UpdateProfileData): Promise<UserProfile> {
+export async function updateMyProfile(data: UpdateProfileData) {
   const res = await api.users.me.profile.put(data);
-
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data;
+  return unwrapEdenResponse(res);
 }
+
+export type { PublicUserLibrary, UserWithProfile };

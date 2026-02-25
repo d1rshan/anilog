@@ -1,33 +1,21 @@
 import { api } from "@/lib/api";
-import type { HeroCuration } from "@/features/anime/lib/requests";
-import type { UserWithProfile } from "@/features/users/lib/requests";
+import { unwrapEdenResponse } from "@/lib/eden";
+import type { AdminUserListResult, HeroCurationUpdateInput, UserWithProfile } from "@anilog/api";
 
 export type AdminStats = {
   totalUsers: number;
 };
 
-export type AdminUsersResult = {
+export type AdminUsersResult = AdminUserListResult & {
   users: UserWithProfile[];
-  total: number;
-  limit: number;
-  offset: number;
 };
 
-export async function getAdminStats(): Promise<AdminStats> {
+export async function getAdminStats() {
   const res = await api.admin.stats.get();
-
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data as AdminStats;
+  return unwrapEdenResponse(res);
 }
 
-export async function getAdminUsers(params: {
-  query: string;
-  limit?: number;
-  offset?: number;
-}): Promise<AdminUsersResult> {
+export async function getAdminUsers(params: { query: string; limit?: number; offset?: number }) {
   const res = await api.admin.users.get({
     query: {
       q: params.query,
@@ -36,58 +24,26 @@ export async function getAdminUsers(params: {
     },
   });
 
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data as AdminUsersResult;
+  return unwrapEdenResponse(res);
 }
 
-export async function setAdminStatus(input: {
-  userId: string;
-  isAdmin: boolean;
-}): Promise<{ id: string; isAdmin: boolean }> {
+export async function setAdminStatus(input: { userId: string; isAdmin: boolean }) {
   const res = await api.admin.users({ id: input.userId }).admin.patch({
     isAdmin: input.isAdmin,
   });
 
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data as { id: string; isAdmin: boolean };
+  return unwrapEdenResponse(res);
 }
 
-export async function getAdminHeroCurations(): Promise<HeroCuration[]> {
+export async function getAdminHeroCurations() {
   const res = await api.admin["hero-curations"].get();
-
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data as HeroCuration[];
+  return unwrapEdenResponse(res);
 }
 
 export async function updateAdminHeroCuration(input: {
   id: number;
-  data: Pick<
-    HeroCuration,
-    | "videoId"
-    | "start"
-    | "stop"
-    | "title"
-    | "subtitle"
-    | "description"
-    | "tag"
-    | "sortOrder"
-    | "isActive"
-  >;
-}): Promise<HeroCuration> {
+  data: HeroCurationUpdateInput;
+}) {
   const res = await api.admin["hero-curations"]({ id: input.id }).patch(input.data);
-
-  if (res.error) {
-    throw res.error;
-  }
-
-  return res.data as HeroCuration;
+  return unwrapEdenResponse(res);
 }
