@@ -3,12 +3,13 @@ import { LibraryService } from "@anilog/api";
 import { auth } from "@anilog/auth";
 import {
   errorResponseSchema,
+  libraryAnimeIdParamsSchema,
   libraryEntrySchema,
   logAnimeInputSchema,
   updateProgressInputSchema,
   updateRatingInputSchema,
   updateStatusInputSchema,
-} from "./schemas";
+} from "../schemas";
 
 const authMiddleware = (app: Elysia) =>
   app.derive(async ({ request }) => {
@@ -51,7 +52,7 @@ export const libraryRoutes = new Elysia({ prefix: "/library" })
       return LibraryService.updateStatus(userId, params.animeId, body.status, body.currentEpisode);
     },
     {
-      params: t.Object({ animeId: t.Integer() }),
+      params: libraryAnimeIdParamsSchema,
       body: updateStatusInputSchema,
       response: {
         200: libraryEntrySchema,
@@ -65,7 +66,7 @@ export const libraryRoutes = new Elysia({ prefix: "/library" })
       return LibraryService.updateProgress(userId, params.animeId, body);
     },
     {
-      params: t.Object({ animeId: t.Integer() }),
+      params: libraryAnimeIdParamsSchema,
       body: updateProgressInputSchema,
       response: {
         200: libraryEntrySchema,
@@ -79,7 +80,7 @@ export const libraryRoutes = new Elysia({ prefix: "/library" })
       return LibraryService.updateRating(userId, params.animeId, body.rating);
     },
     {
-      params: t.Object({ animeId: t.Integer() }),
+      params: libraryAnimeIdParamsSchema,
       body: updateRatingInputSchema,
       response: {
         200: libraryEntrySchema,
@@ -93,7 +94,7 @@ export const libraryRoutes = new Elysia({ prefix: "/library" })
       return LibraryService.removeFromLibrary(userId, params.animeId);
     },
     {
-      params: t.Object({ animeId: t.Integer() }),
+      params: libraryAnimeIdParamsSchema,
       response: {
         200: t.Boolean(),
       },
