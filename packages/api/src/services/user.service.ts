@@ -2,17 +2,9 @@ import { db } from "@anilog/db";
 import { userFollow, userProfile, userAnime, anime } from "@anilog/db/schema/anilog";
 import { user } from "@anilog/db/schema/auth";
 import { eq, getTableColumns, count, and, ilike, asc, or } from "drizzle-orm";
-import type { UserProfile } from "@anilog/db/schema/anilog";
-import type {
-  AdminUserListResult,
-  FollowActionResult,
-  ProfileData,
-  PublicUserLibrary,
-  UserWithProfile,
-} from "../contracts/users";
 
 export class UserService {
-  static async createUserProfile(userId: string): Promise<UserProfile> {
+  static async createUserProfile(userId: string) {
     const [profile] = await db
       .insert(userProfile)
       .values({
@@ -37,7 +29,7 @@ export class UserService {
     return existingProfile;
   }
 
-  static async getUserProfile(userId: string): Promise<UserWithProfile | null> {
+  static async getUserProfile(userId: string) {
     const result = await db
       .select({
         id: user.id,
@@ -74,7 +66,7 @@ export class UserService {
     };
   }
 
-  static async getUserByUsername(username: string): Promise<UserWithProfile | null> {
+  static async getUserByUsername(username: string) {
     const result = await db
       .select({
         id: user.id,
@@ -111,7 +103,20 @@ export class UserService {
     };
   }
 
-  static async updateUserProfile(userId: string, data: ProfileData): Promise<UserProfile> {
+  static async updateUserProfile(
+    userId: string,
+    data: {
+      bio?: string | null;
+      displayName?: string | null;
+      website?: string | null;
+      location?: string | null;
+      twitterUrl?: string | null;
+      discordUrl?: string | null;
+      githubUrl?: string | null;
+      instagramUrl?: string | null;
+      isPublic?: boolean;
+    },
+  ) {
     const [updatedProfile] = await db
       .update(userProfile)
       .set({
@@ -128,7 +133,7 @@ export class UserService {
     return updatedProfile;
   }
 
-  static async followUser(followerId: string, followingId: string): Promise<FollowActionResult> {
+  static async followUser(followerId: string, followingId: string) {
     if (followerId === followingId) {
       throw new Error("Cannot follow yourself");
     }
@@ -155,7 +160,7 @@ export class UserService {
     }
   }
 
-  static async unfollowUser(followerId: string, followingId: string): Promise<FollowActionResult> {
+  static async unfollowUser(followerId: string, followingId: string) {
     const result = await db
       .delete(userFollow)
       .where(and(eq(userFollow.followerId, followerId), eq(userFollow.followingId, followingId)))
@@ -168,7 +173,7 @@ export class UserService {
     return { success: true, message: "Successfully unfollowed user" };
   }
 
-  static async isFollowing(followerId: string, followingId: string): Promise<boolean> {
+  static async isFollowing(followerId: string, followingId: string) {
     const result = await db
       .select({ followerId: userFollow.followerId })
       .from(userFollow)
@@ -178,7 +183,7 @@ export class UserService {
     return result.length > 0;
   }
 
-  static async getFollowers(userId: string): Promise<UserWithProfile[]> {
+  static async getFollowers(userId: string) {
     const followers = await db
       .select({
         id: user.id,
@@ -209,7 +214,7 @@ export class UserService {
     );
   }
 
-  static async getFollowing(userId: string): Promise<UserWithProfile[]> {
+  static async getFollowing(userId: string) {
     const following = await db
       .select({
         id: user.id,
@@ -240,7 +245,7 @@ export class UserService {
     );
   }
 
-  static async getFollowerCount(userId: string): Promise<number> {
+  static async getFollowerCount(userId: string) {
     const result = await db
       .select({ count: count() })
       .from(userFollow)
@@ -249,7 +254,7 @@ export class UserService {
     return result[0]?.count || 0;
   }
 
-  static async getFollowingCount(userId: string): Promise<number> {
+  static async getFollowingCount(userId: string) {
     const result = await db
       .select({ count: count() })
       .from(userFollow)
@@ -258,9 +263,7 @@ export class UserService {
     return result[0]?.count || 0;
   }
 
-  static async getFollowCounts(
-    userId: string,
-  ): Promise<{ followerCount: number; followingCount: number }> {
+  static async getFollowCounts(userId: string) {
     const [followerResult, followingResult] = await Promise.all([
       db.select({ count: count() }).from(userFollow).where(eq(userFollow.followingId, userId)),
       db.select({ count: count() }).from(userFollow).where(eq(userFollow.followerId, userId)),
@@ -272,7 +275,7 @@ export class UserService {
     };
   }
 
-  static async getPublicUserLibrary(userId: string): Promise<PublicUserLibrary> {
+  static async getPublicUserLibrary(userId: string) {
     const library = await db
       .select({
         ...getTableColumns(userAnime),
@@ -302,7 +305,7 @@ export class UserService {
     }));
   }
 
-  static async searchUsers(query: string, limit: number = 20): Promise<UserWithProfile[]> {
+  static async searchUsers(query: string, limit: number = 20) {
     const searchPattern = `%${query}%`;
 
     const users = await db
@@ -335,12 +338,12 @@ export class UserService {
     );
   }
 
-  static async getAdminStats(): Promise<{ totalUsers: number }> {
+  static async getAdminStats() {
     const [result] = await db.select({ count: count() }).from(user);
     return { totalUsers: result?.count ?? 0 };
   }
 
-  static async getAdminStatus(userId: string): Promise<boolean> {
+  static async getAdminStatus(userId: string) {
     const found = await db.query.user.findFirst({
       where: eq(user.id, userId),
       columns: { isAdmin: true },
@@ -351,7 +354,7 @@ export class UserService {
   static async searchUsersForAdmin(
     query: string,
     options: { limit?: number; offset?: number } = {},
-  ): Promise<AdminUserListResult> {
+  ) {
     const limit = Math.min(Math.max(options.limit ?? 20, 1), 100);
     const offset = Math.max(options.offset ?? 0, 0);
     const normalized = query.trim();
@@ -405,11 +408,7 @@ export class UserService {
     };
   }
 
-  static async setUserAdminStatus(
-    targetUserId: string,
-    isAdmin: boolean,
-    actorUserId?: string,
-  ): Promise<{ id: string; isAdmin: boolean }> {
+  static async setUserAdminStatus(targetUserId: string, isAdmin: boolean, actorUserId?: string) {
     if (actorUserId && actorUserId === targetUserId && !isAdmin) {
       throw new Error("You cannot remove your own admin access");
     }

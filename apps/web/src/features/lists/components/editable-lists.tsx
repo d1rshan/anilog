@@ -7,8 +7,7 @@ import { AnimeCard } from "@/features/anime/components/anime-card";
 import { AddToListDialog } from "@/features/anime/components/add-to-list-dialog";
 import { AnimeStackPreview } from "./anime-stack-preview";
 import { useMyLibrary, groupLibraryByStatus } from "../lib/hooks";
-import { LIBRARY_STATUSES, type LibraryEntryWithAnime } from "../lib/requests";
-import type { LogAnimeInput } from "@anilog/api";
+import { LIBRARY_STATUSES, type LibraryEntryWithAnime, type LogAnimeData } from "../lib/requests";
 import type { LibraryStatus } from "@anilog/db/schema/anilog";
 
 const STATUS_LABELS: Record<LibraryStatus, string> = {
@@ -20,7 +19,7 @@ const STATUS_LABELS: Record<LibraryStatus, string> = {
 
 type DialogState = {
   isOpen: boolean;
-  anime: LogAnimeInput["anime"] | null;
+  anime: LogAnimeData["anime"] | null;
   initialStatus?: LibraryStatus;
   entry?: LibraryEntryWithAnime | null;
 };

@@ -1,7 +1,7 @@
 import { api } from "@/lib/api";
 import { unwrapEdenResponse } from "@/lib/eden";
-import type { ArchiveSearchResponse } from "@anilog/api";
-import type { Anime, HeroCuration } from "@anilog/db/schema/anilog";
+
+type UpsertAnimePayload = Parameters<typeof api.anime.upsert.post>[0];
 
 export async function getTrendingAnime() {
   const res = await api.anime.trending.get();
@@ -26,9 +26,9 @@ export async function searchArchive(query: string) {
   return unwrapEdenResponse(res);
 }
 
-export async function upsertAnime(animeData: Anime) {
+export async function upsertAnime(animeData: UpsertAnimePayload) {
   const res = await api.anime.upsert.post(animeData);
   return unwrapEdenResponse(res);
 }
 
-export type { ArchiveSearchResponse, HeroCuration };
+export type HeroCuration = Awaited<ReturnType<typeof getHeroCurations>>[number];

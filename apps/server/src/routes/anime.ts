@@ -2,13 +2,16 @@ import { Elysia, t } from "elysia";
 import { AnimeService } from "@anilog/api";
 import { auth } from "@anilog/auth";
 import {
+  archiveSearchQuerySchema,
   archiveSearchResponseSchema,
   animeSchema,
   errorResponseSchema,
   heroCurationSchema,
   successCountSchema,
+  syncUnauthorizedResponseSchema,
+  upsertAnimeInputSchema,
   upsertAnimeResultSchema,
-} from "./schemas";
+} from "../schemas";
 
 const cronSecret = process.env.CRON_SECRET;
 
@@ -52,7 +55,7 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
     {
       response: {
         200: successCountSchema,
-        401: t.Object({ success: t.Boolean(), error: t.String() }),
+        401: syncUnauthorizedResponseSchema,
       },
     },
   )
@@ -68,7 +71,7 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
     {
       response: {
         200: successCountSchema,
-        401: t.Object({ success: t.Boolean(), error: t.String() }),
+        401: syncUnauthorizedResponseSchema,
       },
     },
   )
@@ -99,10 +102,7 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
       return AnimeService.searchArchive(session.user.id, q, limit);
     },
     {
-      query: t.Object({
-        q: t.String(),
-        limit: t.Optional(t.Integer({ minimum: 1, maximum: 50 })),
-      }),
+      query: archiveSearchQuerySchema,
       response: {
         200: archiveSearchResponseSchema,
         401: errorResponseSchema,
@@ -115,19 +115,7 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
       return AnimeService.upsertAnime(body);
     },
     {
-      body: t.Object({
-        id: t.Integer(),
-        title: t.String(),
-        titleJapanese: t.Optional(t.Nullable(t.String())),
-        description: t.Optional(t.Nullable(t.String())),
-        episodes: t.Optional(t.Nullable(t.Integer())),
-        status: t.Optional(t.Nullable(t.String())),
-        genres: t.Optional(t.Nullable(t.Array(t.String()))),
-        imageUrl: t.String(),
-        bannerImage: t.Optional(t.Nullable(t.String())),
-        year: t.Optional(t.Nullable(t.Integer())),
-        rating: t.Optional(t.Nullable(t.Integer())),
-      }),
+      body: upsertAnimeInputSchema,
       response: {
         200: upsertAnimeResultSchema,
       },

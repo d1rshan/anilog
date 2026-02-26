@@ -1,28 +1,17 @@
 import { api } from "@/lib/api";
 import { unwrapEdenResponse } from "@/lib/eden";
-import type {
-  LibraryEntryWithAnime,
-  LogAnimeInput,
-  UpdateProgressInput,
-  UpdateRatingInput,
-  UpdateStatusInput,
-} from "@anilog/api";
 
 export const LIBRARY_STATUSES = ["watching", "completed", "planned", "dropped"] as const;
 
-export type LogAnimeData = LogAnimeInput;
+type LibraryMeRoute = ReturnType<typeof api.library.me>;
+type UpdateStatusBody = Parameters<LibraryMeRoute["status"]["patch"]>[0];
+type UpdateProgressBody = Parameters<LibraryMeRoute["progress"]["patch"]>[0];
+type UpdateRatingBody = Parameters<LibraryMeRoute["rating"]["patch"]>[0];
 
-export type UpdateLibraryStatusData = {
-  animeId: number;
-} & UpdateStatusInput;
-
-export type UpdateLibraryProgressData = {
-  animeId: number;
-} & UpdateProgressInput;
-
-export type UpdateLibraryRatingData = {
-  animeId: number;
-} & UpdateRatingInput;
+export type LogAnimeData = Parameters<typeof api.library.me.log.post>[0];
+export type UpdateLibraryStatusData = { animeId: number } & UpdateStatusBody;
+export type UpdateLibraryProgressData = { animeId: number } & UpdateProgressBody;
+export type UpdateLibraryRatingData = { animeId: number } & UpdateRatingBody;
 
 export async function getMyLibrary() {
   const res = await api.library.me.get();
@@ -65,4 +54,4 @@ export async function removeFromLibrary(animeId: number) {
   return unwrapEdenResponse(res);
 }
 
-export type { LibraryEntryWithAnime };
+export type LibraryEntryWithAnime = Awaited<ReturnType<typeof getMyLibrary>>[number];

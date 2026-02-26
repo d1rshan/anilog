@@ -1,14 +1,8 @@
 import { api } from "@/lib/api";
 import { unwrapEdenResponse } from "@/lib/eden";
-import type { AdminUserListResult, HeroCurationUpdateInput, UserWithProfile } from "@anilog/api";
 
-export type AdminStats = {
-  totalUsers: number;
-};
-
-export type AdminUsersResult = AdminUserListResult & {
-  users: UserWithProfile[];
-};
+type AdminHeroCurationsRoute = ReturnType<(typeof api.admin)["hero-curations"]>;
+type HeroCurationUpdateInput = Parameters<AdminHeroCurationsRoute["patch"]>[0];
 
 export async function getAdminStats() {
   const res = await api.admin.stats.get();
