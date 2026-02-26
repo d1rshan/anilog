@@ -1,6 +1,7 @@
 import { api } from "@/lib/api";
 import { unwrapEdenResponse } from "@/lib/eden";
-import type { ProfileData, PublicUserLibrary, UserWithProfile } from "@anilog/api";
+
+export type UpdateProfileData = Parameters<typeof api.users.me.profile.put>[0];
 
 export async function searchUsers(query: string) {
   const res = await api.users.search.get({ query: { q: query } });
@@ -53,11 +54,10 @@ export async function getMyAdminStatus() {
   return unwrapEdenResponse(res);
 }
 
-export type UpdateProfileData = ProfileData;
-
 export async function updateMyProfile(data: UpdateProfileData) {
   const res = await api.users.me.profile.put(data);
   return unwrapEdenResponse(res);
 }
 
-export type { PublicUserLibrary, UserWithProfile };
+export type UserWithProfile = Awaited<ReturnType<typeof getUserProfile>>;
+export type PublicUserLibrary = Awaited<ReturnType<typeof getUserPublicLibrary>>;

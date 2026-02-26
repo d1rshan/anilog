@@ -5,11 +5,15 @@ import {
   adminStatusSchema,
   errorResponseSchema,
   followActionResultSchema,
+  isFollowingResultSchema,
   profileUpdateInputSchema,
   publicUserLibraryEntrySchema,
+  userIdParamsSchema,
+  userSearchQuerySchema,
+  usernameParamsSchema,
   userProfileSchema,
   userWithProfileSchema,
-} from "./schemas";
+} from "../schemas";
 
 const authMiddleware = (app: Elysia) =>
   app.derive(async ({ request }) => {
@@ -27,7 +31,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return UserService.searchUsers(query.q || "", 20);
     },
     {
-      query: t.Object({ q: t.String() }),
+      query: userSearchQuerySchema,
       response: {
         200: t.Array(userWithProfileSchema),
       },
@@ -43,7 +47,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return foundUser;
     },
     {
-      params: t.Object({ id: t.String() }),
+      params: userIdParamsSchema,
       response: {
         200: userWithProfileSchema,
       },
@@ -59,7 +63,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return foundUser;
     },
     {
-      params: t.Object({ username: t.String() }),
+      params: usernameParamsSchema,
       response: {
         200: userWithProfileSchema,
       },
@@ -71,7 +75,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return UserService.getPublicUserLibrary(params.id);
     },
     {
-      params: t.Object({ id: t.String() }),
+      params: userIdParamsSchema,
       response: {
         200: t.Array(publicUserLibraryEntrySchema),
       },
@@ -83,7 +87,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return UserService.getFollowers(params.id);
     },
     {
-      params: t.Object({ id: t.String() }),
+      params: userIdParamsSchema,
       response: {
         200: t.Array(userWithProfileSchema),
       },
@@ -95,7 +99,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return UserService.getFollowing(params.id);
     },
     {
-      params: t.Object({ id: t.String() }),
+      params: userIdParamsSchema,
       response: {
         200: t.Array(userWithProfileSchema),
       },
@@ -108,7 +112,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return UserService.followUser(userId, params.id);
     },
     {
-      params: t.Object({ id: t.String() }),
+      params: userIdParamsSchema,
       response: {
         200: followActionResultSchema,
       },
@@ -120,7 +124,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return UserService.unfollowUser(userId, params.id);
     },
     {
-      params: t.Object({ id: t.String() }),
+      params: userIdParamsSchema,
       response: {
         200: followActionResultSchema,
       },
@@ -184,9 +188,9 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return { isFollowing };
     },
     {
-      params: t.Object({ id: t.String() }),
+      params: userIdParamsSchema,
       response: {
-        200: t.Object({ isFollowing: t.Boolean() }),
+        200: isFollowingResultSchema,
       },
     },
   );

@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { animate, motion, useMotionValue } from "framer-motion";
 import type { LibraryStatus } from "@anilog/db/schema/anilog";
-import type { LogAnimeInput } from "@anilog/api";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,11 +26,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { LIBRARY_STATUSES, type LibraryEntryWithAnime } from "@/features/lists/lib/requests";
+import {
+  LIBRARY_STATUSES,
+  type LibraryEntryWithAnime,
+  type LogAnimeData,
+} from "@/features/lists/lib/requests";
 import { useLogAnime, useRemoveFromLibrary } from "@/features/lists/lib/hooks";
 
 interface AddToListDialogProps {
-  anime: LogAnimeInput["anime"] | null;
+  anime: LogAnimeData["anime"] | null;
   entry?: LibraryEntryWithAnime | null;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;

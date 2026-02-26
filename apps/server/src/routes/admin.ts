@@ -2,14 +2,16 @@ import { Elysia, t } from "elysia";
 import { AnimeService, UserService } from "@anilog/api";
 import { auth } from "@anilog/auth";
 import {
+  adminUsersQuerySchema,
   adminStatsSchema,
   adminUsersResultSchema,
   errorResponseSchema,
   heroCurationSchema,
   setAdminStatusInputSchema,
   setAdminStatusResultSchema,
+  userIdParamsSchema,
   updateHeroCurationInputSchema,
-} from "./schemas";
+} from "../schemas";
 
 type RouteSet = { status?: number | string };
 
@@ -62,11 +64,7 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
       });
     },
     {
-      query: t.Object({
-        q: t.Optional(t.String()),
-        limit: t.Optional(t.Integer({ minimum: 1, maximum: 100 })),
-        offset: t.Optional(t.Integer({ minimum: 0 })),
-      }),
+      query: adminUsersQuerySchema,
       response: {
         200: adminUsersResultSchema,
         401: errorResponseSchema,
@@ -96,7 +94,7 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
       }
     },
     {
-      params: t.Object({ id: t.String() }),
+      params: userIdParamsSchema,
       body: setAdminStatusInputSchema,
       response: {
         200: setAdminStatusResultSchema,

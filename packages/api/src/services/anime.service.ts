@@ -1,7 +1,12 @@
 import { db } from "@anilog/db";
-import { anime, heroCuration, trendingAnime, userAnime } from "@anilog/db/schema/anilog";
+import {
+  anime,
+  heroCuration,
+  trendingAnime,
+  userAnime,
+  type HeroCuration,
+} from "@anilog/db/schema/anilog";
 import { and, asc, desc, eq, getTableColumns, ilike, notInArray, or } from "drizzle-orm";
-import type { HeroCurationUpdateInput, SyncResult, UpsertAnimeInput } from "../contracts/anime";
 
 const ANILIST_API = "https://graphql.anilist.co";
 const SEARCH_CACHE_TTL_MS = 30_000;
@@ -40,6 +45,33 @@ type AniListPageResponse = {
     };
   };
   errors?: Array<{ message?: string }>;
+};
+
+type HeroCurationUpdateInput = Pick<
+  HeroCuration,
+  | "videoId"
+  | "start"
+  | "stop"
+  | "title"
+  | "subtitle"
+  | "description"
+  | "tag"
+  | "sortOrder"
+  | "isActive"
+>;
+
+type UpsertAnimeInput = {
+  id: number;
+  title: string;
+  titleJapanese?: string | null;
+  description?: string | null;
+  episodes?: number | null;
+  status?: string | null;
+  genres?: string[] | null;
+  imageUrl: string;
+  bannerImage?: string | null;
+  year?: number | null;
+  rating?: number | null;
 };
 
 function mapAniListMediaToAnime(media: AniListMedia) {
@@ -264,7 +296,7 @@ export class AnimeService {
     return value;
   }
 
-  static async syncAllAnime(): Promise<SyncResult> {
+  static async syncAllAnime() {
     const allAnime = await db.select({ id: anime.id }).from(anime);
     const ids = allAnime.map((a) => a.id);
 
@@ -336,7 +368,7 @@ export class AnimeService {
     return { success: true, count };
   }
 
-  static async syncTrendingAnime(): Promise<SyncResult> {
+  static async syncTrendingAnime() {
     const query = `
       query TrendingAnime {
         Page(page: 1, perPage: 100) {

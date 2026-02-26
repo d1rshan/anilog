@@ -1,7 +1,6 @@
 import { db } from "@anilog/db";
 import { anime, userAnime, type LibraryStatus } from "@anilog/db/schema/anilog";
 import { and, asc, eq, getTableColumns } from "drizzle-orm";
-import type { LibraryEntryWithAnime, LogAnimeInput } from "../contracts/library";
 
 const STATUS_COMPLETION_BLOCKLIST = new Set(["RELEASING", "NOT_YET_RELEASED"]);
 
@@ -10,6 +9,24 @@ type ValidationInput = {
   currentEpisode?: number | null;
   animeStatus?: string | null;
   totalEpisodes?: number | null;
+};
+
+type LogAnimeInput = {
+  anime: {
+    id: number;
+    title: string;
+    titleJapanese?: string | null;
+    description?: string | null;
+    episodes?: number | null;
+    status?: string | null;
+    genres?: string[] | null;
+    imageUrl: string;
+    year?: number | null;
+    rating?: number | null;
+  };
+  status: LibraryStatus;
+  currentEpisode?: number;
+  rating?: number | null;
 };
 
 function validateStatusRules(input: ValidationInput) {
@@ -39,7 +56,7 @@ function validateStatusRules(input: ValidationInput) {
 }
 
 export class LibraryService {
-  static async getUserLibrary(userId: string): Promise<LibraryEntryWithAnime[]> {
+  static async getUserLibrary(userId: string) {
     const rows = await db
       .select({
         ...getTableColumns(userAnime),
@@ -61,10 +78,7 @@ export class LibraryService {
     return rows;
   }
 
-  private static async getLibraryEntry(
-    userId: string,
-    animeId: number,
-  ): Promise<LibraryEntryWithAnime | null> {
+  private static async getLibraryEntry(userId: string, animeId: number) {
     const result = await db
       .select({
         ...getTableColumns(userAnime),
@@ -86,7 +100,7 @@ export class LibraryService {
     return result[0] ?? null;
   }
 
-  static async logAnime(userId: string, input: LogAnimeInput): Promise<LibraryEntryWithAnime> {
+  static async logAnime(userId: string, input: LogAnimeInput) {
     await db
       .insert(anime)
       .values({
@@ -162,7 +176,7 @@ export class LibraryService {
     animeId: number,
     status: LibraryStatus,
     currentEpisode?: number,
-  ): Promise<LibraryEntryWithAnime> {
+  ) {
     const existing = await this.getLibraryEntry(userId, animeId);
     if (!existing) {
       throw new Error("Anime not found in your library");
@@ -201,7 +215,7 @@ export class LibraryService {
     userId: string,
     animeId: number,
     payload: { currentEpisode?: number; delta?: number },
-  ): Promise<LibraryEntryWithAnime> {
+  ) {
     if (payload.currentEpisode === undefined && payload.delta === undefined) {
       throw new Error("Provide currentEpisode or delta for progress update");
     }
@@ -238,11 +252,7 @@ export class LibraryService {
     return updated;
   }
 
-  static async updateRating(
-    userId: string,
-    animeId: number,
-    rating: number | null,
-  ): Promise<LibraryEntryWithAnime> {
+  static async updateRating(userId: string, animeId: number, rating: number | null) {
     const existing = await this.getLibraryEntry(userId, animeId);
     if (!existing) {
       throw new Error("Anime not found in your library");
@@ -264,7 +274,7 @@ export class LibraryService {
     return updated;
   }
 
-  static async removeFromLibrary(userId: string, animeId: number): Promise<boolean> {
+  static async removeFromLibrary(userId: string, animeId: number) {
     const result = await db
       .delete(userAnime)
       .where(and(eq(userAnime.userId, userId), eq(userAnime.animeId, animeId)))
