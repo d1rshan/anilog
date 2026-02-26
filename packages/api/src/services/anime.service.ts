@@ -7,6 +7,12 @@ import {
   type HeroCuration,
 } from "@anilog/db/schema/anilog";
 import { and, asc, desc, eq, getTableColumns, ilike, notInArray, or } from "drizzle-orm";
+import {
+  externalServiceError,
+  internalError,
+  notFoundError,
+  validationError,
+} from "../errors/api-error";
 
 const ANILIST_API = "https://graphql.anilist.co";
 const SEARCH_CACHE_TTL_MS = 30_000;
@@ -121,11 +127,11 @@ export class AnimeService {
 
   static async updateHeroCuration(id: number, payload: HeroCurationUpdateInput) {
     if (payload.start < 0) {
-      throw new Error("Start timestamp must be zero or greater");
+      throw validationError("Start timestamp must be zero or greater");
     }
 
     if (payload.stop <= payload.start) {
-      throw new Error("Stop timestamp must be greater than start timestamp");
+      throw validationError("Stop timestamp must be greater than start timestamp");
     }
 
     const requiredTextFields = [
@@ -138,12 +144,12 @@ export class AnimeService {
 
     for (const field of requiredTextFields) {
       if (!field.value.trim()) {
-        throw new Error(`${field.name} is required`);
+        throw validationError(`${field.name} is required`);
       }
     }
 
     if (payload.sortOrder < 0) {
-      throw new Error("sortOrder must be zero or greater");
+      throw validationError("sortOrder must be zero or greater");
     }
 
     const [updated] = await db
@@ -166,7 +172,7 @@ export class AnimeService {
       });
 
     if (!updated) {
-      throw new Error("Hero curation not found");
+      throw notFoundError("Hero curation not found");
     }
 
     return updated;
@@ -236,7 +242,7 @@ export class AnimeService {
       return result;
     } catch (error) {
       console.error("Error getting all anime:", error);
-      throw new Error("Failed to fetch anime");
+      throw internalError("Failed to fetch anime");
     }
   }
 
@@ -408,7 +414,7 @@ export class AnimeService {
     });
 
     if (!res.ok) {
-      throw new Error("AniList API failed");
+      throw externalServiceError("AniList API failed");
     }
 
     type TrendingAnimeResponse = {
@@ -528,7 +534,7 @@ export class AnimeService {
       const json = (await res.json()) as AniListPageResponse;
 
       if (json.errors?.length) {
-        throw new Error(json.errors[0]?.message ?? "AniList returned an error");
+        throw externalServiceError(json.errors[0]?.message ?? "AniList returned an error");
       }
 
       const media = json.data?.Page?.media ?? [];
@@ -543,7 +549,10 @@ export class AnimeService {
 
       return result;
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : "Failed to search anime");
+      if (error instanceof Error) {
+        throw externalServiceError(error.message);
+      }
+      throw internalError("Failed to search anime");
     }
   }
 
@@ -584,7 +593,7 @@ export class AnimeService {
       return { id: animeData.id, success: true };
     } catch (error) {
       console.error("Error upserting anime:", error);
-      throw new Error("Failed to upsert anime");
+      throw internalError("Failed to upsert anime");
     }
   }
 }

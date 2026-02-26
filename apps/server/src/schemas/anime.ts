@@ -6,11 +6,6 @@ export const successCountSchema = t.Object({
   count: t.Integer(),
 });
 
-export const syncUnauthorizedResponseSchema = t.Object({
-  success: t.Boolean(),
-  error: t.String(),
-});
-
 export const upsertAnimeInputSchema = t.Object({
   id: t.Integer(),
   title: t.String(),

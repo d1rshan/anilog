@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
+import { isApiError } from "@anilog/api";
 import { auth } from "@anilog/auth";
 import { animeRoutes } from "./routes/anime";
 import { userRoutes } from "./routes/users";
@@ -26,6 +27,26 @@ const app = new Elysia()
       return auth.handler(request);
     }
     return status(405);
+  })
+  .onError(({ code, error, set }) => {
+    if (isApiError(error)) {
+      set.status = error.status;
+      return { error: error.message };
+    }
+
+    if (code === "VALIDATION") {
+      set.status = 400;
+      return { error: "Invalid request payload" };
+    }
+
+    if (code === "NOT_FOUND") {
+      set.status = 404;
+      return { error: "Route not found" };
+    }
+
+    console.error("Unhandled server error:", error);
+    set.status = 500;
+    return { error: "Internal server error" };
   })
   .group("/api", (app) => app.use(animeRoutes).use(libraryRoutes).use(userRoutes).use(adminRoutes))
   .get("/", () => "OK")

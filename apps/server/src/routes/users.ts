@@ -1,9 +1,8 @@
 import { Elysia, t } from "elysia";
-import { UserService } from "@anilog/api";
+import { UserService, notFoundError, unauthorizedError } from "@anilog/api";
 import { auth } from "@anilog/auth";
 import {
   adminStatusSchema,
-  errorResponseSchema,
   followActionResultSchema,
   isFollowingResultSchema,
   profileUpdateInputSchema,
@@ -19,7 +18,7 @@ const authMiddleware = (app: Elysia) =>
   app.derive(async ({ request }) => {
     const session = await auth.api.getSession({ headers: request.headers });
     if (!session?.user?.id) {
-      throw new Error("User not authenticated");
+      throw unauthorizedError("User not authenticated");
     }
     return { userId: session.user.id };
   });
@@ -32,9 +31,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
     },
     {
       query: userSearchQuerySchema,
-      response: {
-        200: t.Array(userWithProfileSchema),
-      },
+      response: t.Array(userWithProfileSchema),
     },
   )
   .get(
@@ -42,15 +39,13 @@ export const userRoutes = new Elysia({ prefix: "/users" })
     async ({ params }) => {
       const foundUser = await UserService.getUserProfile(params.id);
       if (!foundUser) {
-        throw new Error("User not found");
+        throw notFoundError("User not found");
       }
       return foundUser;
     },
     {
       params: userIdParamsSchema,
-      response: {
-        200: userWithProfileSchema,
-      },
+      response: userWithProfileSchema,
     },
   )
   .get(
@@ -58,15 +53,13 @@ export const userRoutes = new Elysia({ prefix: "/users" })
     async ({ params }) => {
       const foundUser = await UserService.getUserByUsername(params.username);
       if (!foundUser) {
-        throw new Error("User not found");
+        throw notFoundError("User not found");
       }
       return foundUser;
     },
     {
       params: usernameParamsSchema,
-      response: {
-        200: userWithProfileSchema,
-      },
+      response: userWithProfileSchema,
     },
   )
   .get(
@@ -76,9 +69,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
     },
     {
       params: userIdParamsSchema,
-      response: {
-        200: t.Array(publicUserLibraryEntrySchema),
-      },
+      response: t.Array(publicUserLibraryEntrySchema),
     },
   )
   .get(
@@ -88,9 +79,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
     },
     {
       params: userIdParamsSchema,
-      response: {
-        200: t.Array(userWithProfileSchema),
-      },
+      response: t.Array(userWithProfileSchema),
     },
   )
   .get(
@@ -100,9 +89,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
     },
     {
       params: userIdParamsSchema,
-      response: {
-        200: t.Array(userWithProfileSchema),
-      },
+      response: t.Array(userWithProfileSchema),
     },
   )
   .use(authMiddleware)
@@ -113,9 +100,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
     },
     {
       params: userIdParamsSchema,
-      response: {
-        200: followActionResultSchema,
-      },
+      response: followActionResultSchema,
     },
   )
   .delete(
@@ -125,9 +110,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
     },
     {
       params: userIdParamsSchema,
-      response: {
-        200: followActionResultSchema,
-      },
+      response: followActionResultSchema,
     },
   )
   .get(
@@ -135,14 +118,12 @@ export const userRoutes = new Elysia({ prefix: "/users" })
     async ({ userId }) => {
       const profile = await UserService.getUserProfile(userId);
       if (!profile) {
-        throw new Error("Profile not found");
+        throw notFoundError("Profile not found");
       }
       return profile;
     },
     {
-      response: {
-        200: userWithProfileSchema,
-      },
+      response: userWithProfileSchema,
     },
   )
   .get(
@@ -152,9 +133,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return { isAdmin };
     },
     {
-      response: {
-        200: adminStatusSchema,
-      },
+      response: adminStatusSchema,
     },
   )
   .put(
@@ -164,10 +143,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
     },
     {
       body: profileUpdateInputSchema,
-      response: {
-        200: userProfileSchema,
-        400: errorResponseSchema,
-      },
+      response: userProfileSchema,
     },
   )
   .get(
@@ -176,9 +152,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return UserService.getFollowing(userId);
     },
     {
-      response: {
-        200: t.Array(userWithProfileSchema),
-      },
+      response: t.Array(userWithProfileSchema),
     },
   )
   .get(
@@ -189,8 +163,6 @@ export const userRoutes = new Elysia({ prefix: "/users" })
     },
     {
       params: userIdParamsSchema,
-      response: {
-        200: isFollowingResultSchema,
-      },
+      response: isFollowingResultSchema,
     },
   );
