@@ -1,14 +1,12 @@
 import { Elysia, t } from "elysia";
-import { AnimeService } from "@anilog/api";
+import { AnimeService, unauthorizedError } from "@anilog/api";
 import { auth } from "@anilog/auth";
 import {
   archiveSearchQuerySchema,
   archiveSearchResponseSchema,
   animeSchema,
-  errorResponseSchema,
   heroCurationSchema,
   successCountSchema,
-  syncUnauthorizedResponseSchema,
   upsertAnimeInputSchema,
   upsertAnimeResultSchema,
 } from "../schemas";
@@ -27,9 +25,7 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
       return AnimeService.getHeroCurations();
     },
     {
-      response: {
-        200: t.Array(heroCurationSchema),
-      },
+      response: t.Array(heroCurationSchema),
     },
   )
   .get(
@@ -38,41 +34,31 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
       return AnimeService.getTrendingAnime();
     },
     {
-      response: {
-        200: t.Array(animeSchema),
-      },
+      response: t.Array(animeSchema),
     },
   )
   .get(
     "/sync",
-    async ({ request, set }) => {
+    async ({ request }) => {
       if (!isCronAuthorized(request)) {
-        set.status = 401;
-        return { success: false, error: "Unauthorized" };
+        throw unauthorizedError("Unauthorized");
       }
       return AnimeService.syncTrendingAnime();
     },
     {
-      response: {
-        200: successCountSchema,
-        401: syncUnauthorizedResponseSchema,
-      },
+      response: successCountSchema,
     },
   )
   .get(
     "/sync-all",
-    async ({ request, set }) => {
+    async ({ request }) => {
       if (!isCronAuthorized(request)) {
-        set.status = 401;
-        return { success: false, error: "Unauthorized" };
+        throw unauthorizedError("Unauthorized");
       }
       return AnimeService.syncAllAnime();
     },
     {
-      response: {
-        200: successCountSchema,
-        401: syncUnauthorizedResponseSchema,
-      },
+      response: successCountSchema,
     },
   )
   .get(
@@ -82,18 +68,15 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
     },
     {
       params: t.Object({ query: t.String() }),
-      response: {
-        200: t.Array(animeSchema),
-      },
+      response: t.Array(animeSchema),
     },
   )
   .get(
     "/archive-search",
-    async ({ request, query, set }) => {
+    async ({ request, query }) => {
       const session = await auth.api.getSession({ headers: request.headers });
       if (!session?.user?.id) {
-        set.status = 401;
-        return { error: "User not authenticated" };
+        throw unauthorizedError("User not authenticated");
       }
 
       const q = query.q?.trim() ?? "";
@@ -103,10 +86,7 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
     },
     {
       query: archiveSearchQuerySchema,
-      response: {
-        200: archiveSearchResponseSchema,
-        401: errorResponseSchema,
-      },
+      response: archiveSearchResponseSchema,
     },
   )
   .post(
@@ -116,8 +96,6 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
     },
     {
       body: upsertAnimeInputSchema,
-      response: {
-        200: upsertAnimeResultSchema,
-      },
+      response: upsertAnimeResultSchema,
     },
   );

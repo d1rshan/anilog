@@ -1,9 +1,5 @@
 import { t } from "elysia";
 
-export const errorResponseSchema = t.Object({
-  error: t.String(),
-});
-
 export const libraryStatusSchema = t.Union([
   t.Literal("watching"),
   t.Literal("completed"),

@@ -1,8 +1,7 @@
 import { Elysia, t } from "elysia";
-import { LibraryService } from "@anilog/api";
+import { LibraryService, unauthorizedError } from "@anilog/api";
 import { auth } from "@anilog/auth";
 import {
-  errorResponseSchema,
   libraryAnimeIdParamsSchema,
   libraryEntrySchema,
   logAnimeInputSchema,
@@ -15,7 +14,7 @@ const authMiddleware = (app: Elysia) =>
   app.derive(async ({ request }) => {
     const session = await auth.api.getSession({ headers: request.headers });
     if (!session?.user?.id) {
-      throw new Error("User not authenticated");
+      throw unauthorizedError("User not authenticated");
     }
     return { userId: session.user.id };
   });
@@ -28,9 +27,7 @@ export const libraryRoutes = new Elysia({ prefix: "/library" })
       return LibraryService.getUserLibrary(userId);
     },
     {
-      response: {
-        200: t.Array(libraryEntrySchema),
-      },
+      response: t.Array(libraryEntrySchema),
     },
   )
   .post(
@@ -40,10 +37,7 @@ export const libraryRoutes = new Elysia({ prefix: "/library" })
     },
     {
       body: logAnimeInputSchema,
-      response: {
-        200: libraryEntrySchema,
-        400: errorResponseSchema,
-      },
+      response: libraryEntrySchema,
     },
   )
   .patch(
@@ -54,10 +48,7 @@ export const libraryRoutes = new Elysia({ prefix: "/library" })
     {
       params: libraryAnimeIdParamsSchema,
       body: updateStatusInputSchema,
-      response: {
-        200: libraryEntrySchema,
-        400: errorResponseSchema,
-      },
+      response: libraryEntrySchema,
     },
   )
   .patch(
@@ -68,10 +59,7 @@ export const libraryRoutes = new Elysia({ prefix: "/library" })
     {
       params: libraryAnimeIdParamsSchema,
       body: updateProgressInputSchema,
-      response: {
-        200: libraryEntrySchema,
-        400: errorResponseSchema,
-      },
+      response: libraryEntrySchema,
     },
   )
   .patch(
@@ -82,10 +70,7 @@ export const libraryRoutes = new Elysia({ prefix: "/library" })
     {
       params: libraryAnimeIdParamsSchema,
       body: updateRatingInputSchema,
-      response: {
-        200: libraryEntrySchema,
-        400: errorResponseSchema,
-      },
+      response: libraryEntrySchema,
     },
   )
   .delete(
@@ -95,8 +80,6 @@ export const libraryRoutes = new Elysia({ prefix: "/library" })
     },
     {
       params: libraryAnimeIdParamsSchema,
-      response: {
-        200: t.Boolean(),
-      },
+      response: t.Boolean(),
     },
   );
