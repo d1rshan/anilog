@@ -1,6 +1,7 @@
 import { db } from "@anilog/db";
 import { anime, userAnime, type LibraryStatus } from "@anilog/db/schema/anilog";
 import { and, asc, eq, getTableColumns } from "drizzle-orm";
+import { internalError, notFoundError, validationError } from "../errors/api-error";
 
 const STATUS_COMPLETION_BLOCKLIST = new Set(["RELEASING", "NOT_YET_RELEASED"]);
 
@@ -33,24 +34,24 @@ function validateStatusRules(input: ValidationInput) {
   const animeStatus = (input.animeStatus ?? "").toUpperCase();
 
   if (animeStatus === "NOT_YET_RELEASED" && input.status !== "planned") {
-    throw new Error("Only Planned is allowed for unreleased anime");
+    throw validationError("Only Planned is allowed for unreleased anime");
   }
 
   if (input.status === "completed" && STATUS_COMPLETION_BLOCKLIST.has(animeStatus)) {
-    throw new Error("Cannot mark as Completed until the anime is finished");
+    throw validationError("Cannot mark as Completed until the anime is finished");
   }
 
   if (input.status === "watching" && (!input.currentEpisode || input.currentEpisode < 1)) {
-    throw new Error("Current episode is required for Watching");
+    throw validationError("Current episode is required for Watching");
   }
 
   if (input.status === "completed") {
     if (!input.currentEpisode || input.currentEpisode < 1) {
-      throw new Error("Current episode is required for Completed");
+      throw validationError("Current episode is required for Completed");
     }
 
     if (input.totalEpisodes && input.currentEpisode < input.totalEpisodes) {
-      throw new Error("Completed anime must have all episodes watched");
+      throw validationError("Completed anime must have all episodes watched");
     }
   }
 }
@@ -165,7 +166,7 @@ export class LibraryService {
     const entry = await this.getLibraryEntry(userId, input.anime.id);
 
     if (!entry) {
-      throw new Error("Failed to log anime");
+      throw internalError("Failed to log anime");
     }
 
     return entry;
@@ -179,7 +180,7 @@ export class LibraryService {
   ) {
     const existing = await this.getLibraryEntry(userId, animeId);
     if (!existing) {
-      throw new Error("Anime not found in your library");
+      throw notFoundError("Anime not found in your library");
     }
 
     const resolvedEpisode =
@@ -205,7 +206,7 @@ export class LibraryService {
 
     const updated = await this.getLibraryEntry(userId, animeId);
     if (!updated) {
-      throw new Error("Failed to update status");
+      throw internalError("Failed to update status");
     }
 
     return updated;
@@ -217,16 +218,16 @@ export class LibraryService {
     payload: { currentEpisode?: number; delta?: number },
   ) {
     if (payload.currentEpisode === undefined && payload.delta === undefined) {
-      throw new Error("Provide currentEpisode or delta for progress update");
+      throw validationError("Provide currentEpisode or delta for progress update");
     }
 
     const existing = await this.getLibraryEntry(userId, animeId);
     if (!existing) {
-      throw new Error("Anime not found in your library");
+      throw notFoundError("Anime not found in your library");
     }
 
     if (existing.status !== "watching") {
-      throw new Error("Progress can only be updated for Watching anime");
+      throw validationError("Progress can only be updated for Watching anime");
     }
 
     const nextEpisodeRaw =
@@ -246,7 +247,7 @@ export class LibraryService {
 
     const updated = await this.getLibraryEntry(userId, animeId);
     if (!updated) {
-      throw new Error("Failed to update progress");
+      throw internalError("Failed to update progress");
     }
 
     return updated;
@@ -255,7 +256,7 @@ export class LibraryService {
   static async updateRating(userId: string, animeId: number, rating: number | null) {
     const existing = await this.getLibraryEntry(userId, animeId);
     if (!existing) {
-      throw new Error("Anime not found in your library");
+      throw notFoundError("Anime not found in your library");
     }
 
     await db
@@ -268,7 +269,7 @@ export class LibraryService {
 
     const updated = await this.getLibraryEntry(userId, animeId);
     if (!updated) {
-      throw new Error("Failed to update rating");
+      throw internalError("Failed to update rating");
     }
 
     return updated;

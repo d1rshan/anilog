@@ -2,6 +2,7 @@ import { db } from "@anilog/db";
 import { userFollow, userProfile, userAnime, anime } from "@anilog/db/schema/anilog";
 import { user } from "@anilog/db/schema/auth";
 import { eq, getTableColumns, count, and, ilike, asc, or } from "drizzle-orm";
+import { conflictError, internalError, notFoundError, validationError } from "../errors/api-error";
 
 export class UserService {
   static async createUserProfile(userId: string) {
@@ -23,7 +24,7 @@ export class UserService {
     });
 
     if (!existingProfile) {
-      throw new Error("Failed to create or find user profile");
+      throw internalError("Failed to create or find user profile");
     }
 
     return existingProfile;
@@ -127,7 +128,7 @@ export class UserService {
       .returning();
 
     if (!updatedProfile) {
-      throw new Error("User profile not found");
+      throw notFoundError("User profile not found");
     }
 
     return updatedProfile;
@@ -135,7 +136,7 @@ export class UserService {
 
   static async followUser(followerId: string, followingId: string) {
     if (followerId === followingId) {
-      throw new Error("Cannot follow yourself");
+      throw validationError("Cannot follow yourself");
     }
 
     const targetUser = await db.query.user.findFirst({
@@ -143,7 +144,7 @@ export class UserService {
     });
 
     if (!targetUser) {
-      throw new Error("User not found");
+      throw notFoundError("User not found");
     }
 
     try {
@@ -154,7 +155,7 @@ export class UserService {
       return { success: true, message: "Successfully followed user" };
     } catch (error) {
       if (error instanceof Error && error.message.includes("unique constraint")) {
-        throw new Error("Already following this user");
+        throw conflictError("Already following this user");
       }
       throw error;
     }
@@ -167,7 +168,7 @@ export class UserService {
       .returning();
 
     if (result.length === 0) {
-      throw new Error("Not following this user");
+      throw notFoundError("Not following this user");
     }
 
     return { success: true, message: "Successfully unfollowed user" };
@@ -410,7 +411,7 @@ export class UserService {
 
   static async setUserAdminStatus(targetUserId: string, isAdmin: boolean, actorUserId?: string) {
     if (actorUserId && actorUserId === targetUserId && !isAdmin) {
-      throw new Error("You cannot remove your own admin access");
+      throw validationError("You cannot remove your own admin access");
     }
 
     const [updated] = await db
@@ -426,7 +427,7 @@ export class UserService {
       });
 
     if (!updated) {
-      throw new Error("User not found");
+      throw notFoundError("User not found");
     }
 
     return updated;
