@@ -12,25 +12,26 @@ import {
   updateHeroCurationInputSchema,
 } from "../schemas";
 
-async function requireAdmin(request: Request) {
-  const session = await auth.api.getSession({ headers: request.headers });
-  if (!session?.user?.id) {
-    throw unauthorizedError("User not authenticated");
-  }
+const adminMiddleware = (app: Elysia) =>
+  app.derive(async ({ request }) => {
+    const session = await auth.api.getSession({ headers: request.headers });
+    if (!session?.user?.id) {
+      throw unauthorizedError("User not authenticated");
+    }
 
-  const isAdmin = await UserService.getAdminStatus(session.user.id);
-  if (!isAdmin) {
-    throw forbiddenError("Forbidden");
-  }
+    const isAdmin = await UserService.getAdminStatus(session.user.id);
+    if (!isAdmin) {
+      throw forbiddenError("Forbidden");
+    }
 
-  return { userId: session.user.id };
-}
+    return { adminUserId: session.user.id };
+  });
 
 export const adminRoutes = new Elysia({ prefix: "/admin" })
+  .use(adminMiddleware)
   .get(
     "/stats",
-    async ({ request }) => {
-      await requireAdmin(request);
+    async () => {
       return UserService.getAdminStats();
     },
     {
@@ -39,9 +40,7 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
   )
   .get(
     "/users",
-    async ({ request, query }) => {
-      await requireAdmin(request);
-
+    async ({ query }) => {
       const q = query.q?.trim() ?? "";
       return UserService.searchUsersForAdmin(q, {
         limit: query.limit,
@@ -55,9 +54,8 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
   )
   .patch(
     "/users/:id/admin",
-    async ({ request, params, body }) => {
-      const admin = await requireAdmin(request);
-      return UserService.setUserAdminStatus(params.id, body.isAdmin, admin.userId);
+    async ({ params, body, adminUserId }) => {
+      return UserService.setUserAdminStatus(params.id, body.isAdmin, adminUserId);
     },
     {
       params: userIdParamsSchema,
@@ -67,8 +65,7 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
   )
   .get(
     "/hero-curations",
-    async ({ request }) => {
-      await requireAdmin(request);
+    async () => {
       return AnimeService.getHeroCurationsForAdmin();
     },
     {
@@ -77,8 +74,7 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
   )
   .patch(
     "/hero-curations/:id",
-    async ({ request, params, body }) => {
-      await requireAdmin(request);
+    async ({ params, body }) => {
       return AnimeService.updateHeroCuration(params.id, body);
     },
     {
