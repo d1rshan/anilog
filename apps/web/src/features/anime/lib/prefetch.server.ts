@@ -2,8 +2,8 @@ import "server-only";
 
 import type { QueryClient } from "@tanstack/react-query";
 
-import { animeQueries } from "@/features/anime/lib/queries";
-import { libraryQueries } from "@/features/lists/lib/queries";
+import { animeQueries } from "@/features/anime/lib/options";
+import { libraryQueries } from "@/features/lists/lib/options";
 
 export async function prefetchAnimeHome(
   queryClient: QueryClient,

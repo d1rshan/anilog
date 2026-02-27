@@ -6,7 +6,7 @@ import { AnimeSearch } from "./anime-search";
 import { Volume2, VolumeX, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHeroCurations } from "../lib/hooks";
-import type { HeroCuration } from "../lib/queries";
+import type { HeroCuration } from "../lib/options";
 
 const FALLBACK_CURATIONS: Array<
   Pick<HeroCuration, "videoId" | "start" | "stop" | "title" | "subtitle" | "description" | "tag">

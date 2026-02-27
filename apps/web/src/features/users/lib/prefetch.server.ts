@@ -2,9 +2,9 @@ import "server-only";
 
 import type { QueryClient } from "@tanstack/react-query";
 
-import { libraryQueries } from "@/features/lists/lib/queries";
+import { libraryQueries } from "@/features/lists/lib/options";
 
-import { userQueries } from "./queries";
+import { userQueries } from "./options";
 
 export async function prefetchUserByUsername(queryClient: QueryClient, username: string) {
   await queryClient.prefetchQuery(userQueries.byUsername(username));

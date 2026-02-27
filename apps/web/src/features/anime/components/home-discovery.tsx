@@ -8,7 +8,7 @@ import { useTrendingAnime } from "../lib/hooks";
 import { useMyLibrary, useLogAnime } from "@/features/lists/lib/hooks";
 import { AnimeCard } from "./anime-card";
 import { AddToListDialog } from "./add-to-list-dialog";
-import { type LibraryEntryWithAnime } from "@/features/lists/lib/queries";
+import { type LibraryEntryWithAnime } from "@/features/lists/lib/options";
 import { useAuth, useRequireAuth } from "@/features/auth/lib/hooks";
 import { cn } from "@/lib/utils";
 

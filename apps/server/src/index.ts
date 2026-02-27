@@ -26,7 +26,7 @@ const app = new Elysia()
     if (["POST", "GET"].includes(request.method)) {
       return auth.handler(request);
     }
-    return status(405);
+    return status(405); // this wont be trigger the global onError
   })
   .onError(({ code, error, set }) => {
     if (isApiError(error)) {

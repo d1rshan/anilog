@@ -7,7 +7,7 @@ import {
   prefetchProfileLibrary,
   prefetchUserByUsername,
 } from "@/features/users/lib/prefetch.server";
-import { type UserWithProfile } from "@/features/users/lib/queries";
+import { type UserWithProfile } from "@/features/users/lib/options";
 import { userKeys } from "@/lib/query-keys";
 
 import { UnifiedProfile } from "../components/unified-profile";
