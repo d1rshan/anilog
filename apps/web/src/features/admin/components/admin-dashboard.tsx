@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/features/auth/lib/hooks";
 import { useMyAdminStatus } from "@/features/users/lib/hooks";
-import type { HeroCuration } from "@/features/anime/lib/requests";
+import type { HeroCuration } from "@/features/anime/lib/queries";
 
 import {
   useAdminHeroCurations,

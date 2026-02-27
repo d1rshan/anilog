@@ -26,11 +26,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import {
-  LIBRARY_STATUSES,
-  type LibraryEntryWithAnime,
-  type LogAnimeData,
-} from "@/features/lists/lib/requests";
+import { LIBRARY_STATUSES, type LibraryEntryWithAnime } from "@/features/lists/lib/queries";
+import { type LogAnimeData } from "@/features/lists/lib/mutations";
 import { useLogAnime, useRemoveFromLibrary } from "@/features/lists/lib/hooks";
 
 interface AddToListDialogProps {

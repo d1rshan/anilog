@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { HydrationBoundary, QueryClient, dehydrate } from "@tanstack/react-query";
 
 import { getCurrentUser } from "@/features/auth/lib/server";
-import { myLibraryQueryOptions, trendingAnimeQueryOptions } from "@/lib/query-options";
+import { prefetchAnimeHome } from "@/features/anime/lib/prefetch.server";
 
 import { DiscoverSearchShell } from "../components/discover-search-shell";
 
@@ -12,11 +12,7 @@ export const HomePage = async () => {
 
   const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery(trendingAnimeQueryOptions());
-
-  if (user) {
-    await queryClient.prefetchQuery(myLibraryQueryOptions());
-  }
+  await prefetchAnimeHome(queryClient, { includeMyLibrary: Boolean(user) });
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

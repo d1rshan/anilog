@@ -7,7 +7,8 @@ import { AnimeCard } from "@/features/anime/components/anime-card";
 import { AddToListDialog } from "@/features/anime/components/add-to-list-dialog";
 import { AnimeStackPreview } from "./anime-stack-preview";
 import { useMyLibrary, groupLibraryByStatus } from "../lib/hooks";
-import { LIBRARY_STATUSES, type LibraryEntryWithAnime, type LogAnimeData } from "../lib/requests";
+import { LIBRARY_STATUSES, type LibraryEntryWithAnime } from "../lib/queries";
+import { type LogAnimeData } from "../lib/mutations";
 import type { LibraryStatus } from "@anilog/db/schema/anilog";
 
 const STATUS_LABELS: Record<LibraryStatus, string> = {

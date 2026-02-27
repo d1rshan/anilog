@@ -4,22 +4,16 @@ import type { Anime, LibraryStatus } from "@anilog/db/schema/anilog";
 import type { ApiClientError } from "@/lib/eden";
 import { getApiErrorMessage } from "@/lib/eden";
 
-import { myLibraryQueryOptions } from "@/lib/query-options";
-import { libraryKeys } from "@/lib/query-keys";
-
+import { libraryQueries, type LibraryEntryWithAnime } from "@/features/lists/lib/queries";
 import {
-  logAnime,
-  removeFromLibrary,
-  updateLibraryProgress,
-  updateLibraryRating,
-  updateLibraryStatus,
-  type LibraryEntryWithAnime,
+  libraryMutations,
   type LogAnimeData,
   type UpdateLibraryProgressData,
   type UpdateLibraryRatingData,
   type UpdateLibraryStatusData,
-} from "./requests";
-import type { PublicUserLibrary } from "@/features/users/lib/requests";
+} from "@/features/lists/lib/mutations";
+import type { PublicUserLibrary } from "@/features/users/lib/queries";
+import { libraryKeys } from "@/lib/query-keys";
 
 type MutationContext = {
   previous?: LibraryEntryWithAnime[];
@@ -107,7 +101,7 @@ function removePublicLibraryEntryFromCache(
 
 export const useMyLibrary = (options?: { enabled?: boolean }) => {
   return useQuery({
-    ...myLibraryQueryOptions(),
+    ...libraryQueries.myLibrary(),
     enabled: options?.enabled ?? true,
   });
 };
@@ -119,7 +113,7 @@ export const useLogAnime = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: logAnime,
+    ...libraryMutations.logAnime(),
     onMutate: async (payload: LogAnimeData) => {
       await queryClient.cancelQueries({ queryKey: libraryKeys.me() });
       const previous = queryClient.getQueryData<LibraryEntryWithAnime[]>(libraryKeys.me());
@@ -188,7 +182,7 @@ export const useUpdateLibraryStatus = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: updateLibraryStatus,
+    ...libraryMutations.updateLibraryStatus(),
     onError: (error: ApiClientError) => {
       toast.error(getApiErrorMessage(error, "Failed to update status"));
     },
@@ -207,7 +201,7 @@ export const useUpdateLibraryProgress = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: updateLibraryProgress,
+    ...libraryMutations.updateLibraryProgress(),
     onMutate: async (payload: UpdateLibraryProgressData) => {
       await queryClient.cancelQueries({ queryKey: libraryKeys.me() });
       const previous = queryClient.getQueryData<LibraryEntryWithAnime[]>(libraryKeys.me());
@@ -256,7 +250,7 @@ export const useUpdateLibraryRating = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: updateLibraryRating,
+    ...libraryMutations.updateLibraryRating(),
     onError: (error: ApiClientError) => {
       toast.error(getApiErrorMessage(error, "Failed to update rating"));
     },
@@ -275,7 +269,7 @@ export const useRemoveFromLibrary = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: removeFromLibrary,
+    ...libraryMutations.removeFromLibrary(),
     onMutate: async (animeId) => {
       await queryClient.cancelQueries({ queryKey: libraryKeys.me() });
       const previous = queryClient.getQueryData<LibraryEntryWithAnime[]>(libraryKeys.me());

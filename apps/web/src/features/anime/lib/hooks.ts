@@ -6,22 +6,16 @@ import { toast } from "sonner";
 import type { ApiClientError } from "@/lib/eden";
 import { getApiErrorMessage } from "@/lib/eden";
 
-import {
-  archiveSearchQueryOptions,
-  heroCurationsQueryOptions,
-  searchAnimeQueryOptions,
-  trendingAnimeQueryOptions,
-} from "@/lib/query-options";
+import { animeQueries } from "@/features/anime/lib/queries";
+import { animeMutations } from "@/features/anime/lib/mutations";
 import { animeKeys } from "@/lib/query-keys";
 
-import { upsertAnime } from "./requests";
-
 export function useTrendingAnime() {
-  return useQuery(trendingAnimeQueryOptions());
+  return useQuery(animeQueries.trending());
 }
 
 export function useHeroCurations() {
-  return useQuery(heroCurationsQueryOptions());
+  return useQuery(animeQueries.heroCurations());
 }
 
 export function useSearchAnime(query: string) {
@@ -36,7 +30,7 @@ export function useSearchAnime(query: string) {
   }, [query]);
 
   return useQuery({
-    ...searchAnimeQueryOptions(debouncedQuery),
+    ...animeQueries.search(debouncedQuery),
     enabled: debouncedQuery.length >= 3,
     placeholderData: (previousData) => previousData,
   });
@@ -54,7 +48,7 @@ export function useArchiveSearch(query: string, options?: { enabled?: boolean })
   }, [query]);
 
   return useQuery({
-    ...archiveSearchQueryOptions(debouncedQuery),
+    ...animeQueries.archiveSearch(debouncedQuery),
     enabled: (options?.enabled ?? true) && debouncedQuery.length >= 2,
     placeholderData: (previousData) => previousData,
   });
@@ -64,7 +58,7 @@ export function useUpsertAnime() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: upsertAnime,
+    ...animeMutations.upsertAnime(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: animeKeys.trending() });
     },
