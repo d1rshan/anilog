@@ -1,12 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import type { ApiClientError } from "@/lib/eden";
-import { getApiErrorMessage } from "@/lib/eden";
-
-import { adminQueries } from "@/features/admin/lib/queries";
-import { adminMutations } from "@/features/admin/lib/mutations";
+import { adminQueries, adminMutations } from "@/features/admin/lib/options";
 import { adminKeys, animeKeys } from "@/lib/query-keys";
 
 export function useAdminStats(options?: { enabled?: boolean }) {
@@ -43,10 +38,6 @@ export function useSetUserAdminStatus() {
     ...adminMutations.setAdminStatus(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.all });
-      toast.success("Admin status updated");
-    },
-    onError: (error: ApiClientError) => {
-      toast.error(getApiErrorMessage(error, "Failed to update admin status"));
     },
   });
 }
@@ -59,10 +50,6 @@ export function useUpdateHeroCuration() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.heroCurations() });
       queryClient.invalidateQueries({ queryKey: animeKeys.heroCurations() });
-      toast.success("Hero curation updated");
-    },
-    onError: (error: ApiClientError) => {
-      toast.error(getApiErrorMessage(error, "Failed to update hero curation"));
     },
   });
 }

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { useAuth, useRequireAuth } from "@/features/auth/lib/hooks";
 import { useLogAnime, useMyLibrary } from "@/features/lists/lib/hooks";
-import { type LibraryEntryWithAnime } from "@/features/lists/lib/queries";
+import { type LibraryEntryWithAnime } from "@/features/lists/lib/options";
 import { cn } from "@/lib/utils";
 
 import { useArchiveSearch, useSearchAnime } from "../lib/hooks";

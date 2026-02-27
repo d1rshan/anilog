@@ -2,12 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import type { ApiClientError } from "@/lib/eden";
-import { getApiErrorMessage } from "@/lib/eden";
-
-import { animeQueries } from "@/features/anime/lib/queries";
-import { animeMutations } from "@/features/anime/lib/mutations";
+import { animeQueries, animeMutations } from "@/features/anime/lib/options";
 import { animeKeys } from "@/lib/query-keys";
 
 export function useTrendingAnime() {
@@ -61,9 +56,6 @@ export function useUpsertAnime() {
     ...animeMutations.upsertAnime(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: animeKeys.trending() });
-    },
-    onError: (error: ApiClientError) => {
-      toast.error(getApiErrorMessage(error, "Failed to add anime"));
     },
   });
 }

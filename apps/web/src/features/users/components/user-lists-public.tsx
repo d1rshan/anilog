@@ -6,7 +6,7 @@ import type { LibraryStatus } from "@anilog/db/schema/anilog";
 import { useUserLists } from "../lib/hooks";
 import { Button } from "@/components/ui/button";
 import { AnimeCard } from "@/features/anime/components/anime-card";
-import { LIBRARY_STATUSES } from "@/features/lists/lib/queries";
+import { LIBRARY_STATUSES } from "@/features/lists/lib/options";
 import { AnimeStackPreview } from "@/features/lists/components/anime-stack-preview";
 
 interface UserListsPublicProps {
