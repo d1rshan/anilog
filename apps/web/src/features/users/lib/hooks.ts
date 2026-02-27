@@ -3,57 +3,41 @@ import { toast } from "sonner";
 import type { ApiClientError } from "@/lib/eden";
 import { getApiErrorMessage } from "@/lib/eden";
 
-import {
-  isFollowingQueryOptions,
-  myFollowingQueryOptions,
-  myAdminStatusQueryOptions,
-  myProfileQueryOptions,
-  userByUsernameQueryOptions,
-  userProfileQueryOptions,
-  userPublicLibraryQueryOptions,
-  userSearchQueryOptions,
-} from "@/lib/query-options";
+import { userQueries, type UserWithProfile } from "@/features/users/lib/queries";
+import { userMutations, type UpdateProfileData } from "@/features/users/lib/mutations";
 import { userKeys } from "@/lib/query-keys";
-
-import {
-  followUser,
-  unfollowUser,
-  updateMyProfile,
-  type UserWithProfile,
-  type UpdateProfileData,
-} from "./requests";
 
 export const useSearchUsers = (query: string) => {
   return useQuery({
-    ...userSearchQueryOptions(query),
+    ...userQueries.search(query),
     enabled: query.length >= 3,
   });
 };
 
 export const useUserProfile = (userId: string) => {
   return useQuery({
-    ...userProfileQueryOptions(userId),
+    ...userQueries.profile(userId),
     enabled: !!userId,
   });
 };
 
 export const useUserByUsername = (username: string) => {
   return useQuery({
-    ...userByUsernameQueryOptions(username),
+    ...userQueries.byUsername(username),
     enabled: !!username,
   });
 };
 
 export const useUserLists = (userId: string) => {
   return useQuery({
-    ...userPublicLibraryQueryOptions(userId),
+    ...userQueries.publicLibrary(userId),
     enabled: !!userId,
   });
 };
 
 export const useIsFollowing = (userId: string, options?: { enabled?: boolean }) => {
   return useQuery({
-    ...isFollowingQueryOptions(userId),
+    ...userQueries.isFollowing(userId),
     enabled: !!userId && (options?.enabled ?? true),
   });
 };
@@ -61,7 +45,7 @@ export const useIsFollowing = (userId: string, options?: { enabled?: boolean }) 
 export const useFollowUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: followUser,
+    ...userMutations.follow(),
     onSuccess: (_, userId) => {
       queryClient.setQueryData(userKeys.isFollowing(userId), { isFollowing: true });
       queryClient.setQueryData<UserWithProfile>(userKeys.profile(userId), (current) =>
@@ -81,7 +65,7 @@ export const useFollowUser = () => {
 export const useUnfollowUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: unfollowUser,
+    ...userMutations.unfollow(),
     onSuccess: (_, userId) => {
       queryClient.setQueryData(userKeys.isFollowing(userId), { isFollowing: false });
       queryClient.setQueryData<UserWithProfile>(userKeys.profile(userId), (current) =>
@@ -99,16 +83,16 @@ export const useUnfollowUser = () => {
 };
 
 export const useMyFollowing = () => {
-  return useQuery(myFollowingQueryOptions());
+  return useQuery(userQueries.myFollowing());
 };
 
 export const useMyProfile = () => {
-  return useQuery(myProfileQueryOptions());
+  return useQuery(userQueries.myProfile());
 };
 
 export const useMyAdminStatus = (options?: { enabled?: boolean }) => {
   return useQuery({
-    ...myAdminStatusQueryOptions(),
+    ...userQueries.myAdminStatus(),
     enabled: options?.enabled ?? true,
   });
 };
@@ -116,7 +100,7 @@ export const useMyAdminStatus = (options?: { enabled?: boolean }) => {
 export const useUpdateMyProfile = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: UpdateProfileData) => updateMyProfile(data),
+    ...userMutations.updateMyProfile(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.meProfile() });
       queryClient.invalidateQueries({ queryKey: userKeys.profileRoot() });
@@ -129,3 +113,5 @@ export const useUpdateMyProfile = () => {
     },
   });
 };
+
+export type { UpdateProfileData };

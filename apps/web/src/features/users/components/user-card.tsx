@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FollowButton } from "./follow-button";
-import type { UserWithProfile } from "../lib/requests";
+import type { UserWithProfile } from "../lib/queries";
 import { useRouter } from "next/navigation";
 
 interface UserCardProps {

@@ -5,18 +5,13 @@ import { toast } from "sonner";
 import type { ApiClientError } from "@/lib/eden";
 import { getApiErrorMessage } from "@/lib/eden";
 
-import {
-  adminHeroCurationsQueryOptions,
-  adminStatsQueryOptions,
-  adminUsersQueryOptions,
-} from "@/lib/query-options";
+import { adminQueries } from "@/features/admin/lib/queries";
+import { adminMutations } from "@/features/admin/lib/mutations";
 import { adminKeys, animeKeys } from "@/lib/query-keys";
-
-import { setAdminStatus, updateAdminHeroCuration } from "./requests";
 
 export function useAdminStats(options?: { enabled?: boolean }) {
   return useQuery({
-    ...adminStatsQueryOptions(),
+    ...adminQueries.stats(),
     enabled: options?.enabled ?? true,
   });
 }
@@ -29,14 +24,14 @@ export function useAdminUsers(
   const offset = options?.offset ?? 0;
 
   return useQuery({
-    ...adminUsersQueryOptions(query, limit, offset),
+    ...adminQueries.users(query, limit, offset),
     enabled: options?.enabled ?? true,
   });
 }
 
 export function useAdminHeroCurations(options?: { enabled?: boolean }) {
   return useQuery({
-    ...adminHeroCurationsQueryOptions(),
+    ...adminQueries.heroCurations(),
     enabled: options?.enabled ?? true,
   });
 }
@@ -45,7 +40,7 @@ export function useSetUserAdminStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: setAdminStatus,
+    ...adminMutations.setAdminStatus(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.all });
       toast.success("Admin status updated");
@@ -60,7 +55,7 @@ export function useUpdateHeroCuration() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: updateAdminHeroCuration,
+    ...adminMutations.updateHeroCuration(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.heroCurations() });
       queryClient.invalidateQueries({ queryKey: animeKeys.heroCurations() });

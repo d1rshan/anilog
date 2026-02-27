@@ -4,14 +4,13 @@ import { HydrationBoundary, QueryClient, dehydrate } from "@tanstack/react-query
 
 import { getCurrentUser } from "@/features/auth/lib/server";
 import {
-  myLibraryQueryOptions,
-  userByUsernameQueryOptions,
-  userPublicLibraryQueryOptions,
-} from "@/lib/query-options";
+  prefetchProfileLibrary,
+  prefetchUserByUsername,
+} from "@/features/users/lib/prefetch.server";
+import { type UserWithProfile } from "@/features/users/lib/queries";
 import { userKeys } from "@/lib/query-keys";
 
 import { UnifiedProfile } from "../components/unified-profile";
-import type { UserWithProfile } from "../lib/requests";
 
 interface UserProfilePageProps {
   params: Promise<{
@@ -27,7 +26,7 @@ export const UserProfilePage = async ({ params }: UserProfilePageProps) => {
   const queryClient = new QueryClient();
 
   try {
-    await queryClient.prefetchQuery(userByUsernameQueryOptions(username));
+    await prefetchUserByUsername(queryClient, username);
   } catch (error) {
     if (isNotFoundError(error)) {
       notFound();
@@ -43,11 +42,10 @@ export const UserProfilePage = async ({ params }: UserProfilePageProps) => {
 
   const isOwnProfile = currentUser?.id === user.id;
 
-  if (isOwnProfile) {
-    await queryClient.prefetchQuery(myLibraryQueryOptions());
-  } else {
-    await queryClient.prefetchQuery(userPublicLibraryQueryOptions(user.id));
-  }
+  await prefetchProfileLibrary(queryClient, {
+    isOwnProfile,
+    userId: user.id,
+  });
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
