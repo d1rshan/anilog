@@ -5,8 +5,8 @@ import { type Anime, type LibraryStatus } from "@anilog/db/schema/anilog";
 import { useRouter } from "next/navigation";
 
 import { useAuth, useRequireAuth } from "@/features/auth/lib/hooks";
-import { useLogAnime, useMyLibrary } from "@/features/lists/lib/hooks";
-import { type LibraryEntryWithAnime } from "@/features/lists/lib/options";
+import { useLogAnime, useMyLibrary } from "@/features/library/lib/hooks";
+import { type LibraryEntryWithAnime } from "@/features/library/lib/options";
 import { cn } from "@/lib/utils";
 
 import { useArchiveSearch, useSearchAnime } from "../lib/hooks";

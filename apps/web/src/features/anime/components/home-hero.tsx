@@ -3,8 +3,6 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 
-import { AnimeSearch } from "./anime-search";
-
 const HomeHeroVideo = dynamic(() => import("./home-hero-video").then((mod) => mod.HomeHeroVideo), {
   ssr: false,
 });

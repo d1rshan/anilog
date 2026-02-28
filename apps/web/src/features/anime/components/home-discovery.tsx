@@ -5,10 +5,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { type Anime, type LibraryStatus } from "@anilog/db/schema/anilog";
 import { useRouter } from "next/navigation";
 import { useTrendingAnime } from "../lib/hooks";
-import { useMyLibrary, useLogAnime } from "@/features/lists/lib/hooks";
+import { useMyLibrary, useLogAnime } from "@/features/library/lib/hooks";
 import { AnimeCard } from "./anime-card";
 import { AddToListDialog } from "./add-to-list-dialog";
-import { type LibraryEntryWithAnime } from "@/features/lists/lib/options";
+import { type LibraryEntryWithAnime } from "@/features/library/lib/options";
 import { useAuth, useRequireAuth } from "@/features/auth/lib/hooks";
 import { cn } from "@/lib/utils";
 

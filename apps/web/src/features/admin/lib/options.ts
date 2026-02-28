@@ -4,8 +4,9 @@ import { adminKeys } from "@/lib/query-keys";
 
 const SECOND = 1000;
 
-type AdminHeroCurationsRoute = ReturnType<(typeof api.admin)["hero-curations"]>;
-type HeroCurationUpdateInput = Parameters<AdminHeroCurationsRoute["patch"]>[0];
+type HeroCurationUpdateInput = Parameters<
+  ReturnType<(typeof api.admin)["hero-curations"]>["patch"]
+>[0];
 
 export const adminQueries = {
   stats: () =>
@@ -36,13 +37,7 @@ export const adminMutations = {
 
   updateHeroCuration: () =>
     createMutationOptions(
-      (input: { id: number; data: HeroCurationUpdateInput }) =>
-        api.admin["hero-curations"]({ id: input.id }).patch(input.data),
+      (input: any) => api.admin["hero-curations"]({ id: input.id }).patch(input.data),
       "admin.hero-curation.update",
     ),
 };
-
-type AdminHeroCurationsData = NonNullable<
-  Awaited<ReturnType<(typeof api.admin)["hero-curations"]["get"]>>["data"]
->;
-export type AdminHeroCuration = AdminHeroCurationsData[number];

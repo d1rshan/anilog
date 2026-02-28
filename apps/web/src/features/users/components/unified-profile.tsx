@@ -2,7 +2,7 @@
 
 import { ProfileHeader } from "@/features/users/components/profile-header";
 import { UserListsPublic } from "@/features/users/components/user-lists-public";
-import { EditableLists } from "@/features/lists/components/editable-lists";
+import { EditableLists } from "@/features/library/components/editable-lists";
 import { useUserByUsername } from "@/features/users/lib/hooks";
 import { Loader2 } from "lucide-react";
 
