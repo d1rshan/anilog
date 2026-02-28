@@ -1,5 +1,11 @@
 import { Elysia, t } from "elysia";
-import { AnimeService, UserService, forbiddenError, unauthorizedError } from "@anilog/api";
+import {
+  AdminService,
+  AnimeService,
+  UserService,
+  forbiddenError,
+  unauthorizedError,
+} from "@anilog/api";
 import { auth } from "@anilog/auth";
 import {
   adminUsersQuerySchema,
@@ -32,7 +38,7 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
   .get(
     "/stats",
     async () => {
-      return UserService.getAdminStats();
+      return AdminService.getAdminStats();
     },
     {
       response: adminStatsSchema,
@@ -42,7 +48,7 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
     "/users",
     async ({ query }) => {
       const q = query.q?.trim() ?? "";
-      return UserService.searchUsersForAdmin(q, {
+      return AdminService.searchUsers(q, {
         limit: query.limit,
         offset: query.offset,
       });
@@ -55,7 +61,7 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
   .patch(
     "/users/:id/admin",
     async ({ params, body, adminUserId }) => {
-      return UserService.setUserAdminStatus(params.id, body.isAdmin, adminUserId);
+      return AdminService.setUserAdminStatus(params.id, body.isAdmin, adminUserId);
     },
     {
       params: userIdParamsSchema,

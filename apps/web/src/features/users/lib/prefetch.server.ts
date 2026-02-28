@@ -2,7 +2,7 @@ import "server-only";
 
 import type { QueryClient } from "@tanstack/react-query";
 
-import { libraryQueries } from "@/features/lists/lib/options";
+import { libraryQueries } from "@/features/library/lib/options";
 
 import { userQueries } from "./options";
 

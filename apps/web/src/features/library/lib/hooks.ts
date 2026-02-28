@@ -1,14 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { Anime, LibraryStatus } from "@anilog/db/schema/anilog";
-import { libraryQueries, type LibraryEntryWithAnime } from "@/features/lists/lib/options";
+import { libraryQueries, type LibraryEntryWithAnime } from "./options";
 import {
   libraryMutations,
   type LogAnimeData,
   type UpdateLibraryProgressData,
   type UpdateLibraryRatingData,
   type UpdateLibraryStatusData,
-} from "@/features/lists/lib/options";
+} from "./options";
 import type { PublicUserLibrary } from "@/features/users/lib/options";
 import { ApiError } from "@/lib/eden-fetch";
 import { libraryKeys } from "@/lib/query-keys";

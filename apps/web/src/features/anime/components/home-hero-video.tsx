@@ -6,42 +6,6 @@ import { AnimeSearch } from "./anime-search";
 import { Volume2, VolumeX, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHeroCurations } from "../lib/hooks";
-import type { HeroCuration } from "../lib/options";
-
-const FALLBACK_CURATIONS: Array<
-  Pick<HeroCuration, "videoId" | "start" | "stop" | "title" | "subtitle" | "description" | "tag">
-> = [
-  {
-    videoId: "cszyD9FxsP0",
-    start: 0,
-    stop: 60,
-    title: "ONE PIECE",
-    subtitle: "Egghead Arc Selection",
-    description:
-      "Witness the pinnacle of modern animation as the Straw Hats reach the island of the future and the truth of the world begins to unravel.",
-    tag: "Series Spotlight",
-  },
-  {
-    videoId: "GrLh_7ykWRk",
-    start: 140,
-    stop: 177,
-    title: "Jujutsu Kaisen",
-    subtitle: "Visual Poetry",
-    description:
-      "A kinetic blend of sorcery, cursed energy, and choreography that pushes modern action animation into overdrive.",
-    tag: "Action Showcase",
-  },
-  {
-    videoId: "IZ9yPVlwgzE",
-    start: 0,
-    stop: 11,
-    title: "Chainsaw Man",
-    subtitle: "Chaos & Catharsis",
-    description:
-      "A wild collage of experimental endings and high-energy sequences that defined a new era of anime openings.",
-    tag: "Editor's Pick",
-  },
-];
 
 interface HomeHeroVideoProps {
   searchValue?: string;
@@ -49,13 +13,13 @@ interface HomeHeroVideoProps {
 }
 
 export function HomeHeroVideo({ searchValue, onSearchChange }: HomeHeroVideoProps) {
-  const { data } = useHeroCurations();
+  const { data = [] } = useHeroCurations();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const playerRef = useRef<YouTubePlayer | null>(null);
 
-  const curations = data && data.length > 0 ? data : FALLBACK_CURATIONS;
+  const curations = data;
   const current = curations[currentIndex] ?? curations[0];
 
   useEffect(() => {
