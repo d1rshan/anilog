@@ -2,7 +2,14 @@ import { db } from "@anilog/db";
 import { anime, heroCuration, trendingAnime, userAnime } from "@anilog/db/schema/anilog";
 import { and, asc, desc, eq, getTableColumns, ilike, notInArray, or } from "drizzle-orm";
 import { externalServiceError, internalError } from "../errors/api-error";
-import type { UpsertAnimeBody } from "../schemas";
+import type {
+  AnimeDto,
+  ArchiveSearchDto,
+  HeroCurationDto,
+  SuccessCountDto,
+  UpsertAnimeBody,
+  UpsertAnimeDto,
+} from "../schemas";
 
 const ANILIST_API = "https://graphql.anilist.co";
 const SEARCH_CACHE_TTL_MS = 30_000;
@@ -10,19 +17,19 @@ const ANILIST_CACHE_TTL_MS = 60_000;
 
 type SearchCacheValue = {
   expiresAt: number;
-  value: { library: (typeof anime.$inferSelect)[]; archive: (typeof anime.$inferSelect)[] };
+  value: ArchiveSearchDto;
 };
 
 type AniListCacheValue = {
   expiresAt: number;
-  value: (typeof anime.$inferSelect)[];
+  value: AnimeDto[];
 };
 
 const archiveSearchCache = new Map<string, SearchCacheValue>();
 const anilistSearchCache = new Map<string, AniListCacheValue>();
 
 export class AnimeService {
-  static async getHeroCurations() {
+  static async getHeroCurations(): Promise<HeroCurationDto[]> {
     return db
       .select()
       .from(heroCuration)
@@ -30,7 +37,7 @@ export class AnimeService {
       .orderBy(asc(heroCuration.sortOrder), asc(heroCuration.id));
   }
 
-  static async getTrendingAnime() {
+  static async getTrendingAnime(): Promise<AnimeDto[]> {
     return db
       .select({
         ...getTableColumns(anime),
@@ -40,7 +47,11 @@ export class AnimeService {
       .orderBy(trendingAnime.rank);
   }
 
-  static async searchArchive(userId: string, userQuery: string, limit: number = 12) {
+  static async searchArchive(
+    userId: string,
+    userQuery: string,
+    limit: number = 12,
+  ): Promise<ArchiveSearchDto> {
     const q = userQuery.trim().toLowerCase();
     if (q.length < 2) return { library: [], archive: [] };
 
@@ -54,7 +65,7 @@ export class AnimeService {
 
     const pattern = `%${q}%`;
 
-    const score = (item: typeof anime.$inferSelect) => {
+    const score = (item: AnimeDto) => {
       let best = 0;
       const titles = [item.title, item.titleJapanese];
 
@@ -71,7 +82,7 @@ export class AnimeService {
       return best;
     };
 
-    const rank = (rows: (typeof anime.$inferSelect)[]) =>
+    const rank = (rows: AnimeDto[]) =>
       rows
         .map((item) => ({ item, score: score(item) }))
         .filter((r) => r.score > 0)
@@ -124,7 +135,7 @@ export class AnimeService {
     return value;
   }
 
-  static async syncTrendingAnime() {
+  static async syncTrendingAnime(): Promise<SuccessCountDto> {
     const res = await fetch(ANILIST_API, {
       method: "POST",
       headers: {
@@ -219,7 +230,7 @@ export class AnimeService {
     return { success: true, count: media.length };
   }
 
-  static async searchAnime(userQuery: string) {
+  static async searchAnime(userQuery: string): Promise<AnimeDto[]> {
     const q = userQuery.trim().toLowerCase();
     if (q.length < 3) return [];
 
@@ -293,7 +304,7 @@ export class AnimeService {
     return result;
   }
 
-  static async upsertAnime(animeData: UpsertAnimeBody) {
+  static async upsertAnime(animeData: UpsertAnimeBody): Promise<UpsertAnimeDto> {
     try {
       await db
         .insert(anime)

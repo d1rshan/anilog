@@ -12,8 +12,8 @@ export const UserProfileDto = t.Object({
   githubUrl: t.Nullable(t.String()),
   instagramUrl: t.Nullable(t.String()),
   isPublic: t.Boolean(),
-  createdAt: t.Any(),
-  updatedAt: t.Any(),
+  createdAt: t.Date(),
+  updatedAt: t.Date(),
 });
 
 // User joined with their profile + follow counts

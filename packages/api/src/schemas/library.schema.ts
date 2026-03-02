@@ -20,8 +20,8 @@ export const LibraryEntryDto = t.Object({
   status: LibraryStatusSchema,
   currentEpisode: t.Integer(),
   rating: t.Nullable(t.Integer()),
-  createdAt: t.Any(),
-  updatedAt: t.Any(),
+  createdAt: t.Date(),
+  updatedAt: t.Date(),
   anime: AnimeSummaryDto,
 });
 
@@ -32,7 +32,7 @@ export const PublicLibraryEntryDto = t.Object({
   status: LibraryStatusSchema,
   currentEpisode: t.Integer(),
   rating: t.Nullable(t.Integer()),
-  createdAt: t.Any(),
+  createdAt: t.Date(),
   anime: AnimeSummaryDto,
 });
 

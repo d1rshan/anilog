@@ -27,7 +27,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .get(
     "/search",
     async ({ query }) => {
-      return UserService.searchUsers(query.q || "", 20);
+      return UserService.searchUsers(query, 20);
     },
     {
       query: UserSearchQuery,
@@ -129,8 +129,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .get(
     "/me/admin-status",
     async ({ userId }) => {
-      const isAdmin = await UserService.getAdminStatus(userId);
-      return { isAdmin };
+      return UserService.getAdminStatus(userId);
     },
     {
       response: AdminStatusDto,

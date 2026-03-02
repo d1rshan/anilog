@@ -11,8 +11,8 @@ export const AnimeDto = t.Object({
   imageUrl: t.String(),
   year: t.Integer(),
   rating: t.Integer(),
-  createdAt: t.Any(),
-  updatedAt: t.Any(),
+  createdAt: t.Date(),
+  updatedAt: t.Date(),
 });
 
 // Lightweight anime shape embedded in library entries
@@ -42,8 +42,8 @@ export const HeroCurationDto = t.Object({
   tag: t.String(),
   sortOrder: t.Integer(),
   isActive: t.Boolean(),
-  createdAt: t.Any(),
-  updatedAt: t.Any(),
+  createdAt: t.Date(),
+  updatedAt: t.Date(),
 });
 
 // Route params

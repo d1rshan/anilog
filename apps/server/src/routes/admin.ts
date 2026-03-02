@@ -19,7 +19,7 @@ const adminMiddleware = (app: Elysia) =>
       throw unauthorizedError("User not authenticated");
     }
 
-    const isAdmin = await UserService.getAdminStatus(session.user.id);
+    const { isAdmin } = await UserService.getAdminStatus(session.user.id);
     if (!isAdmin) {
       throw forbiddenError("Forbidden");
     }
@@ -41,11 +41,7 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
   .get(
     "/users",
     async ({ query }) => {
-      const q = query.q?.trim() ?? "";
-      return AdminService.searchUsers(q, {
-        limit: query.limit,
-        offset: query.offset,
-      });
+      return AdminService.searchUsers(query);
     },
     {
       query: AdminUsersQuery,
