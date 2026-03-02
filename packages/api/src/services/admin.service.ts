@@ -3,18 +3,25 @@ import { userProfile, userFollow, heroCuration } from "@anilog/db/schema/anilog"
 import { user } from "@anilog/db/schema/auth";
 import { asc, count, eq, getTableColumns, ilike, or } from "drizzle-orm";
 import { notFoundError, validationError } from "../errors/api-error";
-import { type UpdateHeroCurationBody } from "../schemas";
+import type {
+  AdminStatsDto,
+  AdminUsersDto,
+  AdminUsersQuery,
+  HeroCurationDto,
+  SetUserAdminStatusDto,
+  UpdateHeroCurationBody,
+} from "../schemas";
 
 export class AdminService {
-  static async getAdminStats() {
+  static async getAdminStats(): Promise<AdminStatsDto> {
     const [result] = await db.select({ count: count() }).from(user);
     return { totalUsers: result?.count ?? 0 };
   }
 
-  static async searchUsers(query: string, options: { limit?: number; offset?: number } = {}) {
-    const limit = Math.min(Math.max(options.limit ?? 20, 1), 100);
-    const offset = Math.max(options.offset ?? 0, 0);
-    const normalized = query.trim();
+  static async searchUsers(input: AdminUsersQuery): Promise<AdminUsersDto> {
+    const limit = Math.min(Math.max(input.limit ?? 20, 1), 100);
+    const offset = Math.max(input.offset ?? 0, 0);
+    const normalized = (input.q ?? "").trim();
 
     const whereClause = normalized
       ? or(
@@ -65,7 +72,11 @@ export class AdminService {
     };
   }
 
-  static async setUserAdminStatus(targetUserId: string, isAdmin: boolean, actorUserId?: string) {
+  static async setUserAdminStatus(
+    targetUserId: string,
+    isAdmin: boolean,
+    actorUserId?: string,
+  ): Promise<SetUserAdminStatusDto> {
     if (actorUserId && actorUserId === targetUserId && !isAdmin) {
       throw validationError("You cannot remove your own admin access");
     }
@@ -107,14 +118,17 @@ export class AdminService {
     return result[0]?.count || 0;
   }
 
-  static async getHeroCurationsForAdmin() {
+  static async getHeroCurationsForAdmin(): Promise<HeroCurationDto[]> {
     return db
       .select()
       .from(heroCuration)
       .orderBy(asc(heroCuration.sortOrder), asc(heroCuration.id));
   }
 
-  static async updateHeroCuration(id: number, payload: UpdateHeroCurationBody) {
+  static async updateHeroCuration(
+    id: number,
+    payload: UpdateHeroCurationBody,
+  ): Promise<HeroCurationDto> {
     if (payload.start < 0) {
       throw validationError("Start timestamp must be zero or greater");
     }

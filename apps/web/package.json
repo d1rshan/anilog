@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start -p 3001",
-    "check-types": "tsc -b"
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@anilog/api": "workspace:*",

@@ -65,7 +65,7 @@ export const libraryRoutes = new Elysia({ prefix: "/library" })
   .patch(
     "/me/:animeId/rating",
     async ({ userId, params, body }) => {
-      return LibraryService.updateRating(userId, params.animeId, body.rating);
+      return LibraryService.updateRating(userId, params.animeId, body);
     },
     {
       params: LibraryAnimeParams,

@@ -3,10 +3,18 @@ import { userFollow, userProfile, userAnime, anime } from "@anilog/db/schema/ani
 import { user } from "@anilog/db/schema/auth";
 import { eq, getTableColumns, count, and, ilike, asc } from "drizzle-orm";
 import { conflictError, internalError, notFoundError, validationError } from "../errors/api-error";
-import type { UpdateUserProfileBody } from "../schemas";
+import type {
+  AdminStatusDto,
+  FollowActionDto,
+  PublicLibraryEntryDto,
+  UpdateUserProfileBody,
+  UserProfileDto,
+  UserSearchQuery,
+  UserWithProfileDto,
+} from "../schemas";
 
 export class UserService {
-  static async createUserProfile(userId: string) {
+  static async createUserProfile(userId: string): Promise<UserProfileDto> {
     const [profile] = await db
       .insert(userProfile)
       .values({
@@ -31,7 +39,7 @@ export class UserService {
     return existingProfile;
   }
 
-  static async getUserProfile(userId: string) {
+  static async getUserProfile(userId: string): Promise<UserWithProfileDto | null> {
     const result = await db
       .select({
         id: user.id,
@@ -68,7 +76,7 @@ export class UserService {
     };
   }
 
-  static async getUserByUsername(username: string) {
+  static async getUserByUsername(username: string): Promise<UserWithProfileDto | null> {
     const result = await db
       .select({
         id: user.id,
@@ -105,7 +113,10 @@ export class UserService {
     };
   }
 
-  static async updateUserProfile(userId: string, data: UpdateUserProfileBody) {
+  static async updateUserProfile(
+    userId: string,
+    data: UpdateUserProfileBody,
+  ): Promise<UserProfileDto> {
     const [updatedProfile] = await db
       .update(userProfile)
       .set({
@@ -122,7 +133,7 @@ export class UserService {
     return updatedProfile;
   }
 
-  static async followUser(followerId: string, followingId: string) {
+  static async followUser(followerId: string, followingId: string): Promise<FollowActionDto> {
     if (followerId === followingId) {
       throw validationError("Cannot follow yourself");
     }
@@ -149,7 +160,7 @@ export class UserService {
     }
   }
 
-  static async unfollowUser(followerId: string, followingId: string) {
+  static async unfollowUser(followerId: string, followingId: string): Promise<FollowActionDto> {
     const result = await db
       .delete(userFollow)
       .where(and(eq(userFollow.followerId, followerId), eq(userFollow.followingId, followingId)))
@@ -162,7 +173,7 @@ export class UserService {
     return { success: true, message: "Successfully unfollowed user" };
   }
 
-  static async isFollowing(followerId: string, followingId: string) {
+  static async isFollowing(followerId: string, followingId: string): Promise<boolean> {
     const result = await db
       .select({ followerId: userFollow.followerId })
       .from(userFollow)
@@ -172,7 +183,7 @@ export class UserService {
     return result.length > 0;
   }
 
-  static async getFollowers(userId: string) {
+  static async getFollowers(userId: string): Promise<UserWithProfileDto[]> {
     const followers = await db
       .select({
         id: user.id,
@@ -203,7 +214,7 @@ export class UserService {
     );
   }
 
-  static async getFollowing(userId: string) {
+  static async getFollowing(userId: string): Promise<UserWithProfileDto[]> {
     const following = await db
       .select({
         id: user.id,
@@ -264,7 +275,7 @@ export class UserService {
     };
   }
 
-  static async getPublicUserLibrary(userId: string) {
+  static async getPublicUserLibrary(userId: string): Promise<PublicLibraryEntryDto[]> {
     const library = await db
       .select({
         ...getTableColumns(userAnime),
@@ -296,8 +307,11 @@ export class UserService {
     }));
   }
 
-  static async searchUsers(query: string, limit: number = 20) {
-    const searchPattern = `%${query}%`;
+  static async searchUsers(
+    input: UserSearchQuery,
+    limit: number = 20,
+  ): Promise<UserWithProfileDto[]> {
+    const searchPattern = `%${input.q}%`;
 
     const users = await db
       .select({
@@ -329,11 +343,11 @@ export class UserService {
     );
   }
 
-  static async getAdminStatus(userId: string) {
+  static async getAdminStatus(userId: string): Promise<AdminStatusDto> {
     const found = await db.query.user.findFirst({
       where: eq(user.id, userId),
       columns: { isAdmin: true },
     });
-    return found?.isAdmin ?? false;
+    return { isAdmin: found?.isAdmin ?? false };
   }
 }
