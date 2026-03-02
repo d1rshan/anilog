@@ -3,6 +3,7 @@ import { userFollow, userProfile, userAnime, anime } from "@anilog/db/schema/ani
 import { user } from "@anilog/db/schema/auth";
 import { eq, getTableColumns, count, and, ilike, asc } from "drizzle-orm";
 import { conflictError, internalError, notFoundError, validationError } from "../errors/api-error";
+import type { UpdateUserProfileBody } from "../schemas";
 
 export class UserService {
   static async createUserProfile(userId: string) {
@@ -104,20 +105,7 @@ export class UserService {
     };
   }
 
-  static async updateUserProfile(
-    userId: string,
-    data: {
-      bio?: string | null;
-      displayName?: string | null;
-      website?: string | null;
-      location?: string | null;
-      twitterUrl?: string | null;
-      discordUrl?: string | null;
-      githubUrl?: string | null;
-      instagramUrl?: string | null;
-      isPublic?: boolean;
-    },
-  ) {
+  static async updateUserProfile(userId: string, data: UpdateUserProfileBody) {
     const [updatedProfile] = await db
       .update(userProfile)
       .set({
@@ -288,6 +276,8 @@ export class UserService {
           year: anime.year,
           episodes: anime.episodes,
           status: anime.status,
+          genres: anime.genres,
+          rating: anime.rating,
         },
       })
       .from(userAnime)

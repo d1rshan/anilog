@@ -41,7 +41,7 @@ interface AddToListDialogProps {
 const STATUS_CONFIG: Record<LibraryStatus, { label: string; icon: LucideIcon }> = {
   watching: { label: "Watching", icon: Play },
   completed: { label: "Completed", icon: Check },
-  planned: { label: "Planned", icon: ListTodo },
+  watchlist: { label: "Watchlist", icon: ListTodo },
   dropped: { label: "Dropped", icon: Ban },
 };
 
@@ -49,11 +49,11 @@ function allowedStatusesForAnime(animeStatus?: string | null): LibraryStatus[] {
   const status = (animeStatus ?? "").toUpperCase();
 
   if (status === "NOT_YET_RELEASED") {
-    return ["planned"];
+    return ["watchlist"];
   }
 
   if (status === "RELEASING") {
-    return ["watching", "planned", "dropped"];
+    return ["watching", "watchlist", "dropped"];
   }
 
   return [...LIBRARY_STATUSES];
@@ -80,7 +80,7 @@ export function AddToListDialog({
   const isEpisodeRequired = status === "watching" || status === "completed";
   const maxEpisodes = anime?.episodes && anime.episodes > 0 ? anime.episodes : null;
   const minEpisode = isEpisodeRequired ? 1 : 0;
-  const isPlanned = status === "planned";
+  const isPlanned = status === "watchlist";
 
   const episodePercent = useMemo(() => {
     if (!maxEpisodes) return null;
@@ -157,7 +157,7 @@ export function AddToListDialog({
       return;
     }
 
-    if (newStatus === "planned") {
+    if (newStatus === "watchlist") {
       setCurrentEpisode(0);
     }
   };

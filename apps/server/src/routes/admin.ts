@@ -1,22 +1,16 @@
 import { Elysia, t } from "elysia";
-import {
-  AdminService,
-  AnimeService,
-  UserService,
-  forbiddenError,
-  unauthorizedError,
-} from "@anilog/api";
+import { AdminService, UserService, forbiddenError, unauthorizedError } from "@anilog/api";
 import { auth } from "@anilog/auth";
 import {
-  adminUsersQuerySchema,
-  adminStatsSchema,
-  adminUsersResultSchema,
-  heroCurationSchema,
-  setAdminStatusInputSchema,
-  setAdminStatusResultSchema,
-  userIdParamsSchema,
-  updateHeroCurationInputSchema,
-} from "../schemas";
+  AdminUsersQuery,
+  AdminStatsDto,
+  AdminUsersDto,
+  HeroCurationDto,
+  SetUserAdminStatusBody,
+  SetUserAdminStatusDto,
+  UserParams,
+  UpdateHeroCurationBody,
+} from "@anilog/api";
 
 const adminMiddleware = (app: Elysia) =>
   app.derive(async ({ request }) => {
@@ -41,7 +35,7 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
       return AdminService.getAdminStats();
     },
     {
-      response: adminStatsSchema,
+      response: AdminStatsDto,
     },
   )
   .get(
@@ -54,8 +48,8 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
       });
     },
     {
-      query: adminUsersQuerySchema,
-      response: adminUsersResultSchema,
+      query: AdminUsersQuery,
+      response: AdminUsersDto,
     },
   )
   .patch(
@@ -64,28 +58,28 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
       return AdminService.setUserAdminStatus(params.id, body.isAdmin, adminUserId);
     },
     {
-      params: userIdParamsSchema,
-      body: setAdminStatusInputSchema,
-      response: setAdminStatusResultSchema,
+      params: UserParams,
+      body: SetUserAdminStatusBody,
+      response: SetUserAdminStatusDto,
     },
   )
   .get(
     "/hero-curations",
     async () => {
-      return AnimeService.getHeroCurationsForAdmin();
+      return AdminService.getHeroCurationsForAdmin();
     },
     {
-      response: t.Array(heroCurationSchema),
+      response: t.Array(HeroCurationDto),
     },
   )
   .patch(
     "/hero-curations/:id",
     async ({ params, body }) => {
-      return AnimeService.updateHeroCuration(params.id, body);
+      return AdminService.updateHeroCuration(params.id, body);
     },
     {
       params: t.Object({ id: t.Numeric() }),
-      body: updateHeroCurationInputSchema,
-      response: heroCurationSchema,
+      body: UpdateHeroCurationBody,
+      response: HeroCurationDto,
     },
   );

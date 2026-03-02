@@ -22,24 +22,6 @@ export function HomeHeroVideo({ searchValue, onSearchChange }: HomeHeroVideoProp
   const curations = data;
   const current = curations[currentIndex] ?? curations[0];
 
-  useEffect(() => {
-    if (currentIndex >= curations.length) {
-      setCurrentIndex(0);
-    }
-  }, [currentIndex, curations.length]);
-
-  // --- AUTO-CYCLE LOGIC ---
-  // If muted: Auto-cycle every 15s.
-  // If unmuted: Disable auto-cycle (let the video play to 'stop' time).
-  useEffect(() => {
-    if (!isMuted) return; // Stop the timer if audio is on
-
-    const interval = setInterval(() => {
-      handleNext();
-    }, 15000);
-    return () => clearInterval(interval);
-  }, [currentIndex, isMuted, curations.length]);
-
   const handleNext = () => {
     if (curations.length < 2) return;
     setIsTransitioning(true);
@@ -58,6 +40,24 @@ export function HomeHeroVideo({ searchValue, onSearchChange }: HomeHeroVideoProp
     }, 600);
   };
 
+  useEffect(() => {
+    if (currentIndex >= curations.length) {
+      setCurrentIndex(0);
+    }
+  }, [currentIndex, curations.length]);
+
+  // --- AUTO-CYCLE LOGIC ---
+  // If muted: Auto-cycle every 15s.
+  // If unmuted: Disable auto-cycle (let the video play to 'stop' time).
+  useEffect(() => {
+    if (!isMuted || !current) return; // Stop the timer if audio is on or no data
+
+    const interval = setInterval(() => {
+      handleNext();
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [currentIndex, isMuted, curations.length]);
+
   // --- AUDIO CONTROL ---
   const toggleMute = () => {
     if (!playerRef.current) return;
@@ -69,8 +69,6 @@ export function HomeHeroVideo({ searchValue, onSearchChange }: HomeHeroVideoProp
     } else {
       playerRef.current.unMute();
       playerRef.current.setVolume(100);
-      // Optional: Reset to start when unmute to ensure full experience?
-      // playerRef.current.seekTo(current.start);
     }
   };
 
@@ -95,7 +93,7 @@ export function HomeHeroVideo({ searchValue, onSearchChange }: HomeHeroVideoProp
 
   // While playing, check if we passed the 'stop' timestamp
   useEffect(() => {
-    if (isMuted || !playerRef.current) return;
+    if (isMuted || !playerRef.current || !current) return;
 
     const checkTime = setInterval(async () => {
       try {
@@ -109,7 +107,11 @@ export function HomeHeroVideo({ searchValue, onSearchChange }: HomeHeroVideoProp
     }, 1000);
 
     return () => clearInterval(checkTime);
-  }, [currentIndex, isMuted, current.stop]);
+  }, [currentIndex, isMuted, current?.stop]);
+
+  if (!current) {
+    return null;
+  }
 
   // YouTube Options
   const opts: YouTubeProps["opts"] = {

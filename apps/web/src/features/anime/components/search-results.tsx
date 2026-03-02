@@ -179,7 +179,7 @@ export function SearchResults({ query }: SearchResultsProps) {
       return;
     }
 
-    logAnime.mutate({ anime: selectedAnime, status: "planned", currentEpisode: 0, rating: null });
+    logAnime.mutate({ anime: selectedAnime, status: "watchlist", currentEpisode: 0, rating: null });
   };
 
   const hasArchiveMatches =

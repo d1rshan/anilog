@@ -15,7 +15,8 @@
   "dependencies": {
     "@anilog/config": "workspace:*",
     "@anilog/db": "workspace:*",
-    "drizzle-orm": "^0.45.1"
+    "drizzle-orm": "^0.45.1",
+    "elysia": "^1.4.26"
   },
   "devDependencies": {
     "@types/bun": "latest",

@@ -2,14 +2,14 @@ import { Elysia, t } from "elysia";
 import { AnimeService, unauthorizedError } from "@anilog/api";
 import { auth } from "@anilog/auth";
 import {
-  archiveSearchQuerySchema,
-  archiveSearchResponseSchema,
-  animeSchema,
-  heroCurationSchema,
-  successCountSchema,
-  upsertAnimeInputSchema,
-  upsertAnimeResultSchema,
-} from "../schemas";
+  ArchiveSearchQuery,
+  ArchiveSearchDto,
+  AnimeDto,
+  HeroCurationDto,
+  SuccessCountDto,
+  UpsertAnimeBody,
+  UpsertAnimeDto,
+} from "@anilog/api";
 
 const cronSecret = process.env.CRON_SECRET;
 
@@ -25,7 +25,7 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
       return AnimeService.getHeroCurations();
     },
     {
-      response: t.Array(heroCurationSchema),
+      response: t.Array(HeroCurationDto),
     },
   )
   .get(
@@ -34,7 +34,7 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
       return AnimeService.getTrendingAnime();
     },
     {
-      response: t.Array(animeSchema),
+      response: t.Array(AnimeDto),
     },
   )
   .get(
@@ -46,21 +46,21 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
       return AnimeService.syncTrendingAnime();
     },
     {
-      response: successCountSchema,
+      response: SuccessCountDto,
     },
   )
-  .get(
-    "/sync-all",
-    async ({ request }) => {
-      if (!isCronAuthorized(request)) {
-        throw unauthorizedError("Unauthorized");
-      }
-      return AnimeService.syncAllAnime();
-    },
-    {
-      response: successCountSchema,
-    },
-  )
+  // .get( //TODO: add sync all route that syncs only releasing or upcoming anime
+  //   "/sync-all",
+  //   async ({ request }) => {
+  //     if (!isCronAuthorized(request)) {
+  //       throw unauthorizedError("Unauthorized");
+  //     }
+  //     return AnimeService.syncAllAnime();
+  //   },
+  //   {
+  //     response: SuccessCountDto,
+  //   },
+  // )
   .get(
     "/search/:query",
     async ({ params }) => {
@@ -68,7 +68,7 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
     },
     {
       params: t.Object({ query: t.String() }),
-      response: t.Array(animeSchema),
+      response: t.Array(AnimeDto),
     },
   )
   .get(
@@ -85,8 +85,8 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
       return AnimeService.searchArchive(session.user.id, q, limit);
     },
     {
-      query: archiveSearchQuerySchema,
-      response: archiveSearchResponseSchema,
+      query: ArchiveSearchQuery,
+      response: ArchiveSearchDto,
     },
   )
   .post(
@@ -95,7 +95,7 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
       return AnimeService.upsertAnime(body);
     },
     {
-      body: upsertAnimeInputSchema,
-      response: upsertAnimeResultSchema,
+      body: UpsertAnimeBody,
+      response: UpsertAnimeDto,
     },
   );

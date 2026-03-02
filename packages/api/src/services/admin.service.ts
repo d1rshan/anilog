@@ -1,8 +1,9 @@
 import { db } from "@anilog/db";
-import { userProfile, userFollow } from "@anilog/db/schema/anilog";
+import { userProfile, userFollow, heroCuration } from "@anilog/db/schema/anilog";
 import { user } from "@anilog/db/schema/auth";
 import { asc, count, eq, getTableColumns, ilike, or } from "drizzle-orm";
 import { notFoundError, validationError } from "../errors/api-error";
+import { type UpdateHeroCurationBody } from "../schemas";
 
 export class AdminService {
   static async getAdminStats() {
@@ -104,5 +105,63 @@ export class AdminService {
       .where(eq(userFollow.followerId, userId));
 
     return result[0]?.count || 0;
+  }
+
+  static async getHeroCurationsForAdmin() {
+    return db
+      .select()
+      .from(heroCuration)
+      .orderBy(asc(heroCuration.sortOrder), asc(heroCuration.id));
+  }
+
+  static async updateHeroCuration(id: number, payload: UpdateHeroCurationBody) {
+    if (payload.start < 0) {
+      throw validationError("Start timestamp must be zero or greater");
+    }
+
+    if (payload.stop <= payload.start) {
+      throw validationError("Stop timestamp must be greater than start timestamp");
+    }
+
+    const requiredTextFields = [
+      { value: payload.videoId, name: "videoId" },
+      { value: payload.title, name: "title" },
+      { value: payload.subtitle, name: "subtitle" },
+      { value: payload.description, name: "description" },
+      { value: payload.tag, name: "tag" },
+    ];
+
+    for (const field of requiredTextFields) {
+      if (!field.value.trim()) {
+        throw validationError(`${field.name} is required`);
+      }
+    }
+
+    if (payload.sortOrder < 0) {
+      throw validationError("sortOrder must be zero or greater");
+    }
+
+    const [updated] = await db
+      .update(heroCuration)
+      .set({
+        videoId: payload.videoId.trim(),
+        start: payload.start,
+        stop: payload.stop,
+        title: payload.title.trim(),
+        subtitle: payload.subtitle.trim(),
+        description: payload.description.trim(),
+        tag: payload.tag.trim(),
+        sortOrder: payload.sortOrder,
+        isActive: payload.isActive,
+        updatedAt: new Date(),
+      })
+      .where(eq(heroCuration.id, id))
+      .returning();
+
+    if (!updated) {
+      throw notFoundError("Hero curation not found");
+    }
+
+    return updated;
   }
 }

@@ -2,17 +2,17 @@ import { Elysia, t } from "elysia";
 import { UserService, notFoundError, unauthorizedError } from "@anilog/api";
 import { auth } from "@anilog/auth";
 import {
-  adminStatusSchema,
-  followActionResultSchema,
-  isFollowingResultSchema,
-  profileUpdateInputSchema,
-  publicUserLibraryEntrySchema,
-  userIdParamsSchema,
-  userSearchQuerySchema,
-  usernameParamsSchema,
-  userProfileSchema,
-  userWithProfileSchema,
-} from "../schemas";
+  AdminStatusDto,
+  FollowActionDto,
+  IsFollowingDto,
+  UpdateUserProfileBody,
+  PublicLibraryEntryDto,
+  UserParams,
+  UserSearchQuery,
+  UsernameParams,
+  UserProfileDto,
+  UserWithProfileDto,
+} from "@anilog/api";
 
 const authMiddleware = (app: Elysia) =>
   app.derive(async ({ request }) => {
@@ -30,8 +30,8 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return UserService.searchUsers(query.q || "", 20);
     },
     {
-      query: userSearchQuerySchema,
-      response: t.Array(userWithProfileSchema),
+      query: UserSearchQuery,
+      response: t.Array(UserWithProfileDto),
     },
   )
   .get(
@@ -44,8 +44,8 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return foundUser;
     },
     {
-      params: userIdParamsSchema,
-      response: userWithProfileSchema,
+      params: UserParams,
+      response: UserWithProfileDto,
     },
   )
   .get(
@@ -58,8 +58,8 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return foundUser;
     },
     {
-      params: usernameParamsSchema,
-      response: userWithProfileSchema,
+      params: UsernameParams,
+      response: UserWithProfileDto,
     },
   )
   .get(
@@ -68,8 +68,8 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return UserService.getPublicUserLibrary(params.id);
     },
     {
-      params: userIdParamsSchema,
-      response: t.Array(publicUserLibraryEntrySchema),
+      params: UserParams,
+      response: t.Array(PublicLibraryEntryDto),
     },
   )
   .get(
@@ -78,8 +78,8 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return UserService.getFollowers(params.id);
     },
     {
-      params: userIdParamsSchema,
-      response: t.Array(userWithProfileSchema),
+      params: UserParams,
+      response: t.Array(UserWithProfileDto),
     },
   )
   .get(
@@ -88,8 +88,8 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return UserService.getFollowing(params.id);
     },
     {
-      params: userIdParamsSchema,
-      response: t.Array(userWithProfileSchema),
+      params: UserParams,
+      response: t.Array(UserWithProfileDto),
     },
   )
   .use(authMiddleware)
@@ -99,8 +99,8 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return UserService.followUser(userId, params.id);
     },
     {
-      params: userIdParamsSchema,
-      response: followActionResultSchema,
+      params: UserParams,
+      response: FollowActionDto,
     },
   )
   .delete(
@@ -109,8 +109,8 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return UserService.unfollowUser(userId, params.id);
     },
     {
-      params: userIdParamsSchema,
-      response: followActionResultSchema,
+      params: UserParams,
+      response: FollowActionDto,
     },
   )
   .get(
@@ -123,7 +123,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return profile;
     },
     {
-      response: userWithProfileSchema,
+      response: UserWithProfileDto,
     },
   )
   .get(
@@ -133,7 +133,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return { isAdmin };
     },
     {
-      response: adminStatusSchema,
+      response: AdminStatusDto,
     },
   )
   .put(
@@ -142,8 +142,8 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return UserService.updateUserProfile(userId, body);
     },
     {
-      body: profileUpdateInputSchema,
-      response: userProfileSchema,
+      body: UpdateUserProfileBody,
+      response: UserProfileDto,
     },
   )
   .get(
@@ -152,7 +152,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return UserService.getFollowing(userId);
     },
     {
-      response: t.Array(userWithProfileSchema),
+      response: t.Array(UserWithProfileDto),
     },
   )
   .get(
@@ -162,7 +162,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       return { isFollowing };
     },
     {
-      params: userIdParamsSchema,
-      response: isFollowingResultSchema,
+      params: UserParams,
+      response: IsFollowingDto,
     },
   );

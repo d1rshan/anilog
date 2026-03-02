@@ -9,7 +9,7 @@ type UpdateStatusBody = Parameters<LibraryMeRoute["status"]["patch"]>[0];
 type UpdateProgressBody = Parameters<LibraryMeRoute["progress"]["patch"]>[0];
 type UpdateRatingBody = Parameters<LibraryMeRoute["rating"]["patch"]>[0];
 
-export const LIBRARY_STATUSES = ["watching", "completed", "planned", "dropped"] as const;
+export const LIBRARY_STATUSES = ["watching", "completed", "watchlist", "dropped"] as const;
 
 export const libraryQueries = {
   myLibrary: () =>
