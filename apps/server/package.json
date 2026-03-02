@@ -1,13 +1,10 @@
 {
   "name": "server",
   "type": "module",
-  "main": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs"
-    }
+    ".": "./src/index.ts"
   },
   "scripts": {
     "build": "tsdown",
