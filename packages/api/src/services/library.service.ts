@@ -1,60 +1,8 @@
 import { db } from "@anilog/db";
-import { anime, userAnime, type LibraryStatus } from "@anilog/db/schema/anilog";
+import { anime, userAnime } from "@anilog/db/schema/anilog";
 import { and, asc, eq, getTableColumns } from "drizzle-orm";
 import { internalError, notFoundError, validationError } from "../errors/api-error";
-
-const STATUS_COMPLETION_BLOCKLIST = new Set(["RELEASING", "NOT_YET_RELEASED"]);
-
-type ValidationInput = {
-  status: LibraryStatus;
-  currentEpisode?: number | null;
-  animeStatus?: string | null;
-  totalEpisodes?: number | null;
-};
-
-type LogAnimeInput = {
-  anime: {
-    id: number;
-    title: string;
-    titleJapanese?: string | null;
-    description?: string | null;
-    episodes?: number | null;
-    status?: string | null;
-    genres?: string[] | null;
-    imageUrl: string;
-    year?: number | null;
-    rating?: number | null;
-  };
-  status: LibraryStatus;
-  currentEpisode?: number;
-  rating?: number | null;
-};
-
-function validateStatusRules(input: ValidationInput) {
-  const animeStatus = (input.animeStatus ?? "").toUpperCase();
-
-  if (animeStatus === "NOT_YET_RELEASED" && input.status !== "planned") {
-    throw validationError("Only Planned is allowed for unreleased anime");
-  }
-
-  if (input.status === "completed" && STATUS_COMPLETION_BLOCKLIST.has(animeStatus)) {
-    throw validationError("Cannot mark as Completed until the anime is finished");
-  }
-
-  if (input.status === "watching" && (!input.currentEpisode || input.currentEpisode < 1)) {
-    throw validationError("Current episode is required for Watching");
-  }
-
-  if (input.status === "completed") {
-    if (!input.currentEpisode || input.currentEpisode < 1) {
-      throw validationError("Current episode is required for Completed");
-    }
-
-    if (input.totalEpisodes && input.currentEpisode < input.totalEpisodes) {
-      throw validationError("Completed anime must have all episodes watched");
-    }
-  }
-}
+import type { LogAnimeBody, UpdateLibraryProgressBody, UpdateLibraryStatusBody } from "../schemas";
 
 export class LibraryService {
   static async getUserLibrary(userId: string) {
@@ -69,6 +17,8 @@ export class LibraryService {
           year: anime.year,
           episodes: anime.episodes,
           status: anime.status,
+          genres: anime.genres,
+          rating: anime.rating,
         },
       })
       .from(userAnime)
@@ -91,6 +41,8 @@ export class LibraryService {
           year: anime.year,
           episodes: anime.episodes,
           status: anime.status,
+          genres: anime.genres,
+          rating: anime.rating,
         },
       })
       .from(userAnime)
@@ -101,14 +53,13 @@ export class LibraryService {
     return result[0] ?? null;
   }
 
-  static async logAnime(userId: string, input: LogAnimeInput) {
+  static async logAnime(userId: string, input: LogAnimeBody) {
     await db
       .insert(anime)
       .values({
         id: input.anime.id,
         title: input.anime.title,
         titleJapanese: input.anime.titleJapanese,
-        description: input.anime.description,
         episodes: input.anime.episodes,
         status: input.anime.status,
         genres: input.anime.genres,
@@ -121,7 +72,6 @@ export class LibraryService {
         set: {
           title: input.anime.title,
           titleJapanese: input.anime.titleJapanese,
-          description: input.anime.description,
           episodes: input.anime.episodes,
           status: input.anime.status,
           genres: input.anime.genres,
@@ -137,12 +87,34 @@ export class LibraryService {
         ? input.anime.episodes
         : Math.max(0, input.currentEpisode ?? 0);
 
-    validateStatusRules({
-      status: input.status,
-      currentEpisode: resolvedEpisode,
-      animeStatus: input.anime.status,
-      totalEpisodes: input.anime.episodes,
-    });
+    {
+      const animeStatus = (input.anime.status ?? "").toUpperCase();
+
+      if (animeStatus === "NOT_YET_RELEASED" && input.status !== "watchlist") {
+        throw validationError("Only Planned is allowed for unreleased anime");
+      }
+
+      if (
+        input.status === "completed" &&
+        new Set(["RELEASING", "NOT_YET_RELEASED"]).has(animeStatus)
+      ) {
+        throw validationError("Cannot mark as Completed until the anime is finished");
+      }
+
+      if (input.status === "watching" && (!resolvedEpisode || resolvedEpisode < 1)) {
+        throw validationError("Current episode is required for Watching");
+      }
+
+      if (input.status === "completed") {
+        if (!resolvedEpisode || resolvedEpisode < 1) {
+          throw validationError("Current episode is required for Completed");
+        }
+
+        if (input.anime.episodes && resolvedEpisode < input.anime.episodes) {
+          throw validationError("Completed anime must have all episodes watched");
+        }
+      }
+    }
 
     await db
       .insert(userAnime)
@@ -172,12 +144,8 @@ export class LibraryService {
     return entry;
   }
 
-  static async updateStatus(
-    userId: string,
-    animeId: number,
-    status: LibraryStatus,
-    currentEpisode?: number,
-  ) {
+  static async updateStatus(userId: string, animeId: number, payload: UpdateLibraryStatusBody) {
+    const { currentEpisode, status } = payload;
     const existing = await this.getLibraryEntry(userId, animeId);
     if (!existing) {
       throw notFoundError("Anime not found in your library");
@@ -188,12 +156,31 @@ export class LibraryService {
         ? existing.anime.episodes
         : (currentEpisode ?? existing.currentEpisode);
 
-    validateStatusRules({
-      status,
-      currentEpisode: resolvedEpisode,
-      animeStatus: existing.anime.status,
-      totalEpisodes: existing.anime.episodes,
-    });
+    {
+      const animeStatus = (existing.anime.status ?? "").toUpperCase();
+
+      if (animeStatus === "NOT_YET_RELEASED" && status !== "watchlist") {
+        throw validationError("Only Planned is allowed for unreleased anime");
+      }
+
+      if (status === "completed" && new Set(["RELEASING", "NOT_YET_RELEASED"]).has(animeStatus)) {
+        throw validationError("Cannot mark as Completed until the anime is finished");
+      }
+
+      if (status === "watching" && (!resolvedEpisode || resolvedEpisode < 1)) {
+        throw validationError("Current episode is required for Watching");
+      }
+
+      if (status === "completed") {
+        if (!resolvedEpisode || resolvedEpisode < 1) {
+          throw validationError("Current episode is required for Completed");
+        }
+
+        if (existing.anime.episodes && resolvedEpisode < existing.anime.episodes) {
+          throw validationError("Completed anime must have all episodes watched");
+        }
+      }
+    }
 
     await db
       .update(userAnime)
@@ -212,11 +199,7 @@ export class LibraryService {
     return updated;
   }
 
-  static async updateProgress(
-    userId: string,
-    animeId: number,
-    payload: { currentEpisode?: number; delta?: number },
-  ) {
+  static async updateProgress(userId: string, animeId: number, payload: UpdateLibraryProgressBody) {
     if (payload.currentEpisode === undefined && payload.delta === undefined) {
       throw validationError("Provide currentEpisode or delta for progress update");
     }

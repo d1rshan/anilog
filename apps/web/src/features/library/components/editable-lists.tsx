@@ -14,7 +14,7 @@ import type { LibraryStatus } from "@anilog/db/schema/anilog";
 const STATUS_LABELS: Record<LibraryStatus, string> = {
   watching: "Watching",
   completed: "Completed",
-  planned: "Planned",
+  watchlist: "Watchlist",
   dropped: "Dropped",
 };
 
@@ -32,7 +32,7 @@ export function EditableLists() {
   const [expandedStatuses, setExpandedStatuses] = useState<Record<LibraryStatus, boolean>>({
     watching: false,
     completed: false,
-    planned: false,
+    watchlist: false,
     dropped: false,
   });
 

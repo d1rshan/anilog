@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start -p 3001"
+    "start": "next start -p 3001",
+    "check-types": "tsc -b"
   },
   "dependencies": {
     "@anilog/api": "workspace:*",

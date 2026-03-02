@@ -171,7 +171,7 @@ export function AnimeCard({
                       ? "Completed"
                       : loggedStatus === "dropped"
                         ? `${statusBadgeProgressPercent}% watched before dropping`
-                        : "Planned"
+                        : "Watchlist"
                 }
                 title={
                   loggedStatus === "watching"
@@ -180,7 +180,7 @@ export function AnimeCard({
                       ? "Completed"
                       : loggedStatus === "dropped"
                         ? `${statusBadgeProgressPercent}% watched`
-                        : "Planned"
+                        : "Watchlist"
                 }
               >
                 <svg
@@ -219,7 +219,7 @@ export function AnimeCard({
                   </div>
                 ) : (
                   <div className="relative flex h-full w-full items-center justify-center text-white">
-                    {loggedStatus === "planned" && <ListTodo className="h-3.5 w-3.5" />}
+                    {loggedStatus === "watchlist" && <ListTodo className="h-3.5 w-3.5" />}
                     {loggedStatus === "completed" && <Check className="h-3.5 w-3.5" />}
                     {loggedStatus === "dropped" && <Ban className="h-3.5 w-3.5" />}
                   </div>
@@ -288,14 +288,14 @@ export function AnimeCard({
                 onPlan(anime.id);
               }}
               disabled={disabled}
-              title="Add to Planned"
+              title="Add to Watchlist"
             >
               <ListTodo className="h-5 w-5" />
             </Button>
           )}
 
           {onStartWatching &&
-            (loggedStatus === "planned" || loggedStatus === "dropped" || !loggedStatus) && (
+            (loggedStatus === "watchlist" || loggedStatus === "dropped" || !loggedStatus) && (
               <Button
                 size="icon"
                 variant="secondary"

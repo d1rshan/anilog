@@ -5,16 +5,16 @@ import { AnimeCard } from "@/features/anime/components/anime-card";
 
 type StackEntry = {
   id: string;
-  status: "watching" | "completed" | "planned" | "dropped";
+  status: "watching" | "completed" | "watchlist" | "dropped";
   currentEpisode?: number | null;
   rating?: number | null;
   anime: {
     id: number;
     title: string;
-    titleJapanese?: string | null;
+    titleJapanese: string;
     imageUrl: string;
-    year: number | null;
-    episodes: number | null;
+    year: number;
+    episodes: number;
     status?: string | null;
   };
 };

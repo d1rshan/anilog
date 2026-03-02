@@ -51,6 +51,8 @@ function mapToPublicLibraryEntry(entry: LibraryEntryWithAnime): PublicUserLibrar
       year: entry.anime.year,
       episodes: entry.anime.episodes,
       status: entry.anime.status,
+      genres: entry.anime.genres,
+      rating: entry.anime.rating,
     },
   };
 }
@@ -136,11 +138,13 @@ export const useLogAnime = () => {
           anime: {
             id: payload.anime.id,
             title: payload.anime.title,
-            titleJapanese: payload.anime.titleJapanese ?? null,
+            titleJapanese: payload.anime.titleJapanese,
             imageUrl: payload.anime.imageUrl,
-            year: payload.anime.year ?? null,
-            episodes: payload.anime.episodes ?? null,
-            status: payload.anime.status ?? null,
+            year: payload.anime.year,
+            episodes: payload.anime.episodes,
+            status: payload.anime.status,
+            genres: payload.anime.genres,
+            rating: payload.anime.rating,
           },
         };
 
@@ -164,7 +168,7 @@ export const useLogAnime = () => {
 
       const existedBefore =
         context?.previous?.some((entry) => entry.animeId === payload.anime.id) ?? false;
-      if (payload.status === "planned" && !existedBefore) {
+      if (payload.status === "watchlist" && !existedBefore) {
         toast.success(`Added ${data.anime.title} to watchlist.`);
         return;
       }
@@ -322,7 +326,7 @@ export function groupLibraryByStatus(
   const grouped: Record<LibraryStatus, LibraryEntryWithAnime[]> = {
     watching: [],
     completed: [],
-    planned: [],
+    watchlist: [],
     dropped: [],
   };
 
@@ -339,7 +343,6 @@ export function buildLogPayload(
     | "id"
     | "title"
     | "titleJapanese"
-    | "description"
     | "episodes"
     | "status"
     | "genres"

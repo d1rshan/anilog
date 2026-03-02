@@ -11,6 +11,7 @@ import {
   boolean,
   pgEnum,
 } from "drizzle-orm/pg-core";
+
 import { user } from "./auth";
 
 export const anime = pgTable(
@@ -18,15 +19,13 @@ export const anime = pgTable(
   {
     id: integer("id").primaryKey(),
     title: text("title").notNull(),
-    titleJapanese: text("title_japanese"),
-    description: text("description"),
-    episodes: integer("episodes"),
-    status: text("status"),
-    genres: text("genres").array(),
+    titleJapanese: text("title_japanese").default("").notNull(),
+    episodes: integer("episodes").default(-1).notNull(),
+    status: text("status").notNull(),
+    genres: text("genres").array().notNull(),
     imageUrl: text("image_url").notNull(),
-    bannerImage: text("banner_image"),
-    year: integer("year"),
-    rating: integer("rating"),
+    year: integer("year").default(2006).notNull(),
+    rating: integer("rating").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -36,13 +35,10 @@ export const anime = pgTable(
   (table) => [index("anime_title_idx").on(table.title), index("anime_status_idx").on(table.status)],
 );
 
-export type Anime = typeof anime.$inferSelect;
-export type NewAnime = typeof anime.$inferInsert;
-
 export const libraryStatusEnum = pgEnum("library_status", [
   "watching",
   "completed",
-  "planned",
+  "watchlist",
   "dropped",
 ]);
 
@@ -73,10 +69,6 @@ export const userAnime = pgTable(
   ],
 );
 
-export type UserAnime = typeof userAnime.$inferSelect;
-export type NewUserAnime = typeof userAnime.$inferInsert;
-export type LibraryStatus = (typeof libraryStatusEnum.enumValues)[number];
-
 export const trendingAnime = pgTable(
   "trending_anime",
   {
@@ -89,13 +81,6 @@ export const trendingAnime = pgTable(
   },
   (table) => [index("trending_rank_idx").on(table.rank)],
 );
-
-export const trendingAnimeRelations = relations(trendingAnime, ({ one }) => ({
-  anime: one(anime, {
-    fields: [trendingAnime.animeId],
-    references: [anime.id],
-  }),
-}));
 
 export const heroCuration = pgTable(
   "hero_curation",
@@ -123,24 +108,6 @@ export const heroCuration = pgTable(
   ],
 );
 
-export type HeroCuration = typeof heroCuration.$inferSelect;
-export type NewHeroCuration = typeof heroCuration.$inferInsert;
-
-export const animeRelations = relations(anime, ({ many }) => ({
-  userAnimeEntries: many(userAnime),
-}));
-
-export const userAnimeRelations = relations(userAnime, ({ one }) => ({
-  user: one(user, {
-    fields: [userAnime.userId],
-    references: [user.id],
-  }),
-  anime: one(anime, {
-    fields: [userAnime.animeId],
-    references: [anime.id],
-  }),
-}));
-
 export const userFollow = pgTable(
   "user_follow",
   {
@@ -159,9 +126,6 @@ export const userFollow = pgTable(
     unique("user_follow_unique_follower_following").on(table.followerId, table.followingId),
   ],
 );
-
-export type UserFollow = typeof userFollow.$inferSelect;
-export type NewUserFollow = typeof userFollow.$inferInsert;
 
 export const userProfile = pgTable(
   "user_profile",
@@ -187,8 +151,27 @@ export const userProfile = pgTable(
   (table) => [index("user_profile_userId_idx").on(table.userId)],
 );
 
-export type UserProfile = typeof userProfile.$inferSelect;
-export type NewUserProfile = typeof userProfile.$inferInsert;
+export const animeRelations = relations(anime, ({ many }) => ({
+  userAnimeEntries: many(userAnime),
+}));
+
+export const userAnimeRelations = relations(userAnime, ({ one }) => ({
+  user: one(user, {
+    fields: [userAnime.userId],
+    references: [user.id],
+  }),
+  anime: one(anime, {
+    fields: [userAnime.animeId],
+    references: [anime.id],
+  }),
+}));
+
+export const trendingAnimeRelations = relations(trendingAnime, ({ one }) => ({
+  anime: one(anime, {
+    fields: [trendingAnime.animeId],
+    references: [anime.id],
+  }),
+}));
 
 export const userFollowRelations = relations(userFollow, ({ one }) => ({
   follower: one(user, {
@@ -207,3 +190,19 @@ export const userProfileRelations = relations(userProfile, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export type Anime = typeof anime.$inferSelect;
+// export type NewAnime = typeof anime.$inferInsert;
+//
+// export type UserAnime = typeof userAnime.$inferSelect;
+// export type NewUserAnime = typeof userAnime.$inferInsert;
+export type LibraryStatus = (typeof libraryStatusEnum.enumValues)[number];
+//
+// export type HeroCuration = typeof heroCuration.$inferSelect;
+// export type NewHeroCuration = typeof heroCuration.$inferInsert;
+//
+// export type UserProfile = typeof userProfile.$inferSelect;
+// export type NewUserProfile = typeof userProfile.$inferInsert;
+//
+// export type UserFollow = typeof userFollow.$inferSelect;
+// export type NewUserFollow = typeof userFollow.$inferInsert;
