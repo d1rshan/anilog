@@ -147,12 +147,15 @@ export function EditProfileDialog({
       isPublic: formData.isPublic,
     };
 
-    updateProfile.mutate(dataToSubmit, {
-      onSuccess: () => {
-        onOpenChange(false);
-        onSuccess?.();
+    updateProfile.mutate(
+      { body: dataToSubmit },
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+          onSuccess?.();
+        },
       },
-    });
+    );
   };
 
   const handleCancel = () => {

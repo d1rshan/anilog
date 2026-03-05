@@ -1,6 +1,5 @@
 import { t } from "elysia";
 
-// Full anime record — matches the `anime` table exactly
 export const AnimeDto = t.Object({
   id: t.Integer(),
   title: t.String(),
@@ -15,8 +14,6 @@ export const AnimeDto = t.Object({
   updatedAt: t.Date(),
 });
 
-// Lightweight anime shape embedded in library entries
-// All fields are notNull in the DB (with defaults), so no Nullable wrappers needed
 export const AnimeSummaryDto = t.Object({
   id: t.Integer(),
   title: t.String(),
@@ -29,7 +26,6 @@ export const AnimeSummaryDto = t.Object({
   rating: t.Integer(),
 });
 
-// Hero curation record — matches the `hero_curation` table
 export const HeroCurationDto = t.Object({
   id: t.Integer(),
   key: t.String(),
@@ -46,11 +42,9 @@ export const HeroCurationDto = t.Object({
   updatedAt: t.Date(),
 });
 
-// Route params
 export const HeroCurationParams = t.Object({ id: t.Numeric() });
 export const AnimeSearchParams = t.Object({ query: t.String() });
 
-// Archive search
 export const ArchiveSearchQuery = t.Object({
   q: t.String(),
   limit: t.Optional(t.Integer({ minimum: 1, maximum: 50 })),
@@ -61,7 +55,6 @@ export const ArchiveSearchDto = t.Object({
   archive: t.Array(AnimeDto),
 });
 
-// Anime upsert — used both as a direct endpoint and embedded in LogAnimeBody
 export const UpsertAnimeBody = t.Object({
   id: t.Integer(),
   title: t.String(),

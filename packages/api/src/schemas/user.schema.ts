@@ -1,6 +1,5 @@
 import { t } from "elysia";
 
-// Matches the `user_profile` table (all nullable fields are nullable in DB)
 export const UserProfileDto = t.Object({
   userId: t.String(),
   bio: t.Nullable(t.String()),
@@ -16,7 +15,6 @@ export const UserProfileDto = t.Object({
   updatedAt: t.Date(),
 });
 
-// User joined with their profile + follow counts
 export const UserWithProfileDto = t.Object({
   id: t.String(),
   name: t.String(),
@@ -29,7 +27,6 @@ export const UserWithProfileDto = t.Object({
   followingCount: t.Integer(),
 });
 
-// Inputs
 export const UserSearchQuery = t.Object({ q: t.String() });
 
 export const UpdateUserProfileBody = t.Object({
@@ -44,7 +41,6 @@ export const UpdateUserProfileBody = t.Object({
   isPublic: t.Optional(t.Boolean()),
 });
 
-// Response shapes
 export const FollowActionDto = t.Object({
   success: t.Boolean(),
   message: t.String(),

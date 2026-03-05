@@ -1,12 +1,15 @@
 import { api } from "@/lib/api";
+import type {
+  AdminUsersQuery,
+  HeroCurationParams,
+  SetUserAdminStatusBody,
+  UpdateHeroCurationBody,
+  UserParams,
+} from "@anilog/api";
 import { createQueryOptions, createMutationOptions } from "@/lib/query-helpers";
 import { adminKeys } from "@/lib/query-keys";
 
 const SECOND = 1000;
-
-type HeroCurationUpdateInput = Parameters<
-  ReturnType<(typeof api.admin)["hero-curations"]>["patch"]
->[0];
 
 export const adminQueries = {
   stats: () =>
@@ -14,10 +17,13 @@ export const adminQueries = {
       staleTime: 30 * SECOND,
     }),
 
-  users: (query: string, limit: number, offset: number) =>
+  users: ({ query }: { query?: AdminUsersQuery } = {}) =>
     createQueryOptions(
-      adminKeys.users(query, limit, offset),
-      () => api.admin.users.get({ query: { q: query, limit, offset } }),
+      adminKeys.users(query?.q ?? "", query?.limit ?? 20, query?.offset ?? 0),
+      () =>
+        api.admin.users.get({
+          query,
+        }),
       { staleTime: 30 * SECOND },
     ),
 
@@ -30,14 +36,15 @@ export const adminQueries = {
 export const adminMutations = {
   setAdminStatus: () =>
     createMutationOptions(
-      (input: { userId: string; isAdmin: boolean }) =>
-        api.admin.users({ id: input.userId }).admin.patch({ isAdmin: input.isAdmin }),
+      ({ params, body }: { params: UserParams; body: SetUserAdminStatusBody }) =>
+        api.admin.users(params).admin.patch(body),
       "admin.status.update",
     ),
 
   updateHeroCuration: () =>
     createMutationOptions(
-      (input: any) => api.admin["hero-curations"]({ id: input.id }).patch(input.data),
+      ({ params, body }: { params: HeroCurationParams; body: UpdateHeroCurationBody }) =>
+        api.admin["hero-curations"](params).patch(body),
       "admin.hero-curation.update",
     ),
 };

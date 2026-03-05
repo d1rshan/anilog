@@ -293,7 +293,12 @@ export function AdminDashboard() {
                         </span>
                       </div>
                       <Button
-                        onClick={() => updateHeroCuration.mutate({ id: curation.id, data: draft })}
+                        onClick={() =>
+                          updateHeroCuration.mutate({
+                            params: { id: curation.id },
+                            body: draft,
+                          })
+                        }
                         disabled={updateHeroCuration.isPending}
                       >
                         {updateHeroCuration.isPending ? (
@@ -368,8 +373,8 @@ export function AdminDashboard() {
                         disabled={setAdminStatus.isPending || (isSelf && !willBeAdmin)}
                         onClick={() =>
                           setAdminStatus.mutate({
-                            userId: entry.id,
-                            isAdmin: willBeAdmin,
+                            params: { id: entry.id },
+                            body: { isAdmin: willBeAdmin },
                           })
                         }
                       >

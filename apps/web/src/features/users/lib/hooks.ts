@@ -5,46 +5,47 @@ import { userKeys } from "@/lib/query-keys";
 
 export const useSearchUsers = (query: string) => {
   return useQuery({
-    ...userQueries.search(query),
+    ...userQueries.search({ query: { q: query } }),
     enabled: query.length >= 3,
   });
 };
 
 export const useUserProfile = (userId: string) => {
   return useQuery({
-    ...userQueries.profile(userId),
+    ...userQueries.profile({ params: { id: userId } }),
     enabled: !!userId,
   });
 };
 
 export const useUserByUsername = (username: string) => {
   return useQuery({
-    ...userQueries.byUsername(username),
+    ...userQueries.byUsername({ params: { username } }),
     enabled: !!username,
   });
 };
 
 export const useUserLists = (userId: string) => {
   return useQuery({
-    ...userQueries.publicLibrary(userId),
+    ...userQueries.publicLibrary({ params: { id: userId } }),
     enabled: !!userId,
   });
 };
 
 export const useIsFollowing = (userId: string, options?: { enabled?: boolean }) => {
   return useQuery({
-    ...userQueries.isFollowing(userId),
+    ...userQueries.isFollowing({ params: { id: userId } }),
     enabled: !!userId && (options?.enabled ?? true),
   });
 };
 
 export const useFollowUser = () => {
   const queryClient = useQueryClient();
+
   return useMutation({
     ...userMutations.follow(),
-    onSuccess: (_, userId) => {
-      queryClient.setQueryData(userKeys.isFollowing(userId), { isFollowing: true });
-      queryClient.setQueryData<UserWithProfile>(userKeys.profile(userId), (current) =>
+    onSuccess: (_, { params }) => {
+      queryClient.setQueryData(userKeys.isFollowing(params.id), { isFollowing: true });
+      queryClient.setQueryData<UserWithProfile>(userKeys.profile(params.id), (current) =>
         current ? { ...current, followerCount: current.followerCount + 1 } : current,
       );
 
@@ -56,11 +57,12 @@ export const useFollowUser = () => {
 
 export const useUnfollowUser = () => {
   const queryClient = useQueryClient();
+
   return useMutation({
     ...userMutations.unfollow(),
-    onSuccess: (_, userId) => {
-      queryClient.setQueryData(userKeys.isFollowing(userId), { isFollowing: false });
-      queryClient.setQueryData<UserWithProfile>(userKeys.profile(userId), (current) =>
+    onSuccess: (_, { params }) => {
+      queryClient.setQueryData(userKeys.isFollowing(params.id), { isFollowing: false });
+      queryClient.setQueryData<UserWithProfile>(userKeys.profile(params.id), (current) =>
         current ? { ...current, followerCount: Math.max(0, current.followerCount - 1) } : current,
       );
 
@@ -87,6 +89,7 @@ export const useMyAdminStatus = (options?: { enabled?: boolean }) => {
 
 export const useUpdateMyProfile = () => {
   const queryClient = useQueryClient();
+
   return useMutation({
     ...userMutations.updateMyProfile(),
     onSuccess: () => {

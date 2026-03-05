@@ -1,4 +1,5 @@
 import { t } from "elysia";
+
 import { UserWithProfileDto } from "./user.schema";
 
 export const AdminStatsDto = t.Object({
@@ -18,12 +19,10 @@ export const AdminUsersDto = t.Object({
   offset: t.Integer(),
 });
 
-// Input body for setting a user's admin flag
 export const SetUserAdminStatusBody = t.Object({
   isAdmin: t.Boolean(),
 });
 
-// Response shape when admin status is updated
 export const SetUserAdminStatusDto = t.Object({
   id: t.String(),
   isAdmin: t.Boolean(),
@@ -33,7 +32,6 @@ export const AdminStatusDto = t.Object({
   isAdmin: t.Boolean(),
 });
 
-// Input body for updating a hero curation entry (all editable fields)
 export const UpdateHeroCurationBody = t.Object({
   videoId: t.String(),
   start: t.Integer({ minimum: 0 }),
