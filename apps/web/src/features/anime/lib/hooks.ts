@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import type { UpsertAnimeBody } from "@anilog/api";
 import { animeQueries, animeMutations } from "@/features/anime/lib/options";
 import { animeKeys } from "@/lib/query-keys";
 
@@ -25,7 +26,7 @@ export function useSearchAnime(query: string) {
   }, [query]);
 
   return useQuery({
-    ...animeQueries.search(debouncedQuery),
+    ...animeQueries.search({ params: { query: debouncedQuery } }),
     enabled: debouncedQuery.length >= 3,
     placeholderData: (previousData) => previousData,
   });
@@ -43,7 +44,7 @@ export function useArchiveSearch(query: string, options?: { enabled?: boolean })
   }, [query]);
 
   return useQuery({
-    ...animeQueries.archiveSearch(debouncedQuery),
+    ...animeQueries.archiveSearch({ query: { q: debouncedQuery, limit: 12 } }),
     enabled: (options?.enabled ?? true) && debouncedQuery.length >= 2,
     placeholderData: (previousData) => previousData,
   });
@@ -51,9 +52,11 @@ export function useArchiveSearch(query: string, options?: { enabled?: boolean })
 
 export function useUpsertAnime() {
   const queryClient = useQueryClient();
+  const upsertAnimeMutation = animeMutations.upsertAnime();
 
   return useMutation({
-    ...animeMutations.upsertAnime(),
+    ...upsertAnimeMutation,
+    mutationFn: (body: UpsertAnimeBody) => upsertAnimeMutation.mutationFn({ body }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: animeKeys.trending() });
     },

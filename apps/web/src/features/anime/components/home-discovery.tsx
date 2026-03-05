@@ -174,7 +174,9 @@ export function HomeDiscovery() {
       return;
     }
 
-    logAnime.mutate({ anime: animeItem, status: "watchlist", currentEpisode: 0, rating: null });
+    logAnime.mutate({
+      body: { anime: animeItem, status: "watchlist", currentEpisode: 0, rating: null },
+    });
   };
 
   const openEditor = (target: Anime | LibraryEntryWithAnime) => {

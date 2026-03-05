@@ -19,7 +19,7 @@ export function useAdminUsers(
   const offset = options?.offset ?? 0;
 
   return useQuery({
-    ...adminQueries.users(query, limit, offset),
+    ...adminQueries.users({ query: { q: query, limit, offset } }),
     enabled: options?.enabled ?? true,
   });
 }

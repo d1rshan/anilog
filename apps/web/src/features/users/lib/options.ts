@@ -1,44 +1,46 @@
 import { api } from "@/lib/api";
 import { edenFetch } from "@/lib/eden-fetch";
+import type {
+  UpdateUserProfileBody,
+  UserParams,
+  UserSearchQuery,
+  UsernameParams,
+} from "@anilog/api";
 import { createQueryOptions, createMutationOptions } from "@/lib/query-helpers";
 import { libraryKeys, userKeys } from "@/lib/query-keys";
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 
-export type UpdateProfileData = Parameters<typeof api.users.me.profile.put>[0];
-
 export const userQueries = {
-  search: (query: string) =>
-    createQueryOptions(
-      userKeys.search(query),
-      () => api.users.search.get({ query: { q: query } }),
-      { staleTime: 30 * SECOND },
-    ),
+  search: ({ query }: { query: UserSearchQuery }) =>
+    createQueryOptions(userKeys.search(query.q), () => api.users.search.get({ query }), {
+      staleTime: 30 * SECOND,
+    }),
 
-  profile: (userId: string) =>
-    createQueryOptions(userKeys.profile(userId), () => api.users({ id: userId }).get(), {
+  profile: ({ params }: { params: UserParams }) =>
+    createQueryOptions(userKeys.profile(params.id), () => api.users(params).get(), {
       staleTime: 1 * MINUTE,
     }),
 
-  byUsername: (username: string) =>
+  byUsername: ({ params }: { params: UsernameParams }) =>
     createQueryOptions(
-      userKeys.byUsername(username),
-      () => api.users.username({ username }).get(),
+      userKeys.byUsername(params.username),
+      () => api.users.username(params).get(),
       { staleTime: 1 * MINUTE },
     ),
 
-  publicLibrary: (userId: string) =>
+  publicLibrary: ({ params }: { params: UserParams }) =>
     createQueryOptions(
-      libraryKeys.publicByUserId(userId),
-      () => api.users({ id: userId }).library.get(),
+      libraryKeys.publicByUserId(params.id),
+      () => api.users(params).library.get(),
       { staleTime: 1 * MINUTE },
     ),
 
-  isFollowing: (userId: string) => ({
-    queryKey: userKeys.isFollowing(userId),
+  isFollowing: ({ params }: { params: UserParams }) => ({
+    queryKey: userKeys.isFollowing(params.id),
     queryFn: async () => {
-      const data = await edenFetch(() => api.users.me["check-follow"]({ id: userId }).get());
+      const data = await edenFetch(() => api.users.me["check-follow"](params).get());
       return { isFollowing: data.isFollowing };
     },
     staleTime: 30 * SECOND,
@@ -63,19 +65,19 @@ export const userQueries = {
 export const userMutations = {
   follow: () =>
     createMutationOptions(
-      (userId: string) => api.users({ id: userId }).follow.post(),
+      ({ params }: { params: UserParams }) => api.users(params).follow.post(),
       "user.follow",
     ),
 
   unfollow: () =>
     createMutationOptions(
-      (userId: string) => api.users({ id: userId }).follow.delete(),
+      ({ params }: { params: UserParams }) => api.users(params).follow.delete(),
       "user.unfollow",
     ),
 
   updateMyProfile: () =>
     createMutationOptions(
-      (data: UpdateProfileData) => api.users.me.profile.put(data),
+      ({ body }: { body: UpdateUserProfileBody }) => api.users.me.profile.put(body),
       "user.profile.update",
     ),
 };
@@ -89,3 +91,4 @@ type UserPublicLibraryData = NonNullable<
 
 export type UserWithProfile = UserProfileData;
 export type PublicUserLibrary = UserPublicLibraryData;
+export type { UpdateUserProfileBody as UpdateProfileData };

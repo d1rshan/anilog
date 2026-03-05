@@ -126,10 +126,12 @@ export function AddToListDialog({
 
     logAnime.mutate(
       {
-        anime,
-        status,
-        currentEpisode: resolvedEpisode,
-        rating,
+        body: {
+          anime,
+          status,
+          currentEpisode: resolvedEpisode,
+          rating,
+        },
       },
       {
         onSuccess: () => {
@@ -142,11 +144,14 @@ export function AddToListDialog({
   const handleRemove = () => {
     if (!anime) return;
 
-    removeAnime.mutate(anime.id, {
-      onSuccess: () => {
-        onOpenChange(false);
+    removeAnime.mutate(
+      { params: { animeId: anime.id } },
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+        },
       },
-    });
+    );
   };
 
   const handleStatusChange = (newStatus: LibraryStatus) => {

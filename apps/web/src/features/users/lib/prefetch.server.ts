@@ -7,7 +7,7 @@ import { libraryQueries } from "@/features/library/lib/options";
 import { userQueries } from "./options";
 
 export async function prefetchUserByUsername(queryClient: QueryClient, username: string) {
-  await queryClient.prefetchQuery(userQueries.byUsername(username));
+  await queryClient.prefetchQuery(userQueries.byUsername({ params: { username } }));
 }
 
 export async function prefetchProfileLibrary(
@@ -19,5 +19,5 @@ export async function prefetchProfileLibrary(
     return;
   }
 
-  await queryClient.prefetchQuery(userQueries.publicLibrary(options.userId));
+  await queryClient.prefetchQuery(userQueries.publicLibrary({ params: { id: options.userId } }));
 }

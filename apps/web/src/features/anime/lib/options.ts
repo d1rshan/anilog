@@ -1,4 +1,5 @@
 import { api } from "@/lib/api";
+import type { AnimeSearchParams, ArchiveSearchQuery, UpsertAnimeBody } from "@anilog/api";
 import { createQueryOptions, createMutationOptions } from "@/lib/query-helpers";
 import { animeKeys } from "@/lib/query-keys";
 
@@ -15,15 +16,19 @@ export const animeQueries = {
       staleTime: 10 * MINUTE,
     }),
 
-  search: (query: string) =>
-    createQueryOptions(animeKeys.search(query), () => api.anime.search({ query }).get(), {
-      staleTime: 5 * MINUTE,
-    }),
-
-  archiveSearch: (query: string) =>
+  search: ({ params }: { params: AnimeSearchParams }) =>
     createQueryOptions(
-      animeKeys.archiveSearch(query),
-      () => api.anime["archive-search"].get({ query: { q: query, limit: 12 } }),
+      animeKeys.search(params.query),
+      () => api.anime.search({ query: params.query }).get(),
+      {
+        staleTime: 5 * MINUTE,
+      },
+    ),
+
+  archiveSearch: ({ query }: { query: ArchiveSearchQuery }) =>
+    createQueryOptions(
+      animeKeys.archiveSearch(query.q),
+      () => api.anime["archive-search"].get({ query }),
       { staleTime: 1 * MINUTE },
     ),
 };
@@ -31,7 +36,7 @@ export const animeQueries = {
 export const animeMutations = {
   upsertAnime: () =>
     createMutationOptions(
-      (animeData: Parameters<typeof api.anime.upsert.post>[0]) => api.anime.upsert.post(animeData),
+      ({ body }: { body: UpsertAnimeBody }) => api.anime.upsert.post(body),
       "anime.upsert",
     ),
 };

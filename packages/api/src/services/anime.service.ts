@@ -55,8 +55,7 @@ export class AnimeService {
     const q = userQuery.trim().toLowerCase();
     if (q.length < 2) return { library: [], archive: [] };
 
-    const safeLimit = Math.min(Math.max(limit, 1), 50);
-    const cacheKey = `${userId}:${q}:${safeLimit}`;
+    const cacheKey = `${userId}:${q}:${limit}`;
 
     const cached = archiveSearchCache.get(cacheKey);
     if (cached && cached?.expiresAt > Date.now()) {
@@ -91,7 +90,7 @@ export class AnimeService {
             ? b.score - a.score
             : b.item.updatedAt.getTime() - a.item.updatedAt.getTime(),
         )
-        .slice(0, safeLimit)
+        .slice(0, limit)
         .map((r) => r.item);
 
     // --- Library ---
@@ -121,7 +120,7 @@ export class AnimeService {
         ),
       )
       .orderBy(desc(anime.updatedAt))
-      .limit(safeLimit * 4);
+      .limit(limit * 4);
 
     const archive = rank(archiveRows);
 

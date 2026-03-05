@@ -19,8 +19,8 @@ export class AdminService {
   }
 
   static async searchUsers(input: AdminUsersQuery): Promise<AdminUsersDto> {
-    const limit = Math.min(Math.max(input.limit ?? 20, 1), 100);
-    const offset = Math.max(input.offset ?? 0, 0);
+    const limit = input.limit ?? 20;
+    const offset = input.offset ?? 0;
     const normalized = (input.q ?? "").trim();
 
     const whereClause = normalized
@@ -129,10 +129,6 @@ export class AdminService {
     id: number,
     payload: UpdateHeroCurationBody,
   ): Promise<HeroCurationDto> {
-    if (payload.start < 0) {
-      throw validationError("Start timestamp must be zero or greater");
-    }
-
     if (payload.stop <= payload.start) {
       throw validationError("Stop timestamp must be greater than start timestamp");
     }
@@ -151,10 +147,6 @@ export class AdminService {
       }
     }
 
-    if (payload.sortOrder < 0) {
-      throw validationError("sortOrder must be zero or greater");
-    }
-
     const [updated] = await db
       .update(heroCuration)
       .set({
@@ -167,7 +159,6 @@ export class AdminService {
         tag: payload.tag.trim(),
         sortOrder: payload.sortOrder,
         isActive: payload.isActive,
-        updatedAt: new Date(),
       })
       .where(eq(heroCuration.id, id))
       .returning();

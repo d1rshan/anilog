@@ -1,13 +1,15 @@
 import { api } from "@/lib/api";
+import type {
+  LibraryAnimeParams,
+  LogAnimeBody,
+  UpdateLibraryProgressBody,
+  UpdateLibraryRatingBody,
+  UpdateLibraryStatusBody,
+} from "@anilog/api";
 import { createQueryOptions, createMutationOptions } from "@/lib/query-helpers";
 import { libraryKeys } from "@/lib/query-keys";
 
 const MINUTE = 60_000;
-
-type LibraryMeRoute = ReturnType<typeof api.library.me>;
-type UpdateStatusBody = Parameters<LibraryMeRoute["status"]["patch"]>[0];
-type UpdateProgressBody = Parameters<LibraryMeRoute["progress"]["patch"]>[0];
-type UpdateRatingBody = Parameters<LibraryMeRoute["rating"]["patch"]>[0];
 
 export const LIBRARY_STATUSES = ["watching", "completed", "watchlist", "dropped"] as const;
 
@@ -18,39 +20,37 @@ export const libraryQueries = {
     }),
 };
 
-export type LogAnimeData = Parameters<typeof api.library.me.log.post>[0];
-export type UpdateLibraryStatusData = { animeId: number } & UpdateStatusBody;
-export type UpdateLibraryProgressData = { animeId: number } & UpdateProgressBody;
-export type UpdateLibraryRatingData = { animeId: number } & UpdateRatingBody;
+export type LogAnimeData = LogAnimeBody;
+export type UpdateLibraryStatusData = { animeId: number } & UpdateLibraryStatusBody;
+export type UpdateLibraryProgressData = { animeId: number } & UpdateLibraryProgressBody;
+export type UpdateLibraryRatingData = { animeId: number } & UpdateLibraryRatingBody;
 
 export const libraryMutations = {
-  logAnime: () => createMutationOptions((data: LogAnimeData) => api.library.me.log.post(data)),
+  logAnime: () =>
+    createMutationOptions(({ body }: { body: LogAnimeBody }) => api.library.me.log.post(body)),
 
   updateLibraryStatus: () =>
-    createMutationOptions((data: UpdateLibraryStatusData) =>
-      api.library.me({ animeId: data.animeId }).status.patch({
-        status: data.status,
-        currentEpisode: data.currentEpisode,
-      }),
+    createMutationOptions(
+      ({ params, body }: { params: LibraryAnimeParams; body: UpdateLibraryStatusBody }) =>
+        api.library.me(params).status.patch(body),
     ),
 
   updateLibraryProgress: () =>
-    createMutationOptions((data: UpdateLibraryProgressData) =>
-      api.library.me({ animeId: data.animeId }).progress.patch({
-        currentEpisode: data.currentEpisode,
-        delta: data.delta,
-      }),
+    createMutationOptions(
+      ({ params, body }: { params: LibraryAnimeParams; body: UpdateLibraryProgressBody }) =>
+        api.library.me(params).progress.patch(body),
     ),
 
   updateLibraryRating: () =>
-    createMutationOptions((data: UpdateLibraryRatingData) =>
-      api.library.me({ animeId: data.animeId }).rating.patch({
-        rating: data.rating,
-      }),
+    createMutationOptions(
+      ({ params, body }: { params: LibraryAnimeParams; body: UpdateLibraryRatingBody }) =>
+        api.library.me(params).rating.patch(body),
     ),
 
   removeFromLibrary: () =>
-    createMutationOptions((animeId: number) => api.library.me({ animeId }).delete()),
+    createMutationOptions(({ params }: { params: LibraryAnimeParams }) =>
+      api.library.me(params).delete(),
+    ),
 };
 
 type MyLibraryData = NonNullable<Awaited<ReturnType<(typeof api.library.me)["get"]>>["data"]>;

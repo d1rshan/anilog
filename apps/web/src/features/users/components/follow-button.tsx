@@ -36,9 +36,9 @@ export function FollowButton({ userId, size = "sm", variant = "default" }: Follo
     }
 
     if (isFollowing) {
-      unfollowMutation.mutate(userId);
+      unfollowMutation.mutate({ params: { id: userId } });
     } else {
-      followMutation.mutate(userId);
+      followMutation.mutate({ params: { id: userId } });
     }
   };
 
