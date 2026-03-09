@@ -3,7 +3,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import type { UpsertAnimeBody } from "@anilog/api";
-import { animeQueries, animeMutations } from "@/features/anime/lib/options";
+import {
+  animeQueries,
+  animeMutations,
+  type AnimeArchiveSearchInput,
+  type AnimeSearchInput,
+} from "@/features/anime/lib/options";
 import { animeKeys } from "@/lib/query-keys";
 
 export function useTrendingAnime() {
@@ -14,37 +19,45 @@ export function useHeroCurations() {
   return useQuery(animeQueries.heroCurations());
 }
 
-export function useSearchAnime(query: string) {
-  const [debouncedQuery, setDebouncedQuery] = useState(query);
+export function useSearchAnime(
+  input: AnimeSearchInput,
+  options?: { enabled?: boolean; debounceMs?: number },
+) {
+  const [debouncedQuery, setDebouncedQuery] = useState(input.params.query);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedQuery(query);
-    }, 400);
+      setDebouncedQuery(input.params.query);
+    }, options?.debounceMs ?? 400);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [input.params.query, options?.debounceMs]);
 
   return useQuery({
     ...animeQueries.search({ params: { query: debouncedQuery } }),
-    enabled: debouncedQuery.length >= 3,
+    enabled: (options?.enabled ?? true) && debouncedQuery.length >= 3,
     placeholderData: (previousData) => previousData,
   });
 }
 
-export function useArchiveSearch(query: string, options?: { enabled?: boolean }) {
-  const [debouncedQuery, setDebouncedQuery] = useState(query);
+export function useArchiveSearch(
+  input: AnimeArchiveSearchInput,
+  options?: { enabled?: boolean; debounceMs?: number },
+) {
+  const [debouncedQuery, setDebouncedQuery] = useState(input.query.q);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedQuery(query);
-    }, 200);
+      setDebouncedQuery(input.query.q);
+    }, options?.debounceMs ?? 200);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [input.query.q, options?.debounceMs]);
 
   return useQuery({
-    ...animeQueries.archiveSearch({ query: { q: debouncedQuery, limit: 12 } }),
+    ...animeQueries.archiveSearch({
+      query: { ...input.query, q: debouncedQuery },
+    }),
     enabled: (options?.enabled ?? true) && debouncedQuery.length >= 2,
     placeholderData: (previousData) => previousData,
   });

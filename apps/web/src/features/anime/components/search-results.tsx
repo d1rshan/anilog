@@ -106,15 +106,21 @@ export function SearchResults({ query }: SearchResultsProps) {
     isLoading: isArchiveLoading,
     isError: isArchiveError,
     error: archiveError,
-  } = useArchiveSearch(query, {
-    enabled: isAuthenticated,
-  });
+  } = useArchiveSearch(
+    {
+      query: {
+        q: query,
+        limit: 12,
+      },
+    },
+    { enabled: isAuthenticated },
+  );
   const {
     data: anilistResults,
     isLoading: isAniListLoading,
     isError: isAniListError,
     error: aniListError,
-  } = useSearchAnime(query);
+  } = useSearchAnime({ params: { query } });
 
   const { requireAuth } = useRequireAuth({
     toastMessage: "Please sign in to log anime",

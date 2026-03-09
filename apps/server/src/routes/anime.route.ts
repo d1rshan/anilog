@@ -72,7 +72,7 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
     },
   )
   .get(
-    "/archive-search",
+    "/archive-search", // TODO: isn't it better to pass in params
     async ({ request, query }) => {
       const session = await auth.api.getSession({ headers: request.headers });
       if (!session?.user?.id) {

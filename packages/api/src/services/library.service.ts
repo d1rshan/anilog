@@ -87,7 +87,6 @@ export class LibraryService {
           imageUrl: input.anime.imageUrl,
           year: input.anime.year,
           rating: input.anime.rating,
-          updatedAt: new Date(),
         },
       });
 
@@ -140,7 +139,6 @@ export class LibraryService {
           status: input.status,
           currentEpisode: resolvedEpisode,
           rating: input.rating ?? null,
-          updatedAt: new Date(),
         },
       });
 
@@ -200,7 +198,6 @@ export class LibraryService {
       .set({
         status,
         currentEpisode: resolvedEpisode,
-        updatedAt: new Date(),
       })
       .where(and(eq(userAnime.userId, userId), eq(userAnime.animeId, animeId)));
 

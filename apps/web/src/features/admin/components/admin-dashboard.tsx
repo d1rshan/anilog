@@ -73,7 +73,16 @@ export function AdminDashboard() {
   }, [searchInput]);
 
   const statsQuery = useAdminStats({ enabled: isAdmin });
-  const usersQuery = useAdminUsers(searchQuery, { enabled: isAdmin, limit: 20, offset: 0 });
+  const usersQuery = useAdminUsers(
+    {
+      query: {
+        q: searchQuery,
+        limit: 20,
+        offset: 0,
+      },
+    },
+    { enabled: isAdmin },
+  );
   const heroCurationsQuery = useAdminHeroCurations({ enabled: isAdmin });
 
   const setAdminStatus = useSetUserAdminStatus();

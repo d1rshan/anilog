@@ -5,6 +5,14 @@ import { animeKeys } from "@/lib/query-keys";
 
 const MINUTE = 60_000;
 
+export type AnimeSearchInput = {
+  params: AnimeSearchParams;
+};
+
+export type AnimeArchiveSearchInput = {
+  query: ArchiveSearchQuery;
+};
+
 export const animeQueries = {
   trending: () =>
     createQueryOptions(animeKeys.trending(), () => api.anime.trending.get(), {
@@ -16,7 +24,7 @@ export const animeQueries = {
       staleTime: 10 * MINUTE,
     }),
 
-  search: ({ params }: { params: AnimeSearchParams }) =>
+  search: ({ params }: AnimeSearchInput) =>
     createQueryOptions(
       animeKeys.search(params.query),
       () => api.anime.search({ query: params.query }).get(),
@@ -25,7 +33,7 @@ export const animeQueries = {
       },
     ),
 
-  archiveSearch: ({ query }: { query: ArchiveSearchQuery }) =>
+  archiveSearch: ({ query }: AnimeArchiveSearchInput) =>
     createQueryOptions(
       animeKeys.archiveSearch(query.q),
       () => api.anime["archive-search"].get({ query }),

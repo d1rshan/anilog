@@ -3,10 +3,10 @@ import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { isApiError } from "@anilog/api";
 import { auth } from "@anilog/auth";
-import { animeRoutes } from "./routes/anime";
-import { userRoutes } from "./routes/users";
-import { libraryRoutes } from "./routes/library";
-import { adminRoutes } from "./routes/admin";
+import { animeRoutes } from "./routes/anime.route";
+import { userRoutes } from "./routes/users.route";
+import { libraryRoutes } from "./routes/library.route";
+import { adminRoutes } from "./routes/admin.route";
 
 const allowedOrigins = process.env.CORS_ORIGIN || "http://localhost:3001";
 
