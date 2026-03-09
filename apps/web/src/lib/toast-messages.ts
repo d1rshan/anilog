@@ -1,6 +1,34 @@
 import { toast } from "sonner";
 import { ApiError } from "./eden-fetch";
 
+type BaseToastContext = Record<string, unknown>;
+
+type LibraryLogToastContext = {
+  animeTitle?: string;
+  status?: string;
+  wasNewEntry?: boolean;
+};
+
+type LibraryEntryToastContext = {
+  animeTitle?: string;
+};
+
+type ToastContextByKey = {
+  "anime.upsert": BaseToastContext;
+  "library.log": LibraryLogToastContext;
+  "library.status.update": LibraryEntryToastContext;
+  "library.progress.update": LibraryEntryToastContext;
+  "library.rating.update": LibraryEntryToastContext;
+  "library.remove": LibraryEntryToastContext;
+  "user.follow": BaseToastContext;
+  "user.unfollow": BaseToastContext;
+  "user.profile.update": BaseToastContext;
+  "admin.status.update": BaseToastContext;
+  "admin.hero-curation.update": BaseToastContext;
+};
+
+type ToastMessageTemplate<TContext> = string | ((context: TContext) => string);
+
 export const TOAST_MESSAGES = {
   // anime
   "anime.upsert": {
@@ -10,23 +38,32 @@ export const TOAST_MESSAGES = {
 
   // library
   "library.log": {
-    success: "Added to library",
+    success: (context: LibraryLogToastContext) =>
+      context.status === "watchlist" && context.wasNewEntry
+        ? `Added ${context.animeTitle ?? "anime"} to watchlist.`
+        : `Saved changes for ${context.animeTitle ?? "anime"}.`,
     error: "Failed to log anime",
   },
   "library.status.update": {
-    success: "Status updated",
+    success: (context: LibraryEntryToastContext) =>
+      `Saved changes for ${context.animeTitle ?? "anime"}.`,
     error: "Failed to update status",
   },
   "library.progress.update": {
-    success: "Progress updated",
+    success: (context: LibraryEntryToastContext) =>
+      `Saved changes for ${context.animeTitle ?? "anime"}.`,
     error: "Failed to update progress",
   },
   "library.rating.update": {
-    success: "Rating updated",
+    success: (context: LibraryEntryToastContext) =>
+      `Saved changes for ${context.animeTitle ?? "anime"}.`,
     error: "Failed to update rating",
   },
   "library.remove": {
-    success: "Removed from library",
+    success: (context: LibraryEntryToastContext) =>
+      context.animeTitle
+        ? `Removed ${context.animeTitle} from your library.`
+        : "Removed anime from your library.",
     error: "Failed to remove anime",
   },
 
@@ -57,15 +94,38 @@ export const TOAST_MESSAGES = {
 
 export type ToastKey = keyof typeof TOAST_MESSAGES;
 
-export function showSuccessToast(key: ToastKey) {
-  toast.success(TOAST_MESSAGES[key].success);
+function resolveToastMessage<TContext>(
+  template: ToastMessageTemplate<TContext>,
+  context?: TContext,
+): string {
+  if (typeof template === "function") {
+    return template((context ?? {}) as TContext);
+  }
+
+  return template;
 }
 
-export function showErrorToast(key: ToastKey, error?: unknown) {
+export function showSuccessToast<TKey extends ToastKey>(
+  key: TKey,
+  context?: ToastContextByKey[TKey],
+) {
+  toast.success(resolveToastMessage(TOAST_MESSAGES[key].success, context));
+}
+
+export function showErrorToast<TKey extends ToastKey>(
+  key: TKey,
+  error?: unknown,
+  context?: ToastContextByKey[TKey],
+) {
   let message: string = TOAST_MESSAGES[key].error;
 
   if (error instanceof ApiError && error.message) {
     message = error.message;
+  } else {
+    message = resolveToastMessage(
+      TOAST_MESSAGES[key].error as ToastMessageTemplate<ToastContextByKey[TKey]>,
+      context,
+    );
   }
 
   toast.error(message);

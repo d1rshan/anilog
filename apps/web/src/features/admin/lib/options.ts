@@ -11,13 +11,17 @@ import { adminKeys } from "@/lib/query-keys";
 
 const SECOND = 1000;
 
+export type AdminUsersQueryInput = {
+  query?: AdminUsersQuery;
+};
+
 export const adminQueries = {
   stats: () =>
     createQueryOptions(adminKeys.stats(), () => api.admin.stats.get(), {
       staleTime: 30 * SECOND,
     }),
 
-  users: ({ query }: { query?: AdminUsersQuery } = {}) =>
+  users: ({ query }: AdminUsersQueryInput = {}) =>
     createQueryOptions(
       adminKeys.users(query?.q ?? "", query?.limit ?? 20, query?.offset ?? 0),
       () =>

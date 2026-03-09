@@ -11,6 +11,7 @@ import type {
   UpsertAnimeDto,
 } from "../schemas";
 
+// TODO: use LRU cache library instead
 const ANILIST_API = "https://graphql.anilist.co";
 const SEARCH_CACHE_TTL_MS = 30_000;
 const ANILIST_CACHE_TTL_MS = 60_000;
@@ -179,8 +180,6 @@ export class AnimeService {
       };
     };
 
-    const now = new Date();
-
     const animeInserts = media.map((m) => {
       const fallbackTitle = m.title?.native || "UNKNOWN";
 
@@ -194,8 +193,6 @@ export class AnimeService {
         imageUrl: m.coverImage?.large || "", // decide if empty string is acceptable
         year: m.seasonYear ?? 0,
         rating: m.averageScore ?? 0,
-        createdAt: now,
-        updatedAt: now,
       };
     });
 
@@ -213,7 +210,6 @@ export class AnimeService {
           imageUrl: anime.imageUrl,
           year: anime.year,
           rating: anime.rating,
-          updatedAt: now,
         },
       });
 
@@ -272,11 +268,9 @@ export class AnimeService {
     }
 
     const media = json.data?.Page?.media ?? [];
-    const now = new Date();
 
     const result = media
-      // search results without images are useless for UI → drop early
-      .filter((m: any) => m.coverImage?.large)
+      .filter((m: any) => m.coverImage?.large) // filter out if there are no images
       .map((m: any) => {
         const fallbackTitle = m.title?.native || "UNKNOWN";
 
@@ -290,8 +284,6 @@ export class AnimeService {
           imageUrl: m.coverImage.large,
           year: m.seasonYear ?? 0,
           rating: m.averageScore ?? 0,
-          createdAt: now,
-          updatedAt: now,
         };
       });
 
@@ -329,7 +321,6 @@ export class AnimeService {
             imageUrl: animeData.imageUrl,
             year: animeData.year,
             rating: animeData.rating,
-            updatedAt: new Date(),
           },
         });
 

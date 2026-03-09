@@ -1,7 +1,11 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { adminQueries, adminMutations } from "@/features/admin/lib/options";
+import {
+  adminQueries,
+  adminMutations,
+  type AdminUsersQueryInput,
+} from "@/features/admin/lib/options";
 import { adminKeys, animeKeys } from "@/lib/query-keys";
 
 export function useAdminStats(options?: { enabled?: boolean }) {
@@ -11,15 +15,9 @@ export function useAdminStats(options?: { enabled?: boolean }) {
   });
 }
 
-export function useAdminUsers(
-  query: string,
-  options?: { limit?: number; offset?: number; enabled?: boolean },
-) {
-  const limit = options?.limit ?? 20;
-  const offset = options?.offset ?? 0;
-
+export function useAdminUsers(input: AdminUsersQueryInput = {}, options?: { enabled?: boolean }) {
   return useQuery({
-    ...adminQueries.users({ query: { q: query, limit, offset } }),
+    ...adminQueries.users(input),
     enabled: options?.enabled ?? true,
   });
 }
