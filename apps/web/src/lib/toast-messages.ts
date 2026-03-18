@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import { ApiError } from "./eden-fetch";
+import { getApiErrorMessage } from "./eden-fetch";
 
 type BaseToastContext = Record<string, unknown>;
 
@@ -108,7 +108,9 @@ function resolveToastMessage<TContext>(
 export function showSuccessToast<TKey extends ToastKey>(
   key: TKey,
   context?: ToastContextByKey[TKey],
-) {
+): void;
+export function showSuccessToast(key: ToastKey, context?: Record<string, unknown>): void;
+export function showSuccessToast(key: ToastKey, context?: Record<string, unknown>) {
   toast.success(resolveToastMessage(TOAST_MESSAGES[key].success, context));
 }
 
@@ -116,14 +118,20 @@ export function showErrorToast<TKey extends ToastKey>(
   key: TKey,
   error?: unknown,
   context?: ToastContextByKey[TKey],
-) {
+): void;
+export function showErrorToast(
+  key: ToastKey,
+  error?: unknown,
+  context?: Record<string, unknown>,
+): void;
+export function showErrorToast(key: ToastKey, error?: unknown, context?: Record<string, unknown>) {
   let message: string = TOAST_MESSAGES[key].error;
 
-  if (error instanceof ApiError && error.message) {
-    message = error.message;
+  if (error) {
+    message = getApiErrorMessage(error);
   } else {
     message = resolveToastMessage(
-      TOAST_MESSAGES[key].error as ToastMessageTemplate<ToastContextByKey[TKey]>,
+      TOAST_MESSAGES[key].error as ToastMessageTemplate<Record<string, unknown>>,
       context,
     );
   }

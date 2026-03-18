@@ -1,21 +1,16 @@
-export type ApiErrorCode =
-  | "UNAUTHORIZED"
-  | "FORBIDDEN"
-  | "NOT_FOUND"
-  | "VALIDATION_ERROR"
-  | "CONFLICT"
-  | "EXTERNAL_SERVICE_ERROR"
-  | "INTERNAL_ERROR";
+import type { ErrorCode, ErrorResponse } from "../schemas/error.schema";
 
 export class ApiError extends Error {
-  code: ApiErrorCode;
+  code: ErrorCode;
   status: number;
+  details?: Record<string, unknown>;
 
-  constructor(code: ApiErrorCode, message: string, status: number) {
+  constructor(code: ErrorCode, message: string, status: number, details?: Record<string, unknown>) {
     super(message);
     this.name = "ApiError";
     this.code = code;
     this.status = status;
+    this.details = details;
   }
 }
 
@@ -23,30 +18,49 @@ export function isApiError(value: unknown): value is ApiError {
   return value instanceof ApiError;
 }
 
-export function unauthorizedError(message: string = "Unauthorized") {
-  return new ApiError("UNAUTHORIZED", message, 401);
+export function toErrorResponse(error: ApiError): ErrorResponse {
+  return {
+    error: {
+      code: error.code,
+      message: error.message,
+      ...(error.details ? { details: error.details } : {}),
+    },
+  };
 }
 
-export function forbiddenError(message: string = "Forbidden") {
-  return new ApiError("FORBIDDEN", message, 403);
+export function unauthorizedError(
+  message: string = "Unauthorized",
+  details?: Record<string, unknown>,
+) {
+  return new ApiError("UNAUTHORIZED", message, 401, details);
 }
 
-export function notFoundError(message: string = "Not found") {
-  return new ApiError("NOT_FOUND", message, 404);
+export function forbiddenError(message: string = "Forbidden", details?: Record<string, unknown>) {
+  return new ApiError("FORBIDDEN", message, 403, details);
 }
 
-export function validationError(message: string) {
-  return new ApiError("VALIDATION_ERROR", message, 400);
+export function notFoundError(message: string = "Not found", details?: Record<string, unknown>) {
+  return new ApiError("NOT_FOUND", message, 404, details);
 }
 
-export function conflictError(message: string) {
-  return new ApiError("CONFLICT", message, 409);
+export function validationError(message: string, details?: Record<string, unknown>) {
+  return new ApiError("VALIDATION", message, 400, details);
 }
 
-export function externalServiceError(message: string) {
-  return new ApiError("EXTERNAL_SERVICE_ERROR", message, 502);
+export function conflictError(message: string, details?: Record<string, unknown>) {
+  return new ApiError("CONFLICT", message, 409, details);
 }
 
-export function internalError(message: string = "Internal server error") {
-  return new ApiError("INTERNAL_ERROR", message, 500);
+export function externalServiceError(message: string, details?: Record<string, unknown>) {
+  return new ApiError("EXTERNAL", message, 502, details);
 }
+
+export function internalError(
+  message: string = "Internal server error",
+  details?: Record<string, unknown>,
+) {
+  return new ApiError("INTERNAL", message, 500, details);
+}
+
+export type AppErrorCode = ErrorCode;
+export { ApiError as AppError };
