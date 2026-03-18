@@ -1,4 +1,4 @@
-import type { ErrorCode, ErrorResponse } from "@anilog/api";
+import type { ErrorCode, ErrorResponse } from "@anilog/contracts";
 
 export class ApiError extends Error {
   public readonly status: number;

@@ -109,6 +109,7 @@ type ErrorResponse = {
 - Phase 3 completed
 - Phase 4 completed
 - Phase 5 completed
+- Phase 6 completed
 
 ### Phase 4 Notes
 
@@ -127,6 +128,14 @@ type ErrorResponse = {
 - Replaced frontend DB type usage with transport-contract types from `@anilog/contracts`
 - Added `@anilog/contracts` as a direct dependency of `apps/web`
 - Removed `@anilog/db` as a direct dependency of `apps/web`
+
+### Phase 6 Notes
+
+- Removed `apps/web/src/lib/query-helpers.ts`
+- Removed `apps/web/src/lib/toast-messages.ts`
+- Simplified `apps/web/src/lib/query-provider.tsx` to a plain `QueryClientProvider`
+- Moved mutation success/error toasts into feature-local hooks
+- Replaced helper-generated query/mutation options with direct `queryOptions` and direct Eden unwrapping
 
 ## Phase 0 Completion Criteria
 

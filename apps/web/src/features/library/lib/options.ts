@@ -1,4 +1,5 @@
 import { api } from "@/lib/api";
+import { queryOptions } from "@tanstack/react-query";
 import type {
   LibraryAnimeParams,
   LibraryEntryDto,
@@ -8,7 +9,7 @@ import type {
   UpdateLibraryRatingBody,
   UpdateLibraryStatusBody,
 } from "@anilog/contracts";
-import { createQueryOptions, createMutationOptions } from "@/lib/query-helpers";
+import { edenFetch } from "@/lib/eden-fetch";
 import { libraryKeys } from "@/lib/query-keys";
 
 const MINUTE = 60_000;
@@ -32,7 +33,9 @@ export type RemoveFromLibraryInput = { params: LibraryAnimeParams };
 
 export const libraryQueries = {
   myLibrary: () =>
-    createQueryOptions(libraryKeys.me(), () => api.library.me.get(), {
+    queryOptions({
+      queryKey: libraryKeys.me(),
+      queryFn: () => edenFetch(() => api.library.me.get()),
       staleTime: 1 * MINUTE,
     }),
 };
@@ -44,57 +47,29 @@ export type UpdateLibraryRatingData = { animeId: number } & UpdateLibraryRatingB
 export type LibraryStatus = LibraryStatusSchema;
 
 export const libraryMutations = {
-  logAnime: () =>
-    createMutationOptions(
-      ({ body }: LogAnimeInput) => api.library.me.log.post(body),
-      "library.log",
-      {
-        getSuccessToastContext: ({ data, input }) => ({
-          animeTitle: data.anime.title,
-          status: input.body.status,
-          wasNewEntry: input.body.status === "watchlist",
-        }),
-      },
-    ),
+  logAnime: () => ({
+    mutationFn: ({ body }: LogAnimeInput) => edenFetch(() => api.library.me.log.post(body)),
+  }),
 
-  updateLibraryStatus: () =>
-    createMutationOptions(
-      ({ params, body }: UpdateLibraryStatusInput) => api.library.me(params).status.patch(body),
-      "library.status.update",
-      {
-        getSuccessToastContext: ({ data }) => ({
-          animeTitle: data.anime.title,
-        }),
-      },
-    ),
+  updateLibraryStatus: () => ({
+    mutationFn: ({ params, body }: UpdateLibraryStatusInput) =>
+      edenFetch(() => api.library.me(params).status.patch(body)),
+  }),
 
-  updateLibraryProgress: () =>
-    createMutationOptions(
-      ({ params, body }: UpdateLibraryProgressInput) => api.library.me(params).progress.patch(body),
-      "library.progress.update",
-      {
-        getSuccessToastContext: ({ data }) => ({
-          animeTitle: data.anime.title,
-        }),
-      },
-    ),
+  updateLibraryProgress: () => ({
+    mutationFn: ({ params, body }: UpdateLibraryProgressInput) =>
+      edenFetch(() => api.library.me(params).progress.patch(body)),
+  }),
 
-  updateLibraryRating: () =>
-    createMutationOptions(
-      ({ params, body }: UpdateLibraryRatingInput) => api.library.me(params).rating.patch(body),
-      "library.rating.update",
-      {
-        getSuccessToastContext: ({ data }) => ({
-          animeTitle: data.anime.title,
-        }),
-      },
-    ),
+  updateLibraryRating: () => ({
+    mutationFn: ({ params, body }: UpdateLibraryRatingInput) =>
+      edenFetch(() => api.library.me(params).rating.patch(body)),
+  }),
 
-  removeFromLibrary: () =>
-    createMutationOptions(
-      ({ params }: RemoveFromLibraryInput) => api.library.me(params).delete(),
-      "library.remove",
-    ),
+  removeFromLibrary: () => ({
+    mutationFn: ({ params }: RemoveFromLibraryInput) =>
+      edenFetch(() => api.library.me(params).delete()),
+  }),
 };
 
 export type LibraryEntryWithAnime = LibraryEntryDto;

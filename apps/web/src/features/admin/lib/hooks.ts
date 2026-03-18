@@ -1,11 +1,13 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   adminQueries,
   adminMutations,
   type AdminUsersQueryInput,
 } from "@/features/admin/lib/options";
+import { getApiErrorMessage } from "@/lib/eden-fetch";
 import { adminKeys, animeKeys } from "@/lib/query-keys";
 
 export function useAdminStats(options?: { enabled?: boolean }) {
@@ -35,7 +37,11 @@ export function useSetUserAdminStatus() {
   return useMutation({
     ...adminMutations.setAdminStatus(),
     onSuccess: () => {
+      toast.success("Admin status updated");
       queryClient.invalidateQueries({ queryKey: adminKeys.all });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error));
     },
   });
 }
@@ -46,8 +52,12 @@ export function useUpdateHeroCuration() {
   return useMutation({
     ...adminMutations.updateHeroCuration(),
     onSuccess: () => {
+      toast.success("Hero curation updated");
       queryClient.invalidateQueries({ queryKey: adminKeys.heroCurations() });
       queryClient.invalidateQueries({ queryKey: animeKeys.heroCurations() });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error));
     },
   });
 }

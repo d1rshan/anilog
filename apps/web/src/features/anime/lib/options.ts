@@ -1,6 +1,7 @@
 import { api } from "@/lib/api";
-import type { AnimeSearchParams, ArchiveSearchQuery, UpsertAnimeBody } from "@anilog/api";
-import { createQueryOptions, createMutationOptions } from "@/lib/query-helpers";
+import { queryOptions } from "@tanstack/react-query";
+import type { AnimeSearchParams, ArchiveSearchQuery, UpsertAnimeBody } from "@anilog/contracts";
+import { edenFetch } from "@/lib/eden-fetch";
 import { animeKeys } from "@/lib/query-keys";
 
 const MINUTE = 60_000;
@@ -15,38 +16,39 @@ export type AnimeArchiveSearchInput = {
 
 export const animeQueries = {
   trending: () =>
-    createQueryOptions(animeKeys.trending(), () => api.anime.trending.get(), {
+    queryOptions({
+      queryKey: animeKeys.trending(),
+      queryFn: () => edenFetch(() => api.anime.trending.get()),
       staleTime: 5 * MINUTE,
     }),
 
   heroCurations: () =>
-    createQueryOptions(animeKeys.heroCurations(), () => api.anime["hero-curations"].get(), {
+    queryOptions({
+      queryKey: animeKeys.heroCurations(),
+      queryFn: () => edenFetch(() => api.anime["hero-curations"].get()),
       staleTime: 10 * MINUTE,
     }),
 
   search: ({ params }: AnimeSearchInput) =>
-    createQueryOptions(
-      animeKeys.search(params.query),
-      () => api.anime.search({ query: params.query }).get(),
-      {
-        staleTime: 5 * MINUTE,
-      },
-    ),
+    queryOptions({
+      queryKey: animeKeys.search(params.query),
+      queryFn: () => edenFetch(() => api.anime.search({ query: params.query }).get()),
+      staleTime: 5 * MINUTE,
+    }),
 
   archiveSearch: ({ query }: AnimeArchiveSearchInput) =>
-    createQueryOptions(
-      animeKeys.archiveSearch(query.q),
-      () => api.anime["archive-search"].get({ query }),
-      { staleTime: 1 * MINUTE },
-    ),
+    queryOptions({
+      queryKey: animeKeys.archiveSearch(query.q),
+      queryFn: () => edenFetch(() => api.anime["archive-search"].get({ query })),
+      staleTime: 1 * MINUTE,
+    }),
 };
 
 export const animeMutations = {
-  upsertAnime: () =>
-    createMutationOptions(
-      ({ body }: { body: UpsertAnimeBody }) => api.anime.upsert.post(body),
-      "anime.upsert",
-    ),
+  upsertAnime: () => ({
+    mutationFn: ({ body }: { body: UpsertAnimeBody }) =>
+      edenFetch(() => api.anime.upsert.post(body)),
+  }),
 };
 
 type HeroCurationsData = NonNullable<
