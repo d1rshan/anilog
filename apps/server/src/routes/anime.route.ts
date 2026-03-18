@@ -1,15 +1,16 @@
 import { Elysia, t } from "elysia";
-import { AnimeService, unauthorizedError } from "@anilog/api";
-import { auth } from "@anilog/auth";
+import { AnimeService, unauthorizedError } from "@anilog/domain";
 import {
   ArchiveSearchQuery,
   ArchiveSearchDto,
   AnimeDto,
+  AnimeSearchParams,
   HeroCurationDto,
   SuccessCountDto,
   UpsertAnimeBody,
   UpsertAnimeDto,
-} from "@anilog/api";
+} from "@anilog/contracts";
+import { authPlugin } from "../plugins/auth.plugin";
 
 const cronSecret = process.env.CRON_SECRET;
 
@@ -67,27 +68,24 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
       return AnimeService.searchAnime(params.query);
     },
     {
-      params: t.Object({ query: t.String() }),
+      params: AnimeSearchParams,
       response: t.Array(AnimeDto),
     },
   )
-  .get(
-    "/archive-search", // TODO: isn't it better to pass in params
-    async ({ request, query }) => {
-      const session = await auth.api.getSession({ headers: request.headers });
-      if (!session?.user?.id) {
-        throw unauthorizedError("User not authenticated");
-      }
+  .group("", (app) =>
+    app.use(authPlugin).get(
+      "/archive-search", // TODO: isn't it better to pass in params
+      async ({ query, userId }) => {
+        const q = query.q?.trim() ?? "";
+        const limit = query.limit ?? 12;
 
-      const q = query.q?.trim() ?? "";
-      const limit = query.limit ?? 12;
-
-      return AnimeService.searchArchive(session.user.id, q, limit);
-    },
-    {
-      query: ArchiveSearchQuery,
-      response: ArchiveSearchDto,
-    },
+        return AnimeService.searchArchive(userId, q, limit);
+      },
+      {
+        query: ArchiveSearchQuery,
+        response: ArchiveSearchDto,
+      },
+    ),
   )
   .post(
     "/upsert",

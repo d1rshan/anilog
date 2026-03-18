@@ -1,6 +1,5 @@
 import { Elysia, t } from "elysia";
-import { LibraryService, unauthorizedError } from "@anilog/api";
-import { auth } from "@anilog/auth";
+import { LibraryService } from "@anilog/domain";
 import {
   LibraryAnimeParams,
   LibraryEntryDto,
@@ -8,19 +7,11 @@ import {
   UpdateLibraryProgressBody,
   UpdateLibraryRatingBody,
   UpdateLibraryStatusBody,
-} from "@anilog/api";
-
-const authMiddleware = (app: Elysia) =>
-  app.derive(async ({ request }) => {
-    const session = await auth.api.getSession({ headers: request.headers });
-    if (!session?.user?.id) {
-      throw unauthorizedError("User not authenticated");
-    }
-    return { userId: session.user.id };
-  });
+} from "@anilog/contracts";
+import { authPlugin } from "../plugins/auth.plugin";
 
 export const libraryRoutes = new Elysia({ prefix: "/library" })
-  .use(authMiddleware)
+  .use(authPlugin)
   .get(
     "/me",
     async ({ userId }) => {
