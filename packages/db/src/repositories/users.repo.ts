@@ -1,19 +1,13 @@
 import { db } from "../client";
 import { anime, userAnime, userFollow, userProfile } from "../schema/anilog";
 import { user } from "../schema/auth";
-import { and, asc, count, eq, getTableColumns, ilike, inArray, sql } from "drizzle-orm";
-
-export type UserProfileRecord = typeof userProfile.$inferSelect;
-
-export type UserSummaryRecord = {
-  id: string;
-  name: string;
-  username: string | null;
-  email: string;
-  isAdmin: boolean;
-  image: string | null;
-  profile: UserProfileRecord | null;
-};
+import { and, asc, count, eq, getTableColumns, ilike } from "drizzle-orm";
+import { getFollowCountsMap } from "./shared/follow-counts";
+import {
+  userSummarySelect,
+  type UserProfileRecord,
+  type UserSummaryRecord,
+} from "./shared/user-summary";
 
 export type UserWithCountsRecord = UserSummaryRecord & {
   followerCount: number;
@@ -39,61 +33,6 @@ export type PublicLibraryEntryRecord = {
     rating: number;
   };
 };
-
-function userSummarySelect() {
-  return {
-    id: user.id,
-    name: user.name,
-    username: user.username,
-    email: user.email,
-    isAdmin: user.isAdmin,
-    image: user.image,
-    profile: getTableColumns(userProfile),
-  };
-}
-
-async function getFollowCountsMap(userIds: string[]) {
-  if (userIds.length === 0) {
-    return new Map<string, { followerCount: number; followingCount: number }>();
-  }
-
-  const [followerRows, followingRows] = await Promise.all([
-    db
-      .select({
-        userId: userFollow.followingId,
-        count: sql<number>`count(*)::int`,
-      })
-      .from(userFollow)
-      .where(inArray(userFollow.followingId, userIds))
-      .groupBy(userFollow.followingId),
-    db
-      .select({
-        userId: userFollow.followerId,
-        count: sql<number>`count(*)::int`,
-      })
-      .from(userFollow)
-      .where(inArray(userFollow.followerId, userIds))
-      .groupBy(userFollow.followerId),
-  ]);
-
-  const counts = new Map<string, { followerCount: number; followingCount: number }>();
-
-  for (const userId of userIds) {
-    counts.set(userId, { followerCount: 0, followingCount: 0 });
-  }
-
-  for (const row of followerRows) {
-    const current = counts.get(row.userId) ?? { followerCount: 0, followingCount: 0 };
-    counts.set(row.userId, { ...current, followerCount: row.count });
-  }
-
-  for (const row of followingRows) {
-    const current = counts.get(row.userId) ?? { followerCount: 0, followingCount: 0 };
-    counts.set(row.userId, { ...current, followingCount: row.count });
-  }
-
-  return counts;
-}
 
 export class UsersRepository {
   static async createUserProfile(userId: string): Promise<UserProfileRecord | null> {

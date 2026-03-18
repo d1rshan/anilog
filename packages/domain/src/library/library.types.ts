@@ -1,5 +1,5 @@
 import type { LibraryEntryDto, LibraryStatusSchema, LogAnimeBody } from "@anilog/contracts";
-import type { LibraryEntryRecord } from "@anilog/db/repositories/library.repo";
+import type { LibraryEntryRecord } from "@anilog/db";
 
 export type LibraryEntry = LibraryEntryRecord;
 export type LibraryEntryDtoShape = LibraryEntryDto;

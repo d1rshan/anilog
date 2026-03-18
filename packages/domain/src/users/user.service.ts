@@ -7,7 +7,7 @@ import type {
   UserSearchQuery,
   UserWithProfileDto,
 } from "@anilog/contracts";
-import { UsersRepository } from "@anilog/db/repositories/users.repo";
+import { UsersRepository } from "@anilog/db";
 import {
   conflictError,
   internalError,

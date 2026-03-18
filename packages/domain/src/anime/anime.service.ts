@@ -6,7 +6,7 @@ import type {
   UpsertAnimeBody,
   UpsertAnimeDto,
 } from "@anilog/contracts";
-import { AnimeRepository } from "@anilog/db/repositories/anime.repo";
+import { AnimeRepository } from "@anilog/db";
 import { externalServiceError, internalError } from "../shared/errors/api-error";
 
 const ANILIST_API = "https://graphql.anilist.co";

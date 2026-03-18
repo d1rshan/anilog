@@ -112,6 +112,7 @@ type ErrorResponse = {
 - Phase 6 completed
 - Phase 7 completed
 - Phase 8 completed
+- Phase 9 completed
 
 ### Phase 4 Notes
 
@@ -167,6 +168,32 @@ type ErrorResponse = {
   - `apps/web/src/features/anime/server/prefetch.ts`
   - `apps/web/src/features/admin/api/*`
 - Kept existing `lib/*` entry points in `users`, `anime`, and `admin` as compatibility shims
+
+### Phase 9 Notes
+
+- Confirmed no raw Drizzle/SQL ownership remains in `packages/domain` or `apps/server`
+- Extracted shared repository helpers into `packages/db`:
+  - `packages/db/src/repositories/shared/follow-counts.ts`
+  - `packages/db/src/repositories/shared/user-summary.ts`
+- Removed duplicated follow-count aggregation and user-summary select logic from `users.repo.ts` and `admin.repo.ts`
+- Tightened package boundaries by switching `packages/domain` to consume repositories through the `@anilog/db` package entrypoint instead of deep repository subpaths
+- Left compatibility shims intentionally in place for final cleanup:
+  - `packages/api/src/**/*`
+  - `apps/web/src/features/*/lib/*`
+
+## Remaining Work
+
+### Phase 10 focus
+
+- Review the repository methods that still make multiple count queries and collapse them where it improves clarity or performance
+- Revisit AniList fetch and cache behavior only if there is a measurable pain point
+
+### Phase 11 focus
+
+- Delete the `@anilog/api` compatibility layer
+- Remove remaining web feature `lib/*` compatibility shims
+- Update imports to canonical module paths only
+- Perform the final naming and dead-file cleanup pass
 
 ## Phase 0 Completion Criteria
 
