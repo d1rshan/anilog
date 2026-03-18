@@ -4,7 +4,8 @@ import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import type { LibraryStatus, LogAnimeData } from "@/features/library/lib/options";
+import type { LibraryStatus } from "@/features/library/api/library.query";
+import type { LogAnimeData } from "@/features/library/api/library.mutation";
 
 interface AnimeCardProps {
   anime: Pick<LogAnimeData["anime"], "id" | "title" | "imageUrl" | "year" | "episodes"> & {

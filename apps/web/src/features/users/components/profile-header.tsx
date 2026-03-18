@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { FollowButton } from "./follow-button";
 import { EditProfileDialog } from "./edit-profile-dialog";
 import { Globe, MapPin, Settings } from "lucide-react";
-import type { UserWithProfile } from "@/features/users/lib/options";
+import type { UserWithProfile } from "@/features/users/api/user.query";
 
 interface ProfileHeaderProps {
   user: UserWithProfile;

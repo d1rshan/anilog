@@ -16,8 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { useUpdateMyProfile } from "@/features/users/lib/hooks";
-import type { UserWithProfile } from "@/features/users/lib/options";
+import { useUpdateMyProfile } from "@/features/users/hooks";
+import type { UserWithProfile } from "@/features/users/api/user.query";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 

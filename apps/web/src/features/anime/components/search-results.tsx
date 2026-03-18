@@ -4,15 +4,15 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useAuth, useRequireAuth } from "@/features/auth/lib/hooks";
-import { useLogAnime, useMyLibrary } from "@/features/library/lib/hooks";
+import { useLogAnime, useMyLibrary } from "@/features/library/hooks";
 import {
   type LibraryEntryWithAnime,
   type LibraryStatus,
-  type LogAnimeData,
-} from "@/features/library/lib/options";
+} from "@/features/library/api/library.query";
+import type { LogAnimeData } from "@/features/library/api/library.mutation";
 import { cn } from "@/lib/utils";
 
-import { useArchiveSearch, useSearchAnime } from "../lib/hooks";
+import { useArchiveSearch, useSearchAnime } from "../hooks";
 import { AddToListDialog } from "./add-to-list-dialog";
 import { AnimeCard } from "./anime-card";
 

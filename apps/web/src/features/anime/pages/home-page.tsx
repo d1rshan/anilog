@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { HydrationBoundary, QueryClient, dehydrate } from "@tanstack/react-query";
 
 import { getCurrentUser } from "@/features/auth/lib/server";
-import { prefetchAnimeHome } from "@/features/anime/lib/prefetch.server";
+import { prefetchAnimeHome } from "@/features/anime/server/prefetch";
 
 import { DiscoverSearchShell } from "../components/discover-search-shell";
 

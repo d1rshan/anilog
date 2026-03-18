@@ -5,7 +5,7 @@ import YouTube, { type YouTubeProps, YouTubePlayer } from "react-youtube";
 import { AnimeSearch } from "./anime-search";
 import { Volume2, VolumeX, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useHeroCurations } from "../lib/hooks";
+import { useHeroCurations } from "../hooks";
 
 interface HomeHeroVideoProps {
   searchValue?: string;

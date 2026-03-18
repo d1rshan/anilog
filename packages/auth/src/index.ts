@@ -3,7 +3,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { username } from "better-auth/plugins";
 import { db } from "@anilog/db";
 import * as schema from "@anilog/db/schema/auth";
-import { UserService } from "@anilog/api";
+import { UserService } from "@anilog/domain";
 
 const trustedOrigins = (process.env.CORS_ORIGIN || "")
   .split(",")

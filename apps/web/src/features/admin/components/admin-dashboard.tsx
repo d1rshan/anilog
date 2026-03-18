@@ -12,8 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/features/auth/lib/hooks";
-import { useMyAdminStatus } from "@/features/users/lib/hooks";
-import type { HeroCuration } from "@/features/anime/lib/options";
+import { useMyAdminStatus } from "@/features/users/hooks";
+import type { HeroCuration } from "@/features/anime/api/anime.query";
 
 import {
   useAdminHeroCurations,
@@ -21,7 +21,7 @@ import {
   useAdminUsers,
   useSetUserAdminStatus,
   useUpdateHeroCuration,
-} from "../lib/hooks";
+} from "../hooks";
 
 type HeroDraft = Pick<
   HeroCuration,

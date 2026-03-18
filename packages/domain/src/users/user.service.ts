@@ -113,18 +113,6 @@ export class UserService {
     return UsersRepository.findFollowing(userId);
   }
 
-  static async getFollowerCount(userId: string) {
-    return UsersRepository.getFollowerCount(userId);
-  }
-
-  static async getFollowingCount(userId: string) {
-    return UsersRepository.getFollowingCount(userId);
-  }
-
-  static async getFollowCounts(userId: string) {
-    return UsersRepository.getFollowCounts(userId);
-  }
-
   static async getPublicUserLibrary(userId: string): Promise<PublicLibraryEntryDto[]> {
     return UsersRepository.findPublicLibrary(userId);
   }

@@ -1,20 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  libraryQueries,
-  type LibraryEntryWithAnime,
-  type LibraryStatus,
-} from "../api/library.query";
+import type { PublicUserLibrary } from "@/features/users/api/user.query";
+import { getApiErrorMessage } from "@/lib/eden-fetch";
+import { libraryKeys } from "./api/library.keys";
 import {
   libraryMutations,
   type LogAnimeData,
   type UpdateLibraryProgressData,
   type UpdateLibraryRatingData,
   type UpdateLibraryStatusData,
-} from "../api/library.mutation";
-import type { PublicUserLibrary } from "@/features/users/lib/options";
-import { getApiErrorMessage } from "@/lib/eden-fetch";
-import { libraryKeys } from "../api/library.keys";
+} from "./api/library.mutation";
+import {
+  libraryQueries,
+  type LibraryEntryWithAnime,
+  type LibraryStatus,
+} from "./api/library.query";
 
 type MutationContext = {
   previous?: LibraryEntryWithAnime[];
@@ -109,9 +109,6 @@ export const useMyLibrary = (options?: { enabled?: boolean }) => {
   });
 };
 
-// Backward-compatible alias to keep imports stable while refactoring.
-export const useUserLists = useMyLibrary;
-
 export const useLogAnime = () => {
   const queryClient = useQueryClient();
   const mutation = libraryMutations.logAnime();
@@ -159,7 +156,7 @@ export const useLogAnime = () => {
         queryClient.setQueryData(libraryKeys.me(), context.previous);
       }
     },
-    onSuccess: (data, payload, _context: MutationContext | undefined) => {
+    onSuccess: (data, payload) => {
       toast.success(
         payload.body.status === "watchlist"
           ? `Added ${data.anime.title} to watchlist.`
@@ -356,4 +353,4 @@ export function getNextEpisode(currentEpisode: number): number {
   return Math.max(1, currentEpisode + 1);
 }
 
-export type { UpdateLibraryStatusData, UpdateLibraryProgressData, UpdateLibraryRatingData };
+export type { UpdateLibraryProgressData, UpdateLibraryRatingData, UpdateLibraryStatusData };
