@@ -2,19 +2,22 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { type Anime, type LibraryStatus } from "@anilog/db/schema/anilog";
 import { useRouter } from "next/navigation";
 import { useTrendingAnime } from "../lib/hooks";
 import { useMyLibrary, useLogAnime } from "@/features/library/lib/hooks";
 import { AnimeCard } from "./anime-card";
 import { AddToListDialog } from "./add-to-list-dialog";
-import { type LibraryEntryWithAnime } from "@/features/library/lib/options";
+import {
+  type LibraryEntryWithAnime,
+  type LibraryStatus,
+  type LogAnimeData,
+} from "@/features/library/lib/options";
 import { useAuth, useRequireAuth } from "@/features/auth/lib/hooks";
 import { cn } from "@/lib/utils";
 
 type DialogState = {
   isOpen: boolean;
-  anime: Anime | null;
+  anime: LogAnimeData["anime"] | null;
   initialStatus?: LibraryStatus;
   entry?: LibraryEntryWithAnime | null;
 };
@@ -165,7 +168,7 @@ export function HomeDiscovery() {
     [visibleLibrary],
   );
 
-  const handleAddToWatchlist = (animeItem: Anime) => {
+  const handleAddToWatchlist = (animeItem: LogAnimeData["anime"]) => {
     if (!requireAuth()) {
       return;
     }
@@ -179,12 +182,12 @@ export function HomeDiscovery() {
     });
   };
 
-  const openEditor = (target: Anime | LibraryEntryWithAnime) => {
+  const openEditor = (target: LogAnimeData["anime"] | LibraryEntryWithAnime) => {
     if (!requireAuth()) {
       return;
     }
 
-    const anime = "anime" in target ? (target.anime as Anime) : target;
+    const anime = "anime" in target ? target.anime : target;
     const existingEntry = "anime" in target ? target : (entryByAnimeId.get(target.id) ?? null);
 
     setDialog({

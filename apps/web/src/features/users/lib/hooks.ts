@@ -45,8 +45,10 @@ export const useFollowUser = () => {
     ...userMutations.follow(),
     onSuccess: (_, { params }) => {
       queryClient.setQueryData(userKeys.isFollowing(params.id), { isFollowing: true });
-      queryClient.setQueryData<UserWithProfile>(userKeys.profile(params.id), (current) =>
-        current ? { ...current, followerCount: current.followerCount + 1 } : current,
+      queryClient.setQueryData<UserWithProfile>(
+        userKeys.profile(params.id),
+        (current: UserWithProfile | undefined) =>
+          current ? { ...current, followerCount: current.followerCount + 1 } : current,
       );
 
       queryClient.invalidateQueries({ queryKey: userKeys.byUsernameRoot() });
@@ -62,8 +64,10 @@ export const useUnfollowUser = () => {
     ...userMutations.unfollow(),
     onSuccess: (_, { params }) => {
       queryClient.setQueryData(userKeys.isFollowing(params.id), { isFollowing: false });
-      queryClient.setQueryData<UserWithProfile>(userKeys.profile(params.id), (current) =>
-        current ? { ...current, followerCount: Math.max(0, current.followerCount - 1) } : current,
+      queryClient.setQueryData<UserWithProfile>(
+        userKeys.profile(params.id),
+        (current: UserWithProfile | undefined) =>
+          current ? { ...current, followerCount: Math.max(0, current.followerCount - 1) } : current,
       );
 
       queryClient.invalidateQueries({ queryKey: userKeys.byUsernameRoot() });

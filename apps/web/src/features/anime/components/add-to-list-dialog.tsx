@@ -14,7 +14,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { animate, motion, useMotionValue } from "framer-motion";
-import type { LibraryStatus } from "@anilog/db/schema/anilog";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,8 +25,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { LIBRARY_STATUSES, type LibraryEntryWithAnime } from "@/features/library/lib/options";
-import { type LogAnimeData } from "@/features/library/lib/options";
+import {
+  LIBRARY_STATUSES,
+  type LibraryEntryWithAnime,
+  type LibraryStatus,
+  type LogAnimeData,
+} from "@/features/library/lib/options";
 import { useLogAnime, useRemoveFromLibrary } from "@/features/library/lib/hooks";
 
 interface AddToListDialogProps {

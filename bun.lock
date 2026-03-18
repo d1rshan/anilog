@@ -39,7 +39,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@anilog/api": "workspace:*",
-        "@anilog/db": "workspace:*",
+        "@anilog/contracts": "workspace:*",
         "@elysiajs/eden": "^1.4.6",
         "@radix-ui/react-dialog": "^1.1.15",
         "@tanstack/react-form": "^1.27.3",
