@@ -5,7 +5,7 @@ import type {
   UpdateLibraryRatingBody,
   UpdateLibraryStatusBody,
 } from "@anilog/contracts";
-import { LibraryRepository, type LibraryEntryRecord } from "@anilog/db/repositories/library.repo";
+import { LibraryRepository, type LibraryEntryRecord } from "@anilog/db";
 import { internalError, notFoundError } from "../shared/errors/api-error";
 import {
   resolveLibraryEpisode,

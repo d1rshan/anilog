@@ -6,7 +6,7 @@ import type {
   SetUserAdminStatusDto,
   UpdateHeroCurationBody,
 } from "@anilog/contracts";
-import { AdminRepository } from "@anilog/db/repositories/admin.repo";
+import { AdminRepository } from "@anilog/db";
 import { notFoundError, validationError } from "../shared/errors/api-error";
 
 export class AdminService {
