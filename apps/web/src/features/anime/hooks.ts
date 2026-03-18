@@ -1,16 +1,16 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { UpsertAnimeBody } from "@anilog/contracts";
+import { animeKeys } from "@/features/anime/api/anime.keys";
 import {
   animeQueries,
   type AnimeArchiveSearchInput,
   type AnimeSearchInput,
 } from "@/features/anime/api/anime.query";
 import { animeMutations } from "@/features/anime/api/anime.mutation";
-import { animeKeys } from "@/features/anime/api/anime.keys";
 import { getApiErrorMessage } from "@/lib/eden-fetch";
 
 export function useTrendingAnime() {

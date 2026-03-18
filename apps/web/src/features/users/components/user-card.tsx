@@ -2,7 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FollowButton } from "./follow-button";
-import type { UserWithProfile } from "../lib/options";
+import type { UserWithProfile } from "../api/user.query";
 import { useRouter } from "next/navigation";
 
 interface UserCardProps {

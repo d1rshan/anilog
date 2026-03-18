@@ -1,7 +1,7 @@
 import { db } from "../client";
 import { anime, userAnime, userFollow, userProfile } from "../schema/anilog";
 import { user } from "../schema/auth";
-import { and, asc, count, eq, getTableColumns, ilike } from "drizzle-orm";
+import { and, asc, eq, getTableColumns, ilike } from "drizzle-orm";
 import { getFollowCountsMap } from "./shared/follow-counts";
 import {
   userSummarySelect,
@@ -64,13 +64,13 @@ export class UsersRepository {
       .where(eq(user.id, userId))
       .limit(1);
 
-    const found = rows[0];
+    const [found] = await this.attachCounts(rows);
+
     if (!found) {
       return null;
     }
 
-    const counts = await this.getFollowCounts(userId);
-    return { ...found, ...counts };
+    return found;
   }
 
   static async findUserByUsername(username: string): Promise<UserWithCountsRecord | null> {
@@ -81,13 +81,13 @@ export class UsersRepository {
       .where(eq(user.username, username))
       .limit(1);
 
-    const found = rows[0];
+    const [found] = await this.attachCounts(rows);
+
     if (!found) {
       return null;
     }
 
-    const counts = await this.getFollowCounts(found.id);
-    return { ...found, ...counts };
+    return found;
   }
 
   static async updateUserProfile(userId: string, data: Partial<UserProfileRecord>) {
@@ -158,31 +158,9 @@ export class UsersRepository {
     return this.attachCounts(rows);
   }
 
-  static async getFollowerCount(userId: string) {
-    const rows = await db
-      .select({ count: count() })
-      .from(userFollow)
-      .where(eq(userFollow.followingId, userId));
-
-    return rows[0]?.count || 0;
-  }
-
-  static async getFollowingCount(userId: string) {
-    const rows = await db
-      .select({ count: count() })
-      .from(userFollow)
-      .where(eq(userFollow.followerId, userId));
-
-    return rows[0]?.count || 0;
-  }
-
   static async getFollowCounts(userId: string) {
-    const [followerCount, followingCount] = await Promise.all([
-      this.getFollowerCount(userId),
-      this.getFollowingCount(userId),
-    ]);
-
-    return { followerCount, followingCount };
+    const counts = await getFollowCountsMap([userId]);
+    return counts.get(userId) ?? { followerCount: 0, followingCount: 0 };
   }
 
   static async findPublicLibrary(userId: string): Promise<PublicLibraryEntryRecord[]> {

@@ -113,6 +113,8 @@ type ErrorResponse = {
 - Phase 7 completed
 - Phase 8 completed
 - Phase 9 completed
+- Phase 10 completed
+- Phase 11 completed
 
 ### Phase 4 Notes
 
@@ -181,19 +183,35 @@ type ErrorResponse = {
   - `packages/api/src/**/*`
   - `apps/web/src/features/*/lib/*`
 
+### Phase 10 Notes
+
+- Collapsed single-user profile lookups onto the shared follow-count aggregation path in `packages/db/src/repositories/users.repo.ts`
+- Removed the extra per-profile follower/following count queries that previously ran after `findUserById` and `findUserByUsername`
+- Deleted now-unused follow-count wrapper methods from `packages/domain/src/users/user.service.ts`
+- Left AniList fetch and cache behavior unchanged because there was no measured issue that justified riskier changes
+
+### Phase 11 Notes
+
+- Deleted the `packages/api` compatibility layer
+- Updated `packages/auth` to consume `@anilog/domain` directly
+- Removed the remaining `@anilog/api` dependency from the web app
+- Replaced migrated feature imports with canonical module paths:
+  - `apps/web/src/features/anime/hooks.ts`
+  - `apps/web/src/features/library/hooks.ts`
+  - `apps/web/src/features/users/hooks.ts`
+  - `apps/web/src/features/admin/hooks.ts`
+  - existing `api/*` and `server/*` modules
+- Deleted the legacy compatibility shims for migrated web features:
+  - `apps/web/src/features/anime/lib/*`
+  - `apps/web/src/features/library/lib/*`
+  - `apps/web/src/features/users/lib/*`
+  - `apps/web/src/features/admin/lib/*`
+- Refreshed the Bun workspace install after removing the workspace package and updating inter-package dependencies
+
 ## Remaining Work
 
-### Phase 10 focus
-
-- Review the repository methods that still make multiple count queries and collapse them where it improves clarity or performance
-- Revisit AniList fetch and cache behavior only if there is a measurable pain point
-
-### Phase 11 focus
-
-- Delete the `@anilog/api` compatibility layer
-- Remove remaining web feature `lib/*` compatibility shims
-- Update imports to canonical module paths only
-- Perform the final naming and dead-file cleanup pass
+- Architecture migration complete
+- Future work should be treated as normal feature/performance work rather than migration phases
 
 ## Phase 0 Completion Criteria
 

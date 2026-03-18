@@ -3,15 +3,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTrendingAnime } from "../lib/hooks";
-import { useMyLibrary, useLogAnime } from "@/features/library/lib/hooks";
+import { useTrendingAnime } from "../hooks";
+import { useMyLibrary, useLogAnime } from "@/features/library/hooks";
 import { AnimeCard } from "./anime-card";
 import { AddToListDialog } from "./add-to-list-dialog";
 import {
   type LibraryEntryWithAnime,
   type LibraryStatus,
-  type LogAnimeData,
-} from "@/features/library/lib/options";
+} from "@/features/library/api/library.query";
+import type { LogAnimeData } from "@/features/library/api/library.mutation";
 import { useAuth, useRequireAuth } from "@/features/auth/lib/hooks";
 import { cn } from "@/lib/utils";
 

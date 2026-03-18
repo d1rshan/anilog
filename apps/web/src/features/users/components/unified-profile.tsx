@@ -3,7 +3,7 @@
 import { ProfileHeader } from "@/features/users/components/profile-header";
 import { UserListsPublic } from "@/features/users/components/user-lists-public";
 import { EditableLists } from "@/features/library/components/editable-lists";
-import { useUserByUsername } from "@/features/users/lib/hooks";
+import { useUserByUsername } from "@/features/users/hooks";
 import { Loader2 } from "lucide-react";
 
 interface UnifiedProfileProps {

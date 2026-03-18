@@ -3,11 +3,8 @@ import { headers } from "next/headers";
 import { HydrationBoundary, QueryClient, dehydrate } from "@tanstack/react-query";
 
 import { getCurrentUser } from "@/features/auth/lib/server";
-import {
-  prefetchProfileLibrary,
-  prefetchUserByUsername,
-} from "@/features/users/lib/prefetch.server";
-import { type UserWithProfile } from "@/features/users/lib/options";
+import { prefetchProfileLibrary, prefetchUserByUsername } from "@/features/users/server/prefetch";
+import { type UserWithProfile } from "@/features/users/api/user.query";
 import { userKeys } from "@/lib/query-keys";
 
 import { UnifiedProfile } from "../components/unified-profile";
