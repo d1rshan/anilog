@@ -6,67 +6,26 @@ import type {
   SetUserAdminStatusDto,
   UpdateHeroCurationBody,
 } from "@anilog/contracts";
-import { db } from "@anilog/db";
-import { heroCuration, userFollow, userProfile } from "@anilog/db/schema/anilog";
-import { user } from "@anilog/db/schema/auth";
-import { asc, count, eq, getTableColumns, ilike, or } from "drizzle-orm";
+import { AdminRepository } from "@anilog/db/repositories/admin.repo";
 import { notFoundError, validationError } from "../shared/errors/api-error";
 
 export class AdminService {
   static async getAdminStats(): Promise<AdminStatsDto> {
-    const [result] = await db.select({ count: count() }).from(user);
-    return { totalUsers: result?.count ?? 0 };
+    return { totalUsers: await AdminRepository.getTotalUsers() };
   }
 
   static async searchUsers(input: AdminUsersQuery): Promise<AdminUsersDto> {
     const limit = input.limit ?? 20;
     const offset = input.offset ?? 0;
-    const normalized = (input.q ?? "").trim();
-
-    const whereClause = normalized
-      ? or(
-          ilike(user.name, `%${normalized}%`),
-          ilike(user.username, `%${normalized}%`),
-          ilike(user.email, `%${normalized}%`),
-        )
-      : undefined;
-
-    const rows = await db
-      .select({
-        id: user.id,
-        name: user.name,
-        username: user.username,
-        email: user.email,
-        isAdmin: user.isAdmin,
-        image: user.image,
-        profile: getTableColumns(userProfile),
-      })
-      .from(user)
-      .leftJoin(userProfile, eq(user.id, userProfile.userId))
-      .where(whereClause)
-      .orderBy(asc(user.createdAt))
-      .limit(limit)
-      .offset(offset);
-
-    const [totalResult] = await db.select({ count: count() }).from(user).where(whereClause);
-
-    const users = await Promise.all(
-      rows.map(async (entry) => ({
-        id: entry.id,
-        name: entry.name,
-        username: entry.username,
-        email: entry.email,
-        isAdmin: entry.isAdmin,
-        image: entry.image,
-        profile: entry.profile,
-        followerCount: await this.getFollowerCount(entry.id),
-        followingCount: await this.getFollowingCount(entry.id),
-      })),
-    );
+    const result = await AdminRepository.searchUsers({
+      q: input.q,
+      limit,
+      offset,
+    });
 
     return {
-      users,
-      total: totalResult?.count ?? 0,
+      users: result.users,
+      total: result.total,
       limit,
       offset,
     };
@@ -81,17 +40,7 @@ export class AdminService {
       throw validationError("You cannot remove your own admin access");
     }
 
-    const [updated] = await db
-      .update(user)
-      .set({
-        isAdmin,
-        updatedAt: new Date(),
-      })
-      .where(eq(user.id, targetUserId))
-      .returning({
-        id: user.id,
-        isAdmin: user.isAdmin,
-      });
+    const updated = await AdminRepository.updateUserAdminStatus(targetUserId, isAdmin);
 
     if (!updated) {
       throw notFoundError("User not found");
@@ -100,29 +49,8 @@ export class AdminService {
     return updated;
   }
 
-  static async getFollowerCount(userId: string) {
-    const result = await db
-      .select({ count: count() })
-      .from(userFollow)
-      .where(eq(userFollow.followingId, userId));
-
-    return result[0]?.count || 0;
-  }
-
-  static async getFollowingCount(userId: string) {
-    const result = await db
-      .select({ count: count() })
-      .from(userFollow)
-      .where(eq(userFollow.followerId, userId));
-
-    return result[0]?.count || 0;
-  }
-
   static async getHeroCurationsForAdmin(): Promise<HeroCurationDto[]> {
-    return db
-      .select()
-      .from(heroCuration)
-      .orderBy(asc(heroCuration.sortOrder), asc(heroCuration.id));
+    return AdminRepository.findHeroCurations();
   }
 
   static async updateHeroCuration(
@@ -147,21 +75,17 @@ export class AdminService {
       }
     }
 
-    const [updated] = await db
-      .update(heroCuration)
-      .set({
-        videoId: payload.videoId.trim(),
-        start: payload.start,
-        stop: payload.stop,
-        title: payload.title.trim(),
-        subtitle: payload.subtitle.trim(),
-        description: payload.description.trim(),
-        tag: payload.tag.trim(),
-        sortOrder: payload.sortOrder,
-        isActive: payload.isActive,
-      })
-      .where(eq(heroCuration.id, id))
-      .returning();
+    const updated = await AdminRepository.updateHeroCuration(id, {
+      videoId: payload.videoId.trim(),
+      start: payload.start,
+      stop: payload.stop,
+      title: payload.title.trim(),
+      subtitle: payload.subtitle.trim(),
+      description: payload.description.trim(),
+      tag: payload.tag.trim(),
+      sortOrder: payload.sortOrder,
+      isActive: payload.isActive,
+    });
 
     if (!updated) {
       throw notFoundError("Hero curation not found");

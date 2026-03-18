@@ -7,10 +7,7 @@ import type {
   UserSearchQuery,
   UserWithProfileDto,
 } from "@anilog/contracts";
-import { db } from "@anilog/db";
-import { anime, userAnime, userFollow, userProfile } from "@anilog/db/schema/anilog";
-import { user } from "@anilog/db/schema/auth";
-import { and, asc, count, eq, getTableColumns, ilike } from "drizzle-orm";
+import { UsersRepository } from "@anilog/db/repositories/users.repo";
 import {
   conflictError,
   internalError,
@@ -20,22 +17,13 @@ import {
 
 export class UserService {
   static async createUserProfile(userId: string): Promise<UserProfileDto> {
-    const [profile] = await db
-      .insert(userProfile)
-      .values({
-        userId,
-        isPublic: true,
-      })
-      .onConflictDoNothing()
-      .returning();
+    const profile = await UsersRepository.createUserProfile(userId);
 
     if (profile) {
       return profile;
     }
 
-    const existingProfile = await db.query.userProfile.findFirst({
-      where: eq(userProfile.userId, userId),
-    });
+    const existingProfile = await UsersRepository.findUserProfileRecord(userId);
 
     if (!existingProfile) {
       throw internalError("Failed to create or find user profile");
@@ -45,91 +33,36 @@ export class UserService {
   }
 
   static async getUserProfile(userId: string): Promise<UserWithProfileDto | null> {
-    const result = await db
-      .select({
-        id: user.id,
-        name: user.name,
-        username: user.username,
-        email: user.email,
-        isAdmin: user.isAdmin,
-        image: user.image,
-        profile: getTableColumns(userProfile),
-      })
-      .from(user)
-      .leftJoin(userProfile, eq(user.id, userProfile.userId))
-      .where(eq(user.id, userId))
-      .limit(1);
+    return UsersRepository.findUserById(userId);
+  }
 
-    const userData = result[0];
-    if (!userData) {
-      return null;
+  static async getUserProfileOrThrow(userId: string, message: string = "User not found") {
+    const profile = await this.getUserProfile(userId);
+    if (!profile) {
+      throw notFoundError(message);
     }
 
-    const followerCount = await this.getFollowerCount(userId);
-    const followingCount = await this.getFollowingCount(userId);
-
-    return {
-      id: userData.id,
-      name: userData.name,
-      username: userData.username,
-      email: userData.email,
-      isAdmin: userData.isAdmin,
-      image: userData.image,
-      profile: userData.profile,
-      followerCount,
-      followingCount,
-    };
+    return profile;
   }
 
   static async getUserByUsername(username: string): Promise<UserWithProfileDto | null> {
-    const result = await db
-      .select({
-        id: user.id,
-        name: user.name,
-        username: user.username,
-        email: user.email,
-        isAdmin: user.isAdmin,
-        image: user.image,
-        profile: getTableColumns(userProfile),
-      })
-      .from(user)
-      .leftJoin(userProfile, eq(user.id, userProfile.userId))
-      .where(eq(user.username, username))
-      .limit(1);
+    return UsersRepository.findUserByUsername(username);
+  }
 
-    const userData = result[0];
-    if (!userData) {
-      return null;
+  static async getUserByUsernameOrThrow(username: string, message: string = "User not found") {
+    const foundUser = await this.getUserByUsername(username);
+    if (!foundUser) {
+      throw notFoundError(message);
     }
 
-    const followerCount = await this.getFollowerCount(userData.id);
-    const followingCount = await this.getFollowingCount(userData.id);
-
-    return {
-      id: userData.id,
-      name: userData.name,
-      username: userData.username,
-      email: userData.email,
-      isAdmin: userData.isAdmin,
-      image: userData.image,
-      profile: userData.profile,
-      followerCount,
-      followingCount,
-    };
+    return foundUser;
   }
 
   static async updateUserProfile(
     userId: string,
     data: UpdateUserProfileBody,
   ): Promise<UserProfileDto> {
-    const [updatedProfile] = await db
-      .update(userProfile)
-      .set({
-        ...data,
-        updatedAt: new Date(),
-      })
-      .where(eq(userProfile.userId, userId))
-      .returning();
+    const updatedProfile = await UsersRepository.updateUserProfile(userId, data);
 
     if (!updatedProfile) {
       throw notFoundError("User profile not found");
@@ -143,19 +76,12 @@ export class UserService {
       throw validationError("Cannot follow yourself");
     }
 
-    const targetUser = await db.query.user.findFirst({
-      where: eq(user.id, followingId),
-    });
-
-    if (!targetUser) {
+    if (!(await UsersRepository.findUserExists(followingId))) {
       throw notFoundError("User not found");
     }
 
     try {
-      await db.insert(userFollow).values({
-        followerId,
-        followingId,
-      });
+      await UsersRepository.createFollow(followerId, followingId);
       return { success: true, message: "Successfully followed user" };
     } catch (error) {
       if (error instanceof Error && error.message.includes("unique constraint")) {
@@ -166,10 +92,7 @@ export class UserService {
   }
 
   static async unfollowUser(followerId: string, followingId: string): Promise<FollowActionDto> {
-    const result = await db
-      .delete(userFollow)
-      .where(and(eq(userFollow.followerId, followerId), eq(userFollow.followingId, followingId)))
-      .returning();
+    const result = await UsersRepository.deleteFollow(followerId, followingId);
 
     if (result.length === 0) {
       throw notFoundError("Not following this user");
@@ -179,180 +102,41 @@ export class UserService {
   }
 
   static async isFollowing(followerId: string, followingId: string): Promise<boolean> {
-    const result = await db
-      .select({ followerId: userFollow.followerId })
-      .from(userFollow)
-      .where(and(eq(userFollow.followerId, followerId), eq(userFollow.followingId, followingId)))
-      .limit(1);
-
-    return result.length > 0;
+    return Boolean(await UsersRepository.findFollow(followerId, followingId));
   }
 
   static async getFollowers(userId: string): Promise<UserWithProfileDto[]> {
-    const followers = await db
-      .select({
-        id: user.id,
-        name: user.name,
-        username: user.username,
-        email: user.email,
-        isAdmin: user.isAdmin,
-        image: user.image,
-        profile: getTableColumns(userProfile),
-      })
-      .from(userFollow)
-      .innerJoin(user, eq(userFollow.followerId, user.id))
-      .leftJoin(userProfile, eq(user.id, userProfile.userId))
-      .where(eq(userFollow.followingId, userId));
-
-    return Promise.all(
-      followers.map(async (f) => ({
-        id: f.id,
-        name: f.name,
-        username: f.username,
-        email: f.email,
-        isAdmin: f.isAdmin,
-        image: f.image,
-        profile: f.profile,
-        followerCount: await this.getFollowerCount(f.id),
-        followingCount: await this.getFollowingCount(f.id),
-      })),
-    );
+    return UsersRepository.findFollowers(userId);
   }
 
   static async getFollowing(userId: string): Promise<UserWithProfileDto[]> {
-    const following = await db
-      .select({
-        id: user.id,
-        name: user.name,
-        username: user.username,
-        email: user.email,
-        isAdmin: user.isAdmin,
-        image: user.image,
-        profile: getTableColumns(userProfile),
-      })
-      .from(userFollow)
-      .innerJoin(user, eq(userFollow.followingId, user.id))
-      .leftJoin(userProfile, eq(user.id, userProfile.userId))
-      .where(eq(userFollow.followerId, userId));
-
-    return Promise.all(
-      following.map(async (f) => ({
-        id: f.id,
-        name: f.name,
-        username: f.username,
-        email: f.email,
-        isAdmin: f.isAdmin,
-        image: f.image,
-        profile: f.profile,
-        followerCount: await this.getFollowerCount(f.id),
-        followingCount: await this.getFollowingCount(f.id),
-      })),
-    );
+    return UsersRepository.findFollowing(userId);
   }
 
   static async getFollowerCount(userId: string) {
-    const result = await db
-      .select({ count: count() })
-      .from(userFollow)
-      .where(eq(userFollow.followingId, userId));
-
-    return result[0]?.count || 0;
+    return UsersRepository.getFollowerCount(userId);
   }
 
   static async getFollowingCount(userId: string) {
-    const result = await db
-      .select({ count: count() })
-      .from(userFollow)
-      .where(eq(userFollow.followerId, userId));
-
-    return result[0]?.count || 0;
+    return UsersRepository.getFollowingCount(userId);
   }
 
   static async getFollowCounts(userId: string) {
-    const [followerResult, followingResult] = await Promise.all([
-      db.select({ count: count() }).from(userFollow).where(eq(userFollow.followingId, userId)),
-      db.select({ count: count() }).from(userFollow).where(eq(userFollow.followerId, userId)),
-    ]);
-
-    return {
-      followerCount: followerResult[0]?.count || 0,
-      followingCount: followingResult[0]?.count || 0,
-    };
+    return UsersRepository.getFollowCounts(userId);
   }
 
   static async getPublicUserLibrary(userId: string): Promise<PublicLibraryEntryDto[]> {
-    const library = await db
-      .select({
-        ...getTableColumns(userAnime),
-        anime: {
-          id: anime.id,
-          title: anime.title,
-          titleJapanese: anime.titleJapanese,
-          imageUrl: anime.imageUrl,
-          year: anime.year,
-          episodes: anime.episodes,
-          status: anime.status,
-          genres: anime.genres,
-          rating: anime.rating,
-        },
-      })
-      .from(userAnime)
-      .innerJoin(anime, eq(userAnime.animeId, anime.id))
-      .where(eq(userAnime.userId, userId))
-      .orderBy(asc(userAnime.createdAt));
-
-    return library.map((e) => ({
-      id: e.id,
-      animeId: e.animeId,
-      status: e.status,
-      currentEpisode: e.currentEpisode,
-      rating: e.rating,
-      createdAt: e.createdAt,
-      anime: e.anime,
-    }));
+    return UsersRepository.findPublicLibrary(userId);
   }
 
   static async searchUsers(
     input: UserSearchQuery,
     limit: number = 20,
   ): Promise<UserWithProfileDto[]> {
-    const searchPattern = `%${input.q}%`;
-
-    const users = await db
-      .select({
-        id: user.id,
-        name: user.name,
-        username: user.username,
-        email: user.email,
-        isAdmin: user.isAdmin,
-        image: user.image,
-        profile: getTableColumns(userProfile),
-      })
-      .from(user)
-      .leftJoin(userProfile, eq(user.id, userProfile.userId))
-      .where(and(ilike(user.name, searchPattern), eq(userProfile.isPublic, true)))
-      .limit(limit);
-
-    return Promise.all(
-      users.map(async (u) => ({
-        id: u.id,
-        name: u.name,
-        username: u.username,
-        email: u.email,
-        isAdmin: u.isAdmin,
-        image: u.image,
-        profile: u.profile,
-        followerCount: await this.getFollowerCount(u.id),
-        followingCount: await this.getFollowingCount(u.id),
-      })),
-    );
+    return UsersRepository.searchUsers(input.q, limit);
   }
 
   static async getAdminStatus(userId: string): Promise<AdminStatusDto> {
-    const found = await db.query.user.findFirst({
-      where: eq(user.id, userId),
-      columns: { isAdmin: true },
-    });
-    return { isAdmin: found?.isAdmin ?? false };
+    return UsersRepository.findAdminStatus(userId);
   }
 }

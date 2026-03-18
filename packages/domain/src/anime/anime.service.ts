@@ -6,9 +6,7 @@ import type {
   UpsertAnimeBody,
   UpsertAnimeDto,
 } from "@anilog/contracts";
-import { db } from "@anilog/db";
-import { anime, heroCuration, trendingAnime, userAnime } from "@anilog/db/schema/anilog";
-import { and, asc, desc, eq, getTableColumns, ilike, notInArray, or } from "drizzle-orm";
+import { AnimeRepository } from "@anilog/db/repositories/anime.repo";
 import { externalServiceError, internalError } from "../shared/errors/api-error";
 
 const ANILIST_API = "https://graphql.anilist.co";
@@ -30,21 +28,11 @@ const anilistSearchCache = new Map<string, AniListCacheValue>();
 
 export class AnimeService {
   static async getHeroCurations(): Promise<HeroCurationDto[]> {
-    return db
-      .select()
-      .from(heroCuration)
-      .where(eq(heroCuration.isActive, true))
-      .orderBy(asc(heroCuration.sortOrder), asc(heroCuration.id));
+    return AnimeRepository.findHeroCurations();
   }
 
   static async getTrendingAnime(): Promise<AnimeDto[]> {
-    return db
-      .select({
-        ...getTableColumns(anime),
-      })
-      .from(anime)
-      .innerJoin(trendingAnime, eq(anime.id, trendingAnime.animeId))
-      .orderBy(trendingAnime.rank);
+    return AnimeRepository.findTrendingAnime();
   }
 
   static async searchArchive(
@@ -93,32 +81,10 @@ export class AnimeService {
         .slice(0, limit)
         .map((r) => r.item);
 
-    const libraryRows = await db
-      .select()
-      .from(anime)
-      .innerJoin(userAnime, eq(anime.id, userAnime.animeId))
-      .where(
-        and(
-          eq(userAnime.userId, userId),
-          or(ilike(anime.title, pattern), ilike(anime.titleJapanese, pattern)),
-        ),
-      );
-
-    const library = rank(libraryRows.map((r) => r.anime));
+    const library = rank(await AnimeRepository.findArchiveLibraryMatches(userId, pattern));
     const excludeIds = library.map((a) => a.id);
 
-    const archiveRows = await db
-      .select()
-      .from(anime)
-      .where(
-        and(
-          or(ilike(anime.title, pattern), ilike(anime.titleJapanese, pattern)),
-          excludeIds.length ? notInArray(anime.id, excludeIds) : undefined,
-        ),
-      )
-      .orderBy(desc(anime.updatedAt))
-      .limit(limit * 4);
-
+    const archiveRows = await AnimeRepository.findArchiveMatches(pattern, excludeIds, limit * 4);
     const archive = rank(archiveRows);
     const value = { library, archive };
 
@@ -191,31 +157,8 @@ export class AnimeService {
       };
     });
 
-    await db
-      .insert(anime)
-      .values(animeInserts)
-      .onConflictDoUpdate({
-        target: anime.id,
-        set: {
-          title: anime.title,
-          titleJapanese: anime.titleJapanese,
-          episodes: anime.episodes,
-          status: anime.status,
-          genres: anime.genres,
-          imageUrl: anime.imageUrl,
-          year: anime.year,
-          rating: anime.rating,
-        },
-      });
-
-    await db.delete(trendingAnime);
-
-    await db.insert(trendingAnime).values(
-      media.map((m, i) => ({
-        animeId: m.id,
-        rank: i + 1,
-      })),
-    );
+    await AnimeRepository.upsertAnimeMany(animeInserts);
+    await AnimeRepository.replaceTrending(media.map((m) => m.id));
 
     return { success: true, count: media.length };
   }
@@ -292,32 +235,17 @@ export class AnimeService {
 
   static async upsertAnime(animeData: UpsertAnimeBody): Promise<UpsertAnimeDto> {
     try {
-      await db
-        .insert(anime)
-        .values({
-          id: animeData.id,
-          title: animeData.title,
-          titleJapanese: animeData.titleJapanese,
-          episodes: animeData.episodes,
-          status: animeData.status,
-          genres: animeData.genres,
-          imageUrl: animeData.imageUrl,
-          year: animeData.year,
-          rating: animeData.rating,
-        })
-        .onConflictDoUpdate({
-          target: anime.id,
-          set: {
-            title: animeData.title,
-            titleJapanese: animeData.titleJapanese,
-            episodes: animeData.episodes,
-            status: animeData.status,
-            genres: animeData.genres,
-            imageUrl: animeData.imageUrl,
-            year: animeData.year,
-            rating: animeData.rating,
-          },
-        });
+      await AnimeRepository.upsertAnime({
+        id: animeData.id,
+        title: animeData.title,
+        titleJapanese: animeData.titleJapanese,
+        episodes: animeData.episodes,
+        status: animeData.status,
+        genres: animeData.genres,
+        imageUrl: animeData.imageUrl,
+        year: animeData.year,
+        rating: animeData.rating,
+      });
 
       return { id: animeData.id, success: true };
     } catch (error) {
