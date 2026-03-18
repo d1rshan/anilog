@@ -1,17 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { libraryQueries, type LibraryEntryWithAnime } from "./options";
+import {
+  libraryQueries,
+  type LibraryEntryWithAnime,
+  type LibraryStatus,
+} from "../api/library.query";
 import {
   libraryMutations,
-  type LibraryStatus,
   type LogAnimeData,
   type UpdateLibraryProgressData,
   type UpdateLibraryRatingData,
   type UpdateLibraryStatusData,
-} from "./options";
+} from "../api/library.mutation";
 import type { PublicUserLibrary } from "@/features/users/lib/options";
 import { getApiErrorMessage } from "@/lib/eden-fetch";
-import { libraryKeys } from "@/lib/query-keys";
+import { libraryKeys } from "../api/library.keys";
 
 type MutationContext = {
   previous?: LibraryEntryWithAnime[];
