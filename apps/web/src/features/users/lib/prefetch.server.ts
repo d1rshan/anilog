@@ -2,7 +2,7 @@ import "server-only";
 
 import type { QueryClient } from "@tanstack/react-query";
 
-import { libraryQueries } from "@/features/library/lib/options";
+import { prefetchMyLibrary } from "@/features/library/server/prefetch";
 
 import { userQueries } from "./options";
 
@@ -15,7 +15,7 @@ export async function prefetchProfileLibrary(
   options: { isOwnProfile: boolean; userId: string },
 ) {
   if (options.isOwnProfile) {
-    await queryClient.prefetchQuery(libraryQueries.myLibrary());
+    await prefetchMyLibrary(queryClient);
     return;
   }
 

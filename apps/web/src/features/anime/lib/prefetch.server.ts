@@ -3,7 +3,7 @@ import "server-only";
 import type { QueryClient } from "@tanstack/react-query";
 
 import { animeQueries } from "@/features/anime/lib/options";
-import { libraryQueries } from "@/features/library/lib/options";
+import { prefetchMyLibrary } from "@/features/library/server/prefetch";
 
 export async function prefetchAnimeHome(
   queryClient: QueryClient,
@@ -12,6 +12,6 @@ export async function prefetchAnimeHome(
   await queryClient.prefetchQuery(animeQueries.trending());
 
   if (options?.includeMyLibrary) {
-    await queryClient.prefetchQuery(libraryQueries.myLibrary());
+    await prefetchMyLibrary(queryClient);
   }
 }

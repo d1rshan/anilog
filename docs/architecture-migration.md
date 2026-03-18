@@ -110,6 +110,7 @@ type ErrorResponse = {
 - Phase 4 completed
 - Phase 5 completed
 - Phase 6 completed
+- Phase 7 completed
 
 ### Phase 4 Notes
 
@@ -136,6 +137,19 @@ type ErrorResponse = {
 - Simplified `apps/web/src/lib/query-provider.tsx` to a plain `QueryClientProvider`
 - Moved mutation success/error toasts into feature-local hooks
 - Replaced helper-generated query/mutation options with direct `queryOptions` and direct Eden unwrapping
+
+### Phase 7 Notes
+
+- Added `packages/db/src/repositories/library.repo.ts` and moved library SQL ownership there
+- Extracted library validation and episode resolution rules into `packages/domain/src/library/library.rules.ts`
+- Simplified `packages/domain/src/library/library.service.ts` to orchestrate repository calls and domain rules
+- Added canonical library web modules:
+  - `apps/web/src/features/library/api/library.client.ts`
+  - `apps/web/src/features/library/api/library.keys.ts`
+  - `apps/web/src/features/library/api/library.query.ts`
+  - `apps/web/src/features/library/api/library.mutation.ts`
+  - `apps/web/src/features/library/server/prefetch.ts`
+- Kept `apps/web/src/features/library/lib/*` as compatibility re-exports/wrappers so existing consumers still work
 
 ## Phase 0 Completion Criteria
 
