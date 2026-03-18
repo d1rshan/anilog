@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { userQueries, type UserWithProfile } from "@/features/users/lib/options";
 import { userMutations, type UpdateProfileData } from "@/features/users/lib/options";
+import { getApiErrorMessage } from "@/lib/eden-fetch";
 import { userKeys } from "@/lib/query-keys";
 
 export const useSearchUsers = (query: string) => {
@@ -44,6 +46,7 @@ export const useFollowUser = () => {
   return useMutation({
     ...userMutations.follow(),
     onSuccess: (_, { params }) => {
+      toast.success("Successfully followed user!");
       queryClient.setQueryData(userKeys.isFollowing(params.id), { isFollowing: true });
       queryClient.setQueryData<UserWithProfile>(
         userKeys.profile(params.id),
@@ -54,6 +57,9 @@ export const useFollowUser = () => {
       queryClient.invalidateQueries({ queryKey: userKeys.byUsernameRoot() });
       queryClient.invalidateQueries({ queryKey: userKeys.following() });
     },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error));
+    },
   });
 };
 
@@ -63,6 +69,7 @@ export const useUnfollowUser = () => {
   return useMutation({
     ...userMutations.unfollow(),
     onSuccess: (_, { params }) => {
+      toast.success("Successfully unfollowed user");
       queryClient.setQueryData(userKeys.isFollowing(params.id), { isFollowing: false });
       queryClient.setQueryData<UserWithProfile>(
         userKeys.profile(params.id),
@@ -72,6 +79,9 @@ export const useUnfollowUser = () => {
 
       queryClient.invalidateQueries({ queryKey: userKeys.byUsernameRoot() });
       queryClient.invalidateQueries({ queryKey: userKeys.following() });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error));
     },
   });
 };
@@ -97,10 +107,14 @@ export const useUpdateMyProfile = () => {
   return useMutation({
     ...userMutations.updateMyProfile(),
     onSuccess: () => {
+      toast.success("Profile updated successfully!");
       queryClient.invalidateQueries({ queryKey: userKeys.meProfile() });
       queryClient.invalidateQueries({ queryKey: userKeys.profileRoot() });
       queryClient.invalidateQueries({ queryKey: userKeys.byUsernameRoot() });
       queryClient.invalidateQueries({ queryKey: userKeys.searchRoot() });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error));
     },
   });
 };

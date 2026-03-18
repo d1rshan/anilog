@@ -2,7 +2,8 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import type { UpsertAnimeBody } from "@anilog/api";
+import { toast } from "sonner";
+import type { UpsertAnimeBody } from "@anilog/contracts";
 import {
   animeQueries,
   animeMutations,
@@ -10,6 +11,7 @@ import {
   type AnimeSearchInput,
 } from "@/features/anime/lib/options";
 import { animeKeys } from "@/lib/query-keys";
+import { getApiErrorMessage } from "@/lib/eden-fetch";
 
 export function useTrendingAnime() {
   return useQuery(animeQueries.trending());
@@ -71,7 +73,11 @@ export function useUpsertAnime() {
     ...upsertAnimeMutation,
     mutationFn: (body: UpsertAnimeBody) => upsertAnimeMutation.mutationFn({ body }),
     onSuccess: () => {
+      toast.success("Anime added successfully");
       queryClient.invalidateQueries({ queryKey: animeKeys.trending() });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error));
     },
   });
 }

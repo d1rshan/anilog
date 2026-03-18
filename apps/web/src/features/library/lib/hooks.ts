@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { libraryQueries, type LibraryEntryWithAnime } from "./options";
 import {
   libraryMutations,
@@ -9,6 +10,7 @@ import {
   type UpdateLibraryStatusData,
 } from "./options";
 import type { PublicUserLibrary } from "@/features/users/lib/options";
+import { getApiErrorMessage } from "@/lib/eden-fetch";
 import { libraryKeys } from "@/lib/query-keys";
 
 type MutationContext = {
@@ -149,11 +151,17 @@ export const useLogAnime = () => {
       };
     },
     onError: (_error, _payload, context: MutationContext | undefined) => {
+      toast.error("Failed to log anime");
       if (context?.previous) {
         queryClient.setQueryData(libraryKeys.me(), context.previous);
       }
     },
-    onSuccess: (data, _payload, _context: MutationContext | undefined) => {
+    onSuccess: (data, payload, _context: MutationContext | undefined) => {
+      toast.success(
+        payload.body.status === "watchlist"
+          ? `Added ${data.anime.title} to watchlist.`
+          : `Saved changes for ${data.anime.title}.`,
+      );
       upsertLibraryEntryInCache(queryClient, data);
       upsertPublicLibraryEntryInCache(queryClient, data);
     },
@@ -176,11 +184,15 @@ export const useUpdateLibraryStatus = () => {
   return useMutation({
     ...mutation,
     onSuccess: (data) => {
+      toast.success(`Saved changes for ${data.anime.title}.`);
       upsertLibraryEntryInCache(queryClient, data);
       upsertPublicLibraryEntryInCache(queryClient, data);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: libraryKeys.me() });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error));
     },
   });
 };
@@ -213,11 +225,13 @@ export const useUpdateLibraryProgress = () => {
       return { previous, currentUserId: previous?.[0]?.userId };
     },
     onError: (_error, _payload, context: MutationContext | undefined) => {
+      toast.error("Failed to update progress");
       if (context?.previous) {
         queryClient.setQueryData(libraryKeys.me(), context.previous);
       }
     },
     onSuccess: (data) => {
+      toast.success(`Saved changes for ${data.anime.title}.`);
       upsertLibraryEntryInCache(queryClient, data);
       upsertPublicLibraryEntryInCache(queryClient, data);
     },
@@ -240,11 +254,15 @@ export const useUpdateLibraryRating = () => {
   return useMutation({
     ...mutation,
     onSuccess: (data) => {
+      toast.success(`Saved changes for ${data.anime.title}.`);
       upsertLibraryEntryInCache(queryClient, data);
       upsertPublicLibraryEntryInCache(queryClient, data);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: libraryKeys.me() });
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error));
     },
   });
 };
@@ -269,9 +287,19 @@ export const useRemoveFromLibrary = () => {
       return { previous, currentUserId: previous?.[0]?.userId };
     },
     onError: (_error, _payload, context: MutationContext | undefined) => {
+      toast.error("Failed to remove anime");
       if (context?.previous) {
         queryClient.setQueryData(libraryKeys.me(), context.previous);
       }
+    },
+    onSuccess: (_data, { params }, context) => {
+      const removedTitle = context?.previous?.find((entry) => entry.animeId === params.animeId)
+        ?.anime.title;
+      toast.success(
+        removedTitle
+          ? `Removed ${removedTitle} from your library.`
+          : "Removed anime from your library.",
+      );
     },
     onSettled: (_data, _error, { params }, context) => {
       queryClient.invalidateQueries({ queryKey: libraryKeys.me() });
