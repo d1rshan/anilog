@@ -6,11 +6,11 @@ import { toast } from "sonner";
 import type { UpsertAnimeBody } from "@anilog/contracts";
 import {
   animeQueries,
-  animeMutations,
   type AnimeArchiveSearchInput,
   type AnimeSearchInput,
-} from "@/features/anime/lib/options";
-import { animeKeys } from "@/lib/query-keys";
+} from "@/features/anime/api/anime.query";
+import { animeMutations } from "@/features/anime/api/anime.mutation";
+import { animeKeys } from "@/features/anime/api/anime.keys";
 import { getApiErrorMessage } from "@/lib/eden-fetch";
 
 export function useTrendingAnime() {

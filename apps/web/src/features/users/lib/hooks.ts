@@ -1,9 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { userQueries, type UserWithProfile } from "@/features/users/lib/options";
-import { userMutations, type UpdateProfileData } from "@/features/users/lib/options";
+import { userMutations } from "@/features/users/api/user.mutation";
+import { userKeys } from "@/features/users/api/user.keys";
+import { userQueries, type UserWithProfile } from "@/features/users/api/user.query";
 import { getApiErrorMessage } from "@/lib/eden-fetch";
-import { userKeys } from "@/lib/query-keys";
+import type { UpdateProfileData } from "./options";
 
 export const useSearchUsers = (query: string) => {
   return useQuery({

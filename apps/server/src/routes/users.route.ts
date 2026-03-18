@@ -1,5 +1,5 @@
 import { Elysia, t } from "elysia";
-import { UserService, notFoundError } from "@anilog/domain";
+import { UserService } from "@anilog/domain";
 import {
   AdminStatusDto,
   FollowActionDto,
@@ -28,11 +28,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .get(
     "/:id",
     async ({ params }) => {
-      const foundUser = await UserService.getUserProfile(params.id);
-      if (!foundUser) {
-        throw notFoundError("User not found");
-      }
-      return foundUser;
+      return UserService.getUserProfileOrThrow(params.id);
     },
     {
       params: UserParams,
@@ -42,11 +38,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .get(
     "/username/:username",
     async ({ params }) => {
-      const foundUser = await UserService.getUserByUsername(params.username);
-      if (!foundUser) {
-        throw notFoundError("User not found");
-      }
-      return foundUser;
+      return UserService.getUserByUsernameOrThrow(params.username);
     },
     {
       params: UsernameParams,
@@ -107,11 +99,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .get(
     "/me/profile",
     async ({ userId }) => {
-      const profile = await UserService.getUserProfile(userId);
-      if (!profile) {
-        throw notFoundError("Profile not found");
-      }
-      return profile;
+      return UserService.getUserProfileOrThrow(userId, "Profile not found");
     },
     {
       response: UserWithProfileDto,

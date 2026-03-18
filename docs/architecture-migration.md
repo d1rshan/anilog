@@ -111,6 +111,7 @@ type ErrorResponse = {
 - Phase 5 completed
 - Phase 6 completed
 - Phase 7 completed
+- Phase 8 completed
 
 ### Phase 4 Notes
 
@@ -150,6 +151,22 @@ type ErrorResponse = {
   - `apps/web/src/features/library/api/library.mutation.ts`
   - `apps/web/src/features/library/server/prefetch.ts`
 - Kept `apps/web/src/features/library/lib/*` as compatibility re-exports/wrappers so existing consumers still work
+
+### Phase 8 Notes
+
+- Added `packages/db/src/repositories/users.repo.ts` and moved user/profile/follow/public-library queries there
+- Added `packages/db/src/repositories/anime.repo.ts` and moved anime/trending/archive DB queries there
+- Added `packages/db/src/repositories/admin.repo.ts` and moved admin stats/user-search/hero-curation queries there
+- Simplified `packages/domain/src/users/user.service.ts` to orchestrate repository calls and added `getUserProfileOrThrow` / `getUserByUsernameOrThrow`
+- Simplified `packages/domain/src/anime/anime.service.ts` to keep AniList orchestration while delegating DB ownership to the repository
+- Simplified `packages/domain/src/admin/admin.service.ts` to orchestrate repository calls
+- Added canonical web modules for:
+  - `apps/web/src/features/users/api/*`
+  - `apps/web/src/features/users/server/prefetch.ts`
+  - `apps/web/src/features/anime/api/*`
+  - `apps/web/src/features/anime/server/prefetch.ts`
+  - `apps/web/src/features/admin/api/*`
+- Kept existing `lib/*` entry points in `users`, `anime`, and `admin` as compatibility shims
 
 ## Phase 0 Completion Criteria
 
