@@ -54,7 +54,10 @@ export const useFollowUser = () => {
           current ? { ...current, followerCount: current.followerCount + 1 } : current,
       );
 
+      queryClient.invalidateQueries({ queryKey: userKeys.searchRoot() });
+      queryClient.invalidateQueries({ queryKey: userKeys.profileRoot() });
       queryClient.invalidateQueries({ queryKey: userKeys.byUsernameRoot() });
+      queryClient.invalidateQueries({ queryKey: userKeys.meProfile() });
       queryClient.invalidateQueries({ queryKey: userKeys.following() });
     },
     onError: (error) => {
@@ -77,7 +80,10 @@ export const useUnfollowUser = () => {
           current ? { ...current, followerCount: Math.max(0, current.followerCount - 1) } : current,
       );
 
+      queryClient.invalidateQueries({ queryKey: userKeys.searchRoot() });
+      queryClient.invalidateQueries({ queryKey: userKeys.profileRoot() });
       queryClient.invalidateQueries({ queryKey: userKeys.byUsernameRoot() });
+      queryClient.invalidateQueries({ queryKey: userKeys.meProfile() });
       queryClient.invalidateQueries({ queryKey: userKeys.following() });
     },
     onError: (error) => {
