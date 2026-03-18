@@ -108,6 +108,7 @@ type ErrorResponse = {
 - Phase 2 completed
 - Phase 3 completed
 - Phase 4 completed
+- Phase 5 completed
 
 ### Phase 4 Notes
 
@@ -119,6 +120,13 @@ type ErrorResponse = {
 - Simplified `apps/server/src/index.ts` to bootstrap only
 - Rewired server routes to use `@anilog/contracts` and `@anilog/domain`
 - Removed duplicated route-local auth/admin middleware in server routes
+
+### Phase 5 Notes
+
+- Removed all `@anilog/db` imports from `apps/web/src`
+- Replaced frontend DB type usage with transport-contract types from `@anilog/contracts`
+- Added `@anilog/contracts` as a direct dependency of `apps/web`
+- Removed `@anilog/db` as a direct dependency of `apps/web`
 
 ## Phase 0 Completion Criteria
 

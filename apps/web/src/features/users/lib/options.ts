@@ -1,11 +1,13 @@
 import { api } from "@/lib/api";
 import { edenFetch } from "@/lib/eden-fetch";
 import type {
+  PublicLibraryEntryDto,
   UpdateUserProfileBody,
   UserParams,
   UserSearchQuery,
+  UserWithProfileDto,
   UsernameParams,
-} from "@anilog/api";
+} from "@anilog/contracts";
 import { createQueryOptions, createMutationOptions } from "@/lib/query-helpers";
 import { libraryKeys, userKeys } from "@/lib/query-keys";
 
@@ -82,13 +84,6 @@ export const userMutations = {
     ),
 };
 
-type UserProfileData = NonNullable<
-  Awaited<ReturnType<ReturnType<typeof api.users>["get"]>>["data"]
->;
-type UserPublicLibraryData = NonNullable<
-  Awaited<ReturnType<ReturnType<typeof api.users>["library"]["get"]>>["data"]
->;
-
-export type UserWithProfile = UserProfileData;
-export type PublicUserLibrary = UserPublicLibraryData;
+export type UserWithProfile = UserWithProfileDto;
+export type PublicUserLibrary = PublicLibraryEntryDto[];
 export type { UpdateUserProfileBody as UpdateProfileData };

@@ -1,12 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { type Anime, type LibraryStatus } from "@anilog/db/schema/anilog";
 import { useRouter } from "next/navigation";
 
 import { useAuth, useRequireAuth } from "@/features/auth/lib/hooks";
 import { useLogAnime, useMyLibrary } from "@/features/library/lib/hooks";
-import { type LibraryEntryWithAnime } from "@/features/library/lib/options";
+import {
+  type LibraryEntryWithAnime,
+  type LibraryStatus,
+  type LogAnimeData,
+} from "@/features/library/lib/options";
 import { cn } from "@/lib/utils";
 
 import { useArchiveSearch, useSearchAnime } from "../lib/hooks";
@@ -19,7 +22,7 @@ interface SearchResultsProps {
 
 type DialogState = {
   isOpen: boolean;
-  anime: Anime | null;
+  anime: LogAnimeData["anime"] | null;
   initialStatus?: LibraryStatus;
   entry?: LibraryEntryWithAnime | null;
 };
@@ -54,7 +57,7 @@ function AnimeGrid({
   onAddToWatchlist,
   onQuickAdd,
 }: {
-  items: Anime[];
+  items: LogAnimeData["anime"][];
   entryByAnimeId: Map<number, LibraryEntryWithAnime>;
   onAddToWatchlist: (animeId: number) => void;
   onQuickAdd: (animeId: number, initialStatus?: LibraryStatus) => void;
@@ -137,7 +140,7 @@ export function SearchResults({ query }: SearchResultsProps) {
   );
 
   const animeById = useMemo(() => {
-    const byId = new Map<number, Anime>();
+    const byId = new Map<number, LogAnimeData["anime"]>();
     for (const item of archiveResults?.library ?? []) byId.set(item.id, item);
     for (const item of archiveResults?.archive ?? []) byId.set(item.id, item);
     for (const item of anilistResults ?? []) byId.set(item.id, item);

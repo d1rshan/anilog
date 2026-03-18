@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, ListTodo, Pencil, Plus, Play, Star, X, Ban } from "lucide-react";
 import Image from "next/image";
-import { type Anime, type LibraryStatus } from "@anilog/db/schema/anilog";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import type { LibraryStatus, LogAnimeData } from "@/features/library/lib/options";
 
 interface AnimeCardProps {
-  anime: Pick<Anime, "id" | "title" | "imageUrl" | "year" | "episodes"> & {
+  anime: Pick<LogAnimeData["anime"], "id" | "title" | "imageUrl" | "year" | "episodes"> & {
     status?: string | null;
   };
   disabled?: boolean;

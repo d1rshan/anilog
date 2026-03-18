@@ -1,17 +1,19 @@
 import { api } from "@/lib/api";
 import type {
   LibraryAnimeParams,
+  LibraryEntryDto,
+  LibraryStatusSchema,
   LogAnimeBody,
   UpdateLibraryProgressBody,
   UpdateLibraryRatingBody,
   UpdateLibraryStatusBody,
-} from "@anilog/api";
+} from "@anilog/contracts";
 import { createQueryOptions, createMutationOptions } from "@/lib/query-helpers";
 import { libraryKeys } from "@/lib/query-keys";
 
 const MINUTE = 60_000;
 
-export const LIBRARY_STATUSES = ["watching", "completed", "watchlist", "dropped"] as const;
+export const LIBRARY_STATUSES: LibraryStatus[] = ["watching", "completed", "watchlist", "dropped"];
 
 export type LogAnimeInput = { body: LogAnimeBody };
 export type UpdateLibraryStatusInput = {
@@ -39,6 +41,7 @@ export type LogAnimeData = LogAnimeBody;
 export type UpdateLibraryStatusData = { animeId: number } & UpdateLibraryStatusBody;
 export type UpdateLibraryProgressData = { animeId: number } & UpdateLibraryProgressBody;
 export type UpdateLibraryRatingData = { animeId: number } & UpdateLibraryRatingBody;
+export type LibraryStatus = LibraryStatusSchema;
 
 export const libraryMutations = {
   logAnime: () =>
@@ -94,5 +97,4 @@ export const libraryMutations = {
     ),
 };
 
-type MyLibraryData = NonNullable<Awaited<ReturnType<(typeof api.library.me)["get"]>>["data"]>;
-export type LibraryEntryWithAnime = MyLibraryData[number];
+export type LibraryEntryWithAnime = LibraryEntryDto;

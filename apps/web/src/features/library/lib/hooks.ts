@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Anime, LibraryStatus } from "@anilog/db/schema/anilog";
 import { libraryQueries, type LibraryEntryWithAnime } from "./options";
 import {
   libraryMutations,
+  type LibraryStatus,
   type LogAnimeData,
   type UpdateLibraryProgressData,
   type UpdateLibraryRatingData,
@@ -148,14 +148,12 @@ export const useLogAnime = () => {
         currentUserId: previous?.[0]?.userId,
       };
     },
-    onError: (error, payload, context: MutationContext | undefined) => {
-      mutation.onError?.(error, payload);
+    onError: (_error, _payload, context: MutationContext | undefined) => {
       if (context?.previous) {
         queryClient.setQueryData(libraryKeys.me(), context.previous);
       }
     },
-    onSuccess: (data, payload, context: MutationContext | undefined) => {
-      mutation.onSuccess?.(data, payload);
+    onSuccess: (data, _payload, _context: MutationContext | undefined) => {
       upsertLibraryEntryInCache(queryClient, data);
       upsertPublicLibraryEntryInCache(queryClient, data);
     },
@@ -177,11 +175,7 @@ export const useUpdateLibraryStatus = () => {
 
   return useMutation({
     ...mutation,
-    onError: (error, payload) => {
-      mutation.onError?.(error, payload);
-    },
-    onSuccess: (data, payload) => {
-      mutation.onSuccess?.(data, payload);
+    onSuccess: (data) => {
       upsertLibraryEntryInCache(queryClient, data);
       upsertPublicLibraryEntryInCache(queryClient, data);
     },
@@ -218,14 +212,12 @@ export const useUpdateLibraryProgress = () => {
 
       return { previous, currentUserId: previous?.[0]?.userId };
     },
-    onError: (error, payload, context: MutationContext | undefined) => {
-      mutation.onError?.(error, payload);
+    onError: (_error, _payload, context: MutationContext | undefined) => {
       if (context?.previous) {
         queryClient.setQueryData(libraryKeys.me(), context.previous);
       }
     },
-    onSuccess: (data, payload) => {
-      mutation.onSuccess?.(data, payload);
+    onSuccess: (data) => {
       upsertLibraryEntryInCache(queryClient, data);
       upsertPublicLibraryEntryInCache(queryClient, data);
     },
@@ -247,11 +239,7 @@ export const useUpdateLibraryRating = () => {
 
   return useMutation({
     ...mutation,
-    onError: (error, payload) => {
-      mutation.onError?.(error, payload);
-    },
-    onSuccess: (data, payload) => {
-      mutation.onSuccess?.(data, payload);
+    onSuccess: (data) => {
       upsertLibraryEntryInCache(queryClient, data);
       upsertPublicLibraryEntryInCache(queryClient, data);
     },
@@ -280,14 +268,10 @@ export const useRemoveFromLibrary = () => {
 
       return { previous, currentUserId: previous?.[0]?.userId };
     },
-    onError: (error, payload, context: MutationContext | undefined) => {
-      mutation.onError?.(error, payload);
+    onError: (_error, _payload, context: MutationContext | undefined) => {
       if (context?.previous) {
         queryClient.setQueryData(libraryKeys.me(), context.previous);
       }
-    },
-    onSuccess: (data, payload) => {
-      mutation.onSuccess?.(data, payload);
     },
     onSettled: (_data, _error, { params }, context) => {
       queryClient.invalidateQueries({ queryKey: libraryKeys.me() });
@@ -320,18 +304,7 @@ export function groupLibraryByStatus(
 }
 
 export function buildLogPayload(
-  anime: Pick<
-    Anime,
-    | "id"
-    | "title"
-    | "titleJapanese"
-    | "episodes"
-    | "status"
-    | "genres"
-    | "imageUrl"
-    | "year"
-    | "rating"
-  >,
+  anime: LogAnimeData["anime"],
   status: LibraryStatus,
   currentEpisode?: number,
   rating?: number | null,
