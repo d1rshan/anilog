@@ -101,6 +101,25 @@ type ErrorResponse = {
 11. Phase 10: performance cleanup
 12. Phase 11: delete legacy compatibility layer
 
+## Current Progress
+
+- Phase 0 completed
+- Phase 1 completed
+- Phase 2 completed
+- Phase 3 completed
+- Phase 4 completed
+
+### Phase 4 Notes
+
+- Added shared server plugins:
+  - `apps/server/src/plugins/auth.plugin.ts`
+  - `apps/server/src/plugins/admin.plugin.ts`
+  - `apps/server/src/plugins/error.plugin.ts`
+- Moved server composition into `apps/server/src/app.ts`
+- Simplified `apps/server/src/index.ts` to bootstrap only
+- Rewired server routes to use `@anilog/contracts` and `@anilog/domain`
+- Removed duplicated route-local auth/admin middleware in server routes
+
 ## Phase 0 Completion Criteria
 
 - Baseline dependency hotspots identified

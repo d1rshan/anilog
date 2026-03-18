@@ -1,27 +1,18 @@
 import { Elysia, t } from "elysia";
-import { UserService, notFoundError, unauthorizedError } from "@anilog/api";
-import { auth } from "@anilog/auth";
+import { UserService, notFoundError } from "@anilog/domain";
 import {
   AdminStatusDto,
   FollowActionDto,
   IsFollowingDto,
-  UpdateUserProfileBody,
   PublicLibraryEntryDto,
+  UpdateUserProfileBody,
   UserParams,
   UserSearchQuery,
-  UsernameParams,
   UserProfileDto,
   UserWithProfileDto,
-} from "@anilog/api";
-
-const authMiddleware = (app: Elysia) =>
-  app.derive(async ({ request }) => {
-    const session = await auth.api.getSession({ headers: request.headers });
-    if (!session?.user?.id) {
-      throw unauthorizedError("User not authenticated");
-    }
-    return { userId: session.user.id };
-  });
+  UsernameParams,
+} from "@anilog/contracts";
+import { authPlugin } from "../plugins/auth.plugin";
 
 export const userRoutes = new Elysia({ prefix: "/users" })
   .get(
@@ -92,7 +83,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       response: t.Array(UserWithProfileDto),
     },
   )
-  .use(authMiddleware)
+  .use(authPlugin)
   .post(
     "/:id/follow",
     async ({ params, userId }) => {
