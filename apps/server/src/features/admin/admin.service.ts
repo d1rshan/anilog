@@ -6,18 +6,18 @@ import type {
   SetUserAdminStatusDto,
   UpdateHeroCurationBody,
 } from "@anilog/contracts";
-import { AdminRepository } from "@anilog/db";
-import { notFoundError, validationError } from "../shared/errors/api-error";
+import { AdminQueries } from "@anilog/db";
+import { notFoundError, validationError } from "../../lib/api-error";
 
 export class AdminService {
   static async getAdminStats(): Promise<AdminStatsDto> {
-    return { totalUsers: await AdminRepository.getTotalUsers() };
+    return { totalUsers: await AdminQueries.getTotalUsers() };
   }
 
   static async searchUsers(input: AdminUsersQuery): Promise<AdminUsersDto> {
     const limit = input.limit ?? 20;
     const offset = input.offset ?? 0;
-    const result = await AdminRepository.searchUsers({
+    const result = await AdminQueries.searchUsers({
       q: input.q,
       limit,
       offset,
@@ -40,7 +40,7 @@ export class AdminService {
       throw validationError("You cannot remove your own admin access");
     }
 
-    const updated = await AdminRepository.updateUserAdminStatus(targetUserId, isAdmin);
+    const updated = await AdminQueries.updateUserAdminStatus(targetUserId, isAdmin);
 
     if (!updated) {
       throw notFoundError("User not found");
@@ -50,7 +50,7 @@ export class AdminService {
   }
 
   static async getHeroCurationsForAdmin(): Promise<HeroCurationDto[]> {
-    return AdminRepository.findHeroCurations();
+    return AdminQueries.findHeroCurations();
   }
 
   static async updateHeroCuration(
@@ -75,7 +75,7 @@ export class AdminService {
       }
     }
 
-    const updated = await AdminRepository.updateHeroCuration(id, {
+    const updated = await AdminQueries.updateHeroCuration(id, {
       videoId: payload.videoId.trim(),
       start: payload.start,
       stop: payload.stop,

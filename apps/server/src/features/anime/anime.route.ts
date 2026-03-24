@@ -1,8 +1,7 @@
 import { Elysia, t } from "elysia";
-import { AnimeService, unauthorizedError } from "@anilog/domain";
 import {
-  ArchiveSearchQuery,
   ArchiveSearchDto,
+  ArchiveSearchQuery,
   AnimeDto,
   AnimeSearchParams,
   HeroCurationDto,
@@ -10,7 +9,9 @@ import {
   UpsertAnimeBody,
   UpsertAnimeDto,
 } from "@anilog/contracts";
-import { authPlugin } from "../plugins/auth.plugin";
+import { unauthorizedError } from "../../lib/api-error";
+import { authPlugin } from "../../plugins/auth.plugin";
+import { AnimeService } from "./anime.service";
 
 const cronSecret = process.env.CRON_SECRET;
 
@@ -50,18 +51,6 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
       response: SuccessCountDto,
     },
   )
-  // .get( //TODO: add sync all route that syncs only releasing or upcoming anime
-  //   "/sync-all",
-  //   async ({ request }) => {
-  //     if (!isCronAuthorized(request)) {
-  //       throw unauthorizedError("Unauthorized");
-  //     }
-  //     return AnimeService.syncAllAnime();
-  //   },
-  //   {
-  //     response: SuccessCountDto,
-  //   },
-  // )
   .get(
     "/search/:query",
     async ({ params }) => {
@@ -74,7 +63,7 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
   )
   .group("", (app) =>
     app.use(authPlugin).get(
-      "/archive-search", // TODO: isn't it better to pass in params
+      "/archive-search",
       async ({ query, userId }) => {
         const q = query.q?.trim() ?? "";
         const limit = query.limit ?? 12;

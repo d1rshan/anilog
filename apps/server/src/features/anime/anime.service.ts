@@ -6,8 +6,8 @@ import type {
   UpsertAnimeBody,
   UpsertAnimeDto,
 } from "@anilog/contracts";
-import { AnimeRepository } from "@anilog/db";
-import { externalServiceError, internalError } from "../shared/errors/api-error";
+import { AnimeQueries } from "@anilog/db";
+import { externalServiceError, internalError } from "../../lib/api-error";
 
 const ANILIST_API = "https://graphql.anilist.co";
 const SEARCH_CACHE_TTL_MS = 30_000;
@@ -28,11 +28,11 @@ const anilistSearchCache = new Map<string, AniListCacheValue>();
 
 export class AnimeService {
   static async getHeroCurations(): Promise<HeroCurationDto[]> {
-    return AnimeRepository.findHeroCurations();
+    return AnimeQueries.findHeroCurations();
   }
 
   static async getTrendingAnime(): Promise<AnimeDto[]> {
-    return AnimeRepository.findTrendingAnime();
+    return AnimeQueries.findTrendingAnime();
   }
 
   static async searchArchive(
@@ -46,7 +46,7 @@ export class AnimeService {
     const cacheKey = `${userId}:${q}:${limit}`;
 
     const cached = archiveSearchCache.get(cacheKey);
-    if (cached && cached?.expiresAt > Date.now()) {
+    if (cached && cached.expiresAt > Date.now()) {
       return cached.value;
     }
 
@@ -81,10 +81,10 @@ export class AnimeService {
         .slice(0, limit)
         .map((r) => r.item);
 
-    const library = rank(await AnimeRepository.findArchiveLibraryMatches(userId, pattern));
+    const library = rank(await AnimeQueries.findArchiveLibraryMatches(userId, pattern));
     const excludeIds = library.map((a) => a.id);
 
-    const archiveRows = await AnimeRepository.findArchiveMatches(pattern, excludeIds, limit * 4);
+    const archiveRows = await AnimeQueries.findArchiveMatches(pattern, excludeIds, limit * 4);
     const archive = rank(archiveRows);
     const value = { library, archive };
 
@@ -157,8 +157,8 @@ export class AnimeService {
       };
     });
 
-    await AnimeRepository.upsertAnimeMany(animeInserts);
-    await AnimeRepository.replaceTrending(media.map((m) => m.id));
+    await AnimeQueries.upsertAnimeMany(animeInserts);
+    await AnimeQueries.replaceTrending(media.map((m) => m.id));
 
     return { success: true, count: media.length };
   }
@@ -168,7 +168,7 @@ export class AnimeService {
     if (q.length < 3) return [];
 
     const cached = anilistSearchCache.get(q);
-    if (cached && cached?.expiresAt > Date.now()) {
+    if (cached && cached.expiresAt > Date.now()) {
       return cached.value;
     }
 
@@ -235,7 +235,7 @@ export class AnimeService {
 
   static async upsertAnime(animeData: UpsertAnimeBody): Promise<UpsertAnimeDto> {
     try {
-      await AnimeRepository.upsertAnime({
+      await AnimeQueries.upsertAnime({
         id: animeData.id,
         title: animeData.title,
         titleJapanese: animeData.titleJapanese,

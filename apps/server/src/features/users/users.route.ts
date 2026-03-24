@@ -1,5 +1,4 @@
 import { Elysia, t } from "elysia";
-import { UserService } from "@anilog/domain";
 import {
   AdminStatusDto,
   FollowActionDto,
@@ -12,7 +11,8 @@ import {
   UserWithProfileDto,
   UsernameParams,
 } from "@anilog/contracts";
-import { authPlugin } from "../plugins/auth.plugin";
+import { authPlugin } from "../../plugins/auth.plugin";
+import { UserService } from "./users.service";
 
 export const userRoutes = new Elysia({ prefix: "/users" })
   .get(

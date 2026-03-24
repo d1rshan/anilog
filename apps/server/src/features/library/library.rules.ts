@@ -1,10 +1,10 @@
 import type {
+  LibraryEntryDto,
   LogAnimeBody,
-  UpdateLibraryStatusBody,
   UpdateLibraryProgressBody,
+  UpdateLibraryStatusBody,
 } from "@anilog/contracts";
-import { validationError } from "../shared/errors/api-error";
-import type { LibraryEntry } from "./library.types";
+import { validationError } from "../../lib/api-error";
 
 function normalizeAnimeStatus(status?: string | null) {
   return (status ?? "").toUpperCase();
@@ -26,7 +26,7 @@ export function resolveLibraryEpisode(params: {
 }
 
 export function validateLibraryStatusChange(
-  entry: Pick<LibraryEntry, "anime" | "currentEpisode">,
+  entry: Pick<LibraryEntryDto, "anime" | "currentEpisode">,
   payload: {
     status: LogAnimeBody["status"] | UpdateLibraryStatusBody["status"];
     currentEpisode: number;
@@ -59,7 +59,7 @@ export function validateLibraryStatusChange(
 }
 
 export function resolveNextProgress(
-  existing: Pick<LibraryEntry, "status" | "currentEpisode">,
+  existing: Pick<LibraryEntryDto, "status" | "currentEpisode">,
   payload: UpdateLibraryProgressBody,
 ) {
   if (payload.currentEpisode === undefined && payload.delta === undefined) {

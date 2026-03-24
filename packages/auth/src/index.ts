@@ -1,9 +1,8 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { username } from "better-auth/plugins";
-import { db } from "@anilog/db";
+import { UsersQueries, db } from "@anilog/db";
 import * as schema from "@anilog/db/schema/auth";
-import { UserService } from "@anilog/domain";
 
 const trustedOrigins = (process.env.CORS_ORIGIN || "")
   .split(",")
@@ -38,7 +37,7 @@ export const auth = betterAuth({
       create: {
         after: async (user) => {
           try {
-            await UserService.createUserProfile(user.id);
+            await UsersQueries.createUserProfile(user.id);
             console.log(`[Auth] Created profile for user: ${user.id}`);
           } catch (error) {
             console.error(`[Auth] Failed to create profile for user: ${user.id}`, error);

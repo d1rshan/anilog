@@ -5,8 +5,8 @@ import type {
   UpdateLibraryRatingBody,
   UpdateLibraryStatusBody,
 } from "@anilog/contracts";
-import { LibraryRepository, type LibraryEntryRecord } from "@anilog/db";
-import { internalError, notFoundError } from "../shared/errors/api-error";
+import { LibraryQueries, type LibraryEntryRecord } from "@anilog/db";
+import { internalError, notFoundError } from "../../lib/api-error";
 import {
   resolveLibraryEpisode,
   resolveNextProgress,
@@ -15,11 +15,11 @@ import {
 
 export class LibraryService {
   static async getUserLibrary(userId: string): Promise<LibraryEntryDto[]> {
-    const rows = await LibraryRepository.findUserLibrary(userId);
-    return rows.map(this.toLibraryEntryDto);
+    const rows = await LibraryQueries.findUserLibrary(userId);
+    return rows.map(this.toLibraryEntry);
   }
 
-  private static toLibraryEntryDto(entry: LibraryEntryRecord): LibraryEntryDto {
+  private static toLibraryEntry(entry: LibraryEntryRecord): LibraryEntryDto {
     return entry;
   }
 
@@ -27,12 +27,12 @@ export class LibraryService {
     userId: string,
     animeId: number,
   ): Promise<LibraryEntryDto | null> {
-    const entry = await LibraryRepository.findLibraryEntry(userId, animeId);
-    return entry ? this.toLibraryEntryDto(entry) : null;
+    const entry = await LibraryQueries.findLibraryEntry(userId, animeId);
+    return entry ? this.toLibraryEntry(entry) : null;
   }
 
   static async logAnime(userId: string, input: LogAnimeBody): Promise<LibraryEntryDto> {
-    await LibraryRepository.upsertAnime(input.anime);
+    await LibraryQueries.upsertAnime(input.anime);
 
     const resolvedEpisode = Math.max(
       0,
@@ -55,7 +55,7 @@ export class LibraryService {
       },
     );
 
-    await LibraryRepository.upsertLibraryEntry({
+    await LibraryQueries.upsertLibraryEntry({
       userId,
       animeId: input.anime.id,
       status: input.status,
@@ -95,7 +95,7 @@ export class LibraryService {
       currentEpisode: resolvedEpisode,
     });
 
-    await LibraryRepository.updateStatus(userId, animeId, {
+    await LibraryQueries.updateStatus(userId, animeId, {
       status,
       currentEpisode: resolvedEpisode,
     });
@@ -120,7 +120,7 @@ export class LibraryService {
 
     const nextEpisode = resolveNextProgress(existing, payload);
 
-    await LibraryRepository.updateProgress(userId, animeId, nextEpisode);
+    await LibraryQueries.updateProgress(userId, animeId, nextEpisode);
 
     const updated = await this.getLibraryEntry(userId, animeId);
     if (!updated) {
@@ -140,7 +140,7 @@ export class LibraryService {
       throw notFoundError("Anime not found in your library");
     }
 
-    await LibraryRepository.updateRating(userId, animeId, payload.rating);
+    await LibraryQueries.updateRating(userId, animeId, payload.rating);
 
     const updated = await this.getLibraryEntry(userId, animeId);
     if (!updated) {
@@ -151,6 +151,6 @@ export class LibraryService {
   }
 
   static async removeFromLibrary(userId: string, animeId: number): Promise<boolean> {
-    return LibraryRepository.deleteLibraryEntry(userId, animeId);
+    return LibraryQueries.deleteLibraryEntry(userId, animeId);
   }
 }

@@ -1,4 +1,19 @@
-import type { ErrorCode, ErrorResponse } from "@anilog/contracts";
+export type ErrorCode =
+  | "UNAUTHORIZED"
+  | "FORBIDDEN"
+  | "NOT_FOUND"
+  | "CONFLICT"
+  | "VALIDATION"
+  | "EXTERNAL"
+  | "INTERNAL";
+
+export type ErrorResponse = {
+  error: {
+    code: ErrorCode;
+    message: string;
+    details?: Record<string, unknown>;
+  };
+};
 
 export class ApiError extends Error {
   code: ErrorCode;
@@ -61,6 +76,3 @@ export function internalError(
 ) {
   return new ApiError("INTERNAL", message, 500, details);
 }
-
-export type AppErrorCode = ErrorCode;
-export { ApiError as AppError };

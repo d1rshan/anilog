@@ -2,10 +2,10 @@ import "dotenv/config";
 import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { auth } from "@anilog/auth";
-import { adminRoutes } from "./routes/admin.route";
-import { animeRoutes } from "./routes/anime.route";
-import { libraryRoutes } from "./routes/library.route";
-import { userRoutes } from "./routes/users.route";
+import { adminRoutes } from "./features/admin/admin.route";
+import { animeRoutes } from "./features/anime/anime.route";
+import { libraryRoutes } from "./features/library/library.route";
+import { userRoutes } from "./features/users/users.route";
 import { errorPlugin } from "./plugins/error.plugin";
 
 const allowedOrigins = process.env.CORS_ORIGIN || "http://localhost:3001";

@@ -48,15 +48,15 @@ The API is running at [http://localhost:3000](http://localhost:3000).
 
 ## Project Structure
 
-```
+```txt
 anilog/
 ├── apps/
 │   ├── web/         # Frontend application (Next.js)
-│   └── server/      # Backend API (Elysia)
+│   └── server/      # Backend API (Elysia) with feature-local services
 ├── packages/
-│   ├── api/         # API layer / business logic
-│   ├── auth/        # Authentication configuration & logic
-│   └── db/          # Database schema & queries
+│   ├── auth/        # Authentication configuration
+│   ├── contracts/   # Shared API contracts for web/mobile clients
+│   └── db/          # Database schema & query modules
 ```
 
 ## Available Scripts
