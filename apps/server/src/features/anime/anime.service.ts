@@ -8,23 +8,22 @@ import type {
 } from "@anilog/contracts";
 import { AnimeQueries } from "@anilog/db";
 import { externalServiceError, internalError } from "../../lib/api-error";
+import { TtlCache } from "../../lib/ttl-cache";
 
 const ANILIST_API = "https://graphql.anilist.co";
 const SEARCH_CACHE_TTL_MS = 30_000;
 const ANILIST_CACHE_TTL_MS = 60_000;
+const ARCHIVE_SEARCH_CACHE_MAX_SIZE = 500;
+const ANILIST_SEARCH_CACHE_MAX_SIZE = 200;
 
-type SearchCacheValue = {
-  expiresAt: number;
-  value: ArchiveSearchDto;
-};
-
-type AniListCacheValue = {
-  expiresAt: number;
-  value: AnimeDto[];
-};
-
-const archiveSearchCache = new Map<string, SearchCacheValue>();
-const anilistSearchCache = new Map<string, AniListCacheValue>();
+const archiveSearchCache = new TtlCache<string, ArchiveSearchDto>(
+  SEARCH_CACHE_TTL_MS,
+  ARCHIVE_SEARCH_CACHE_MAX_SIZE,
+);
+const anilistSearchCache = new TtlCache<string, AnimeDto[]>(
+  ANILIST_CACHE_TTL_MS,
+  ANILIST_SEARCH_CACHE_MAX_SIZE,
+);
 
 export class AnimeService {
   static async getHeroCurations(): Promise<HeroCurationDto[]> {
@@ -46,8 +45,8 @@ export class AnimeService {
     const cacheKey = `${userId}:${q}:${limit}`;
 
     const cached = archiveSearchCache.get(cacheKey);
-    if (cached && cached.expiresAt > Date.now()) {
-      return cached.value;
+    if (cached) {
+      return cached;
     }
 
     const pattern = `%${q}%`;
@@ -88,10 +87,7 @@ export class AnimeService {
     const archive = rank(archiveRows);
     const value = { library, archive };
 
-    archiveSearchCache.set(cacheKey, {
-      expiresAt: Date.now() + SEARCH_CACHE_TTL_MS,
-      value,
-    });
+    archiveSearchCache.set(cacheKey, value);
 
     return value;
   }
@@ -168,8 +164,8 @@ export class AnimeService {
     if (q.length < 3) return [];
 
     const cached = anilistSearchCache.get(q);
-    if (cached && cached.expiresAt > Date.now()) {
-      return cached.value;
+    if (cached) {
+      return cached;
     }
 
     const res = await fetch(ANILIST_API, {
@@ -225,10 +221,7 @@ export class AnimeService {
         };
       });
 
-    anilistSearchCache.set(q, {
-      expiresAt: Date.now() + ANILIST_CACHE_TTL_MS,
-      value: result,
-    });
+    anilistSearchCache.set(q, result);
 
     return result;
   }

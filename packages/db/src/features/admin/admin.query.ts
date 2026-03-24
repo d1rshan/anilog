@@ -1,9 +1,10 @@
-import { db } from "../client";
-import { heroCuration, userProfile } from "../schema/anilog";
-import { user } from "../schema/auth";
+import { db } from "../../client";
+import { heroCuration } from "./admin.schema";
+import { userProfile } from "../users/users.schema";
+import { user } from "../auth/auth.schema";
 import { asc, count, eq, ilike, or } from "drizzle-orm";
-import { getFollowCountsMap } from "./shared/follow-counts";
-import { userSummarySelect, type UserSummaryRecord } from "./shared/user-summary";
+import { getFollowCountsMap } from "../users/users.helpers";
+import { userSummarySelect, type UserSummaryRecord } from "../users/users.helpers";
 
 export type AdminUserRecord = UserSummaryRecord & {
   followerCount: number;

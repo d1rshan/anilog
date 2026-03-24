@@ -1,13 +1,11 @@
-import { db } from "../client";
-import { anime, userAnime, userFollow, userProfile } from "../schema/anilog";
-import { user } from "../schema/auth";
+import { db } from "../../client";
+import { anime } from "../anime/anime.schema";
+import { userAnime } from "../library/library.schema";
+import { user } from "../auth/auth.schema";
 import { and, asc, eq, getTableColumns, ilike } from "drizzle-orm";
-import { getFollowCountsMap } from "./shared/follow-counts";
-import {
-  userSummarySelect,
-  type UserProfileRecord,
-  type UserSummaryRecord,
-} from "./shared/user-summary";
+import { userFollow, userProfile } from "./users.schema";
+import { getFollowCountsMap } from "./users.helpers";
+import { userSummarySelect, type UserProfileRecord, type UserSummaryRecord } from "./users.helpers";
 
 export type UserWithCountsRecord = UserSummaryRecord & {
   followerCount: number;
@@ -112,11 +110,17 @@ export class UsersQueries {
     return Boolean(found);
   }
 
-  static async createFollow(followerId: string, followingId: string) {
-    await db.insert(userFollow).values({
-      followerId,
-      followingId,
-    });
+  static async createFollow(followerId: string, followingId: string): Promise<boolean> {
+    const [createdFollow] = await db
+      .insert(userFollow)
+      .values({
+        followerId,
+        followingId,
+      })
+      .onConflictDoNothing()
+      .returning({ id: userFollow.id });
+
+    return Boolean(createdFollow);
   }
 
   static async deleteFollow(followerId: string, followingId: string) {

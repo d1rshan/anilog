@@ -5,8 +5,8 @@ import { auth } from "@anilog/auth";
 import { adminRoutes } from "./features/admin/admin.route";
 import { animeRoutes } from "./features/anime/anime.route";
 import { libraryRoutes } from "./features/library/library.route";
-import { userRoutes } from "./features/users/users.route";
-import { errorPlugin } from "./plugins/error.plugin";
+import { usersRoutes } from "./features/users/users.route";
+import { errorMiddleware } from "./middleware/error.middleware";
 
 const allowedOrigins = process.env.CORS_ORIGIN || "http://localhost:3001";
 
@@ -19,7 +19,7 @@ export const app = new Elysia()
       credentials: true,
     }),
   )
-  .use(errorPlugin)
+  .use(errorMiddleware)
   .all("/auth/*", async ({ request, status }) => {
     if (["POST", "GET"].includes(request.method)) {
       return auth.handler(request);
@@ -27,7 +27,7 @@ export const app = new Elysia()
 
     return status(405);
   })
-  .group("/api", (api) => api.use(animeRoutes).use(libraryRoutes).use(userRoutes).use(adminRoutes))
+  .group("/api", (api) => api.use(animeRoutes).use(libraryRoutes).use(usersRoutes).use(adminRoutes))
   .get("/", () => "OK");
 
 export type App = typeof app;

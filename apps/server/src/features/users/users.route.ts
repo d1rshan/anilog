@@ -11,14 +11,14 @@ import {
   UserWithProfileDto,
   UsernameParams,
 } from "@anilog/contracts";
-import { authPlugin } from "../../plugins/auth.plugin";
-import { UserService } from "./users.service";
+import { authMiddleware } from "../../middleware/auth.middleware";
+import { UsersService } from "./users.service";
 
-export const userRoutes = new Elysia({ prefix: "/users" })
+export const usersRoutes = new Elysia({ prefix: "/users" })
   .get(
     "/search",
     async ({ query }) => {
-      return UserService.searchUsers(query, 20);
+      return UsersService.searchUsers(query, 20);
     },
     {
       query: UserSearchQuery,
@@ -28,7 +28,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .get(
     "/:id",
     async ({ params }) => {
-      return UserService.getUserProfileOrThrow(params.id);
+      return UsersService.getUserProfileOrThrow(params.id);
     },
     {
       params: UserParams,
@@ -38,7 +38,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .get(
     "/username/:username",
     async ({ params }) => {
-      return UserService.getUserByUsernameOrThrow(params.username);
+      return UsersService.getUserByUsernameOrThrow(params.username);
     },
     {
       params: UsernameParams,
@@ -48,7 +48,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .get(
     "/:id/library",
     async ({ params }) => {
-      return UserService.getPublicUserLibrary(params.id);
+      return UsersService.getPublicUserLibrary(params.id);
     },
     {
       params: UserParams,
@@ -58,7 +58,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .get(
     "/:id/followers",
     async ({ params }) => {
-      return UserService.getFollowers(params.id);
+      return UsersService.getFollowers(params.id);
     },
     {
       params: UserParams,
@@ -68,18 +68,18 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .get(
     "/:id/following",
     async ({ params }) => {
-      return UserService.getFollowing(params.id);
+      return UsersService.getFollowing(params.id);
     },
     {
       params: UserParams,
       response: t.Array(UserWithProfileDto),
     },
   )
-  .use(authPlugin)
+  .use(authMiddleware)
   .post(
     "/:id/follow",
     async ({ params, userId }) => {
-      return UserService.followUser(userId, params.id);
+      return UsersService.followUser(userId, params.id);
     },
     {
       params: UserParams,
@@ -89,7 +89,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .delete(
     "/:id/follow",
     async ({ params, userId }) => {
-      return UserService.unfollowUser(userId, params.id);
+      return UsersService.unfollowUser(userId, params.id);
     },
     {
       params: UserParams,
@@ -99,7 +99,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .get(
     "/me/profile",
     async ({ userId }) => {
-      return UserService.getUserProfileOrThrow(userId, "Profile not found");
+      return UsersService.getUserProfileOrThrow(userId, "Profile not found");
     },
     {
       response: UserWithProfileDto,
@@ -108,7 +108,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .get(
     "/me/admin-status",
     async ({ userId }) => {
-      return UserService.getAdminStatus(userId);
+      return UsersService.getAdminStatus(userId);
     },
     {
       response: AdminStatusDto,
@@ -117,7 +117,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .put(
     "/me/profile",
     async ({ body, userId }) => {
-      return UserService.updateUserProfile(userId, body);
+      return UsersService.updateUserProfile(userId, body);
     },
     {
       body: UpdateUserProfileBody,
@@ -127,7 +127,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .get(
     "/me/following",
     async ({ userId }) => {
-      return UserService.getFollowing(userId);
+      return UsersService.getFollowing(userId);
     },
     {
       response: t.Array(UserWithProfileDto),
@@ -136,7 +136,7 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   .get(
     "/me/check-follow/:id",
     async ({ params, userId }) => {
-      const isFollowing = await UserService.isFollowing(userId, params.id);
+      const isFollowing = await UsersService.isFollowing(userId, params.id);
       return { isFollowing };
     },
     {

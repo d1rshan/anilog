@@ -1,5 +1,7 @@
-import { db } from "../client";
-import { anime, heroCuration, trendingAnime, userAnime } from "../schema/anilog";
+import { db } from "../../client";
+import { heroCuration } from "../admin/admin.schema";
+import { userAnime } from "../library/library.schema";
+import { anime, trendingAnime } from "./anime.schema";
 import { and, asc, desc, eq, getTableColumns, ilike, notInArray, or } from "drizzle-orm";
 
 export type AnimeRecord = typeof anime.$inferSelect;
@@ -73,14 +75,20 @@ export class AnimeQueries {
   }
 
   static async replaceTrending(animeIds: number[]) {
-    await db.delete(trendingAnime);
+    await db.transaction(async (tx) => {
+      await tx.delete(trendingAnime);
 
-    await db.insert(trendingAnime).values(
-      animeIds.map((animeId, index) => ({
-        animeId,
-        rank: index + 1,
-      })),
-    );
+      if (animeIds.length === 0) {
+        return;
+      }
+
+      await tx.insert(trendingAnime).values(
+        animeIds.map((animeId, index) => ({
+          animeId,
+          rank: index + 1,
+        })),
+      );
+    });
   }
 
   static async upsertAnime(animeData: typeof anime.$inferInsert) {
