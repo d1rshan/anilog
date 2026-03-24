@@ -5,8 +5,11 @@
     ".": {
       "default": "./src/index.ts"
     },
-    "./*": {
-      "default": "./src/*.ts"
+    "./schema": {
+      "default": "./src/schema/index.ts"
+    },
+    "./features/auth/auth.schema": {
+      "default": "./src/features/auth/auth.schema.ts"
     }
   },
   "scripts": {

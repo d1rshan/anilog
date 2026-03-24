@@ -1,5 +1,6 @@
-import { db } from "../client";
-import { anime, type LibraryStatus, userAnime } from "../schema/anilog";
+import { db } from "../../client";
+import { anime } from "../anime/anime.schema";
+import { type LibraryStatus, userAnime } from "./library.schema";
 import { and, asc, eq, getTableColumns } from "drizzle-orm";
 
 export type AnimeSummaryRecord = {

@@ -7,11 +7,11 @@ import {
   UpdateLibraryRatingBody,
   UpdateLibraryStatusBody,
 } from "@anilog/contracts";
-import { authPlugin } from "../../plugins/auth.plugin";
+import { authMiddleware } from "../../middleware/auth.middleware";
 import { LibraryService } from "./library.service";
 
 export const libraryRoutes = new Elysia({ prefix: "/library" })
-  .use(authPlugin)
+  .use(authMiddleware)
   .get(
     "/me",
     async ({ userId }) => {

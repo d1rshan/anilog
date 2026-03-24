@@ -1,6 +1,7 @@
-import { inArray, sql } from "drizzle-orm";
+import { getTableColumns, inArray, sql } from "drizzle-orm";
 import { db } from "../../client";
-import { userFollow } from "../../schema/anilog";
+import { user } from "../auth/auth.schema";
+import { userFollow, userProfile } from "./users.schema";
 
 export type FollowCounts = {
   followerCount: number;
@@ -48,4 +49,28 @@ export async function getFollowCountsMap(userIds: string[]) {
   }
 
   return counts;
+}
+
+export type UserProfileRecord = typeof userProfile.$inferSelect;
+
+export type UserSummaryRecord = {
+  id: string;
+  name: string;
+  username: string | null;
+  email: string;
+  isAdmin: boolean;
+  image: string | null;
+  profile: UserProfileRecord | null;
+};
+
+export function userSummarySelect() {
+  return {
+    id: user.id,
+    name: user.name,
+    username: user.username,
+    email: user.email,
+    isAdmin: user.isAdmin,
+    image: user.image,
+    profile: getTableColumns(userProfile),
+  };
 }

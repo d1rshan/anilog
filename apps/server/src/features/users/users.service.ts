@@ -10,7 +10,7 @@ import type {
 import { UsersQueries } from "@anilog/db";
 import { conflictError, internalError, notFoundError, validationError } from "../../lib/api-error";
 
-export class UserService {
+export class UsersService {
   static async createUserProfile(userId: string): Promise<UserProfileDto> {
     const profile = await UsersQueries.createUserProfile(userId);
 
@@ -75,15 +75,13 @@ export class UserService {
       throw notFoundError("User not found");
     }
 
-    try {
-      await UsersQueries.createFollow(followerId, followingId);
-      return { success: true, message: "Successfully followed user" };
-    } catch (error) {
-      if (error instanceof Error && error.message.includes("unique constraint")) {
-        throw conflictError("Already following this user");
-      }
-      throw error;
+    const created = await UsersQueries.createFollow(followerId, followingId);
+
+    if (!created) {
+      throw conflictError("Already following this user");
     }
+
+    return { success: true, message: "Successfully followed user" };
   }
 
   static async unfollowUser(followerId: string, followingId: string): Promise<FollowActionDto> {

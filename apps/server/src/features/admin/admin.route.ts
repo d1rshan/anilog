@@ -10,11 +10,11 @@ import {
   UpdateHeroCurationBody,
   UserParams,
 } from "@anilog/contracts";
-import { adminPlugin } from "../../plugins/admin.plugin";
+import { adminMiddleware } from "./admin.middleware";
 import { AdminService } from "./admin.service";
 
 export const adminRoutes = new Elysia({ prefix: "/admin" })
-  .use(adminPlugin)
+  .use(adminMiddleware)
   .get(
     "/stats",
     async () => {

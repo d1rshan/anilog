@@ -10,7 +10,7 @@ import {
   UpsertAnimeDto,
 } from "@anilog/contracts";
 import { unauthorizedError } from "../../lib/api-error";
-import { authPlugin } from "../../plugins/auth.plugin";
+import { authMiddleware } from "../../middleware/auth.middleware";
 import { AnimeService } from "./anime.service";
 
 const cronSecret = process.env.CRON_SECRET;
@@ -62,7 +62,7 @@ export const animeRoutes = new Elysia({ prefix: "/anime" })
     },
   )
   .group("", (app) =>
-    app.use(authPlugin).get(
+    app.use(authMiddleware).get(
       "/archive-search",
       async ({ query, userId }) => {
         const q = query.q?.trim() ?? "";
