@@ -5,7 +5,7 @@ import { and, asc, desc, eq, getTableColumns, ilike, notInArray, or } from "driz
 export type AnimeRecord = typeof anime.$inferSelect;
 export type HeroCurationRecord = typeof heroCuration.$inferSelect;
 
-export class AnimeRepository {
+export class AnimeQueries {
   static async findHeroCurations(): Promise<HeroCurationRecord[]> {
     return db
       .select()

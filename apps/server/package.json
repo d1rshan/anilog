@@ -16,7 +16,7 @@
   "dependencies": {
     "@anilog/auth": "workspace:*",
     "@anilog/contracts": "workspace:*",
-    "@anilog/domain": "workspace:*",
+    "@anilog/db": "workspace:*",
     "@elysiajs/cors": "^1.3.3",
     "dotenv": "catalog:",
     "elysia": "^1.4.26"

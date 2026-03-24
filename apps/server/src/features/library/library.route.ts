@@ -1,5 +1,4 @@
 import { Elysia, t } from "elysia";
-import { LibraryService } from "@anilog/domain";
 import {
   LibraryAnimeParams,
   LibraryEntryDto,
@@ -8,7 +7,8 @@ import {
   UpdateLibraryRatingBody,
   UpdateLibraryStatusBody,
 } from "@anilog/contracts";
-import { authPlugin } from "../plugins/auth.plugin";
+import { authPlugin } from "../../plugins/auth.plugin";
+import { LibraryService } from "./library.service";
 
 export const libraryRoutes = new Elysia({ prefix: "/library" })
   .use(authPlugin)

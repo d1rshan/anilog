@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-import { isApiError, toErrorResponse } from "@anilog/domain";
+import { isApiError, toErrorResponse } from "../lib/api-error";
 
 export const errorPlugin = new Elysia({ name: "error.plugin" }).onError(({ code, error, set }) => {
   if (isApiError(error)) {

@@ -53,7 +53,7 @@ function libraryEntrySelect() {
   };
 }
 
-export class LibraryRepository {
+export class LibraryQueries {
   static async findUserLibrary(userId: string): Promise<LibraryEntryRecord[]> {
     const rows = await db
       .select(libraryEntrySelect())

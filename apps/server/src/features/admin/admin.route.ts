@@ -1,17 +1,17 @@
 import { Elysia, t } from "elysia";
-import { AdminService } from "@anilog/domain";
 import {
-  AdminUsersQuery,
   AdminStatsDto,
   AdminUsersDto,
+  AdminUsersQuery,
   HeroCurationDto,
+  HeroCurationParams,
   SetUserAdminStatusBody,
   SetUserAdminStatusDto,
-  HeroCurationParams,
-  UserParams,
   UpdateHeroCurationBody,
+  UserParams,
 } from "@anilog/contracts";
-import { adminPlugin } from "../plugins/admin.plugin";
+import { adminPlugin } from "../../plugins/admin.plugin";
+import { AdminService } from "./admin.service";
 
 export const adminRoutes = new Elysia({ prefix: "/admin" })
   .use(adminPlugin)

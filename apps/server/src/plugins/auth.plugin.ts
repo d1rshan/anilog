@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { auth } from "@anilog/auth";
-import { unauthorizedError } from "@anilog/domain";
+import { unauthorizedError } from "../lib/api-error";
 
 export const authPlugin = (app: Elysia) =>
   app.derive(async ({ request }) => {

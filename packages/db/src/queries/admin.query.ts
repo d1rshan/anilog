@@ -23,7 +23,7 @@ type HeroCurationUpdateInput = Pick<
   | "isActive"
 >;
 
-export class AdminRepository {
+export class AdminQueries {
   static async getTotalUsers() {
     const [result] = await db.select({ count: count() }).from(user);
     return result?.count ?? 0;

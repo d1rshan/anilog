@@ -34,7 +34,7 @@ export type PublicLibraryEntryRecord = {
   };
 };
 
-export class UsersRepository {
+export class UsersQueries {
   static async createUserProfile(userId: string): Promise<UserProfileRecord | null> {
     const [profile] = await db
       .insert(userProfile)

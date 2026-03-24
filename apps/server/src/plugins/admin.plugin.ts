@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
-import { UserService, forbiddenError } from "@anilog/domain";
+import { forbiddenError } from "../lib/api-error";
+import { UserService } from "../features/users/users.service";
 import { authPlugin } from "./auth.plugin";
 
 export const adminPlugin = (app: Elysia) =>
