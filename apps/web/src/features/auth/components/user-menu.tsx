@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { useAuth, useLogout } from "../lib/hooks";
+import { useAuth, useLogout } from "../auth.hooks";
 
 export const UserMenu = () => {
   const router = useRouter();

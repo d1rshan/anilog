@@ -29,9 +29,9 @@ import {
   LIBRARY_STATUSES,
   type LibraryEntryWithAnime,
   type LibraryStatus,
-} from "@/features/library/api/library.query";
-import type { LogAnimeData } from "@/features/library/api/library.mutation";
-import { useLogAnime, useRemoveFromLibrary } from "@/features/library/hooks";
+  type LogAnimeData,
+} from "@/features/library/library.api";
+import { useLogAnime, useRemoveFromLibrary } from "@/features/library/library.hooks";
 
 interface AddToListDialogProps {
   anime: LogAnimeData["anime"] | null;

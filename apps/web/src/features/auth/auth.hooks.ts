@@ -1,8 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { authClient } from "@/lib/auth-client";
-import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 export const useSession = () => authClient.useSession();
 
@@ -30,21 +29,19 @@ export function useRequireAuth(options: UseRequireAuthOptions = {}) {
   const { toastMessage = "Please sign in to continue", onUnauthenticated } = options;
   const auth = useAuth();
 
-  const requireAuth = useCallback(() => {
-    if (auth.isAuthenticated) {
-      return true;
-    }
-
-    if (toastMessage) {
-      toast.error(toastMessage);
-    }
-    onUnauthenticated?.();
-    return false;
-  }, [auth.isAuthenticated, onUnauthenticated, toastMessage]);
-
   return {
     ...auth,
-    requireAuth,
+    requireAuth: () => {
+      if (auth.isAuthenticated) {
+        return true;
+      }
+
+      if (toastMessage) {
+        toast.error(toastMessage);
+      }
+      onUnauthenticated?.();
+      return false;
+    },
   };
 }
 

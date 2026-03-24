@@ -1,20 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { PublicUserLibrary } from "@/features/users/api/user.query";
+import type { PublicUserLibrary } from "@/features/users/users.api";
 import { getApiErrorMessage } from "@/lib/eden-fetch";
-import { libraryKeys } from "./api/library.keys";
+import { libraryKeys } from "./library.keys";
 import {
+  LIBRARY_STATUSES,
   libraryMutations,
+  libraryQueries,
+  type LibraryEntryWithAnime,
+  type LibraryStatus,
   type LogAnimeData,
   type UpdateLibraryProgressData,
   type UpdateLibraryRatingData,
   type UpdateLibraryStatusData,
-} from "./api/library.mutation";
-import {
-  libraryQueries,
-  type LibraryEntryWithAnime,
-  type LibraryStatus,
-} from "./api/library.query";
+} from "./library.api";
 
 type MutationContext = {
   previous?: LibraryEntryWithAnime[];
@@ -353,4 +352,4 @@ export function getNextEpisode(currentEpisode: number): number {
   return Math.max(1, currentEpisode + 1);
 }
 
-export type { UpdateLibraryProgressData, UpdateLibraryRatingData, UpdateLibraryStatusData };
+export { LIBRARY_STATUSES };

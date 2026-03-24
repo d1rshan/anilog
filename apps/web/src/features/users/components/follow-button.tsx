@@ -3,8 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { UserPlus, UserCheck, Loader2 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { useAuth, useRequireAuth } from "@/features/auth/lib/hooks";
-import { useIsFollowing, useFollowUser, useUnfollowUser } from "../hooks";
+import { useAuth, useRequireAuth } from "@/features/auth/auth.hooks";
+import { useIsFollowing, useFollowUser, useUnfollowUser } from "../users.hooks";
 
 interface FollowButtonProps {
   userId: string;

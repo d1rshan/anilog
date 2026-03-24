@@ -2,11 +2,11 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FollowButton } from "./follow-button";
-import type { UserWithProfile } from "../api/user.query";
+import type { UserWithProfileDto } from "@anilog/contracts";
 import { useRouter } from "next/navigation";
 
 interface UserCardProps {
-  user: UserWithProfile;
+  user: UserWithProfileDto;
 }
 
 export function UserCard({ user }: UserCardProps) {

@@ -1,4 +1,4 @@
-import { LoginPage } from "@/features/auth/pages/login-page";
+import { LoginPage } from "@/features/auth/login-page";
 
 interface LoginRoutePageProps {
   searchParams: Promise<{

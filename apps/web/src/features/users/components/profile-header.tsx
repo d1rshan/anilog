@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { FollowButton } from "./follow-button";
 import { EditProfileDialog } from "./edit-profile-dialog";
 import { Globe, MapPin, Settings } from "lucide-react";
-import type { UserWithProfile } from "@/features/users/api/user.query";
+import type { UserWithProfileDto } from "@anilog/contracts";
 
 interface ProfileHeaderProps {
-  user: UserWithProfile;
+  user: UserWithProfileDto;
   isOwnProfile: boolean;
 }
 

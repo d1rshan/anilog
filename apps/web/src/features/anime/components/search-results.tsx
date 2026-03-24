@@ -3,16 +3,16 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { useAuth, useRequireAuth } from "@/features/auth/lib/hooks";
-import { useLogAnime, useMyLibrary } from "@/features/library/hooks";
+import { useAuth, useRequireAuth } from "@/features/auth/auth.hooks";
+import { useLogAnime, useMyLibrary } from "@/features/library/library.hooks";
 import {
   type LibraryEntryWithAnime,
   type LibraryStatus,
-} from "@/features/library/api/library.query";
-import type { LogAnimeData } from "@/features/library/api/library.mutation";
+  type LogAnimeData,
+} from "@/features/library/library.api";
 import { cn } from "@/lib/utils";
 
-import { useArchiveSearch, useSearchAnime } from "../hooks";
+import { useArchiveSearch, useSearchAnime } from "../anime.hooks";
 import { AddToListDialog } from "./add-to-list-dialog";
 import { AnimeCard } from "./anime-card";
 

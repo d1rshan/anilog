@@ -1,5 +1,5 @@
-import { authClient } from "@/lib/auth-client";
 import { redirect } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 export async function getSession(headers: Headers) {
   return authClient.getSession({

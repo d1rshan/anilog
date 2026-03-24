@@ -1,4 +1,4 @@
-import { UserSearch } from "../components/user-search";
+import { UserSearch } from "./components/user-search";
 
 export const UsersPage = async () => {
   return (

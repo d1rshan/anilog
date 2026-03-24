@@ -16,13 +16,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { useUpdateMyProfile } from "@/features/users/hooks";
-import type { UserWithProfile } from "@/features/users/api/user.query";
+import type { UserWithProfileDto } from "@anilog/contracts";
+import { useUpdateMyProfile } from "@/features/users/users.hooks";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 
 interface EditProfileDialogProps {
-  user: UserWithProfile;
+  user: UserWithProfileDto;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;

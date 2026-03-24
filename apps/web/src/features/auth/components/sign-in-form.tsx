@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 
-import { useAuth } from "../lib/hooks";
+import { useAuth } from "../auth.hooks";
 
 export const SignInForm = ({
   onSwitchToSignUp,

@@ -1,13 +1,11 @@
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { HydrationBoundary, QueryClient, dehydrate } from "@tanstack/react-query";
-
-import { getCurrentUser } from "@/features/auth/lib/server";
-import { userKeys } from "@/features/users/api/user.keys";
-import { prefetchProfileLibrary, prefetchUserByUsername } from "@/features/users/server/prefetch";
-import { type UserWithProfile } from "@/features/users/api/user.query";
-
-import { UnifiedProfile } from "../components/unified-profile";
+import type { UserWithProfileDto } from "@anilog/contracts";
+import { getCurrentUser } from "@/features/auth/auth.server";
+import { usersKeys } from "./users.keys";
+import { prefetchProfileLibrary, prefetchUserByUsername } from "./users.server";
+import { UnifiedProfile } from "./components/unified-profile";
 
 interface UserProfilePageProps {
   params: Promise<{
@@ -31,7 +29,7 @@ export const UserProfilePage = async ({ params }: UserProfilePageProps) => {
     throw error;
   }
 
-  const user = queryClient.getQueryData<UserWithProfile>(userKeys.byUsername(username));
+  const user = queryClient.getQueryData<UserWithProfileDto>(usersKeys.byUsername(username));
 
   if (!user) {
     notFound();

@@ -2,11 +2,10 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { animeKeys } from "@/features/anime/api/anime.keys";
-import { adminKeys } from "@/features/admin/api/admin.keys";
-import { adminMutations } from "@/features/admin/api/admin.mutation";
-import { adminQueries, type AdminUsersQueryInput } from "@/features/admin/api/admin.query";
+import { animeKeys } from "@/features/anime/anime.keys";
 import { getApiErrorMessage } from "@/lib/eden-fetch";
+import { adminKeys } from "./admin.keys";
+import { adminMutations, adminQueries, type AdminUsersQueryInput } from "./admin.api";
 
 export function useAdminStats(options?: { enabled?: boolean }) {
   return useQuery({

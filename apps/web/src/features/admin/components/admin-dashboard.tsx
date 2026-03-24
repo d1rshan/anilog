@@ -11,9 +11,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { useAuth } from "@/features/auth/lib/hooks";
-import { useMyAdminStatus } from "@/features/users/hooks";
-import type { HeroCuration } from "@/features/anime/api/anime.query";
+import { useAuth } from "@/features/auth/auth.hooks";
+import { useMyAdminStatus } from "@/features/users/users.hooks";
+import type { HeroCuration } from "../admin.api";
 
 import {
   useAdminHeroCurations,
@@ -21,7 +21,7 @@ import {
   useAdminUsers,
   useSetUserAdminStatus,
   useUpdateHeroCuration,
-} from "../hooks";
+} from "../admin.hooks";
 
 type HeroDraft = Pick<
   HeroCuration,
