@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { ChevronUp, FolderOpen } from "lucide-react";
-import { useUserLists } from "../hooks";
+import { useUserLists } from "../users.hooks";
 import { Button } from "@/components/ui/button";
 import { AnimeCard } from "@/features/anime/components/anime-card";
-import { LIBRARY_STATUSES, type LibraryStatus } from "@/features/library/api/library.query";
+import { LIBRARY_STATUSES, type LibraryStatus } from "@/features/library/library.api";
 import { AnimeStackPreview } from "@/features/library/components/anime-stack-preview";
 
 interface UserListsPublicProps {

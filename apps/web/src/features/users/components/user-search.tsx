@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Search, Loader2 } from "lucide-react";
-import { useSearchUsers } from "../hooks";
+import { useSearchUsers } from "../users.hooks";
 import { UserCard } from "./user-card";
 import { Skeleton } from "@/components/ui/skeleton";
 

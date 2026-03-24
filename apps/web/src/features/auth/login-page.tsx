@@ -1,9 +1,8 @@
 import { headers } from "next/headers";
 import type { Route } from "next";
 import { redirect } from "next/navigation";
-
-import { LoginPageClient } from "../components/login-page-client";
-import { getCurrentUser } from "../lib/server";
+import { LoginPageClient } from "./components/login-page-client";
+import { getCurrentUser } from "./auth.server";
 
 interface LoginPageProps {
   redirectTo?: string;

@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { AnimeCard } from "@/features/anime/components/anime-card";
 import { AddToListDialog } from "@/features/anime/components/add-to-list-dialog";
 import { AnimeStackPreview } from "./anime-stack-preview";
-import { useMyLibrary, groupLibraryByStatus } from "../hooks";
+import { useMyLibrary, groupLibraryByStatus } from "../library.hooks";
 import {
   LIBRARY_STATUSES,
   type LibraryEntryWithAnime,
   type LibraryStatus,
-} from "../api/library.query";
-import type { LogAnimeData } from "../api/library.mutation";
+  type LogAnimeData,
+} from "../library.api";
 
 const STATUS_LABELS: Record<LibraryStatus, string> = {
   watching: "Watching",

@@ -1,11 +1,11 @@
 import "server-only";
 
 import type { QueryClient } from "@tanstack/react-query";
-import { prefetchMyLibrary } from "@/features/library/server/prefetch";
-import { userQueries } from "../api/user.query";
+import { prefetchMyLibrary } from "@/features/library/library.server";
+import { usersQueries } from "./users.api";
 
 export async function prefetchUserByUsername(queryClient: QueryClient, username: string) {
-  await queryClient.prefetchQuery(userQueries.byUsername({ params: { username } }));
+  await queryClient.prefetchQuery(usersQueries.byUsername({ params: { username } }));
 }
 
 export async function prefetchProfileLibrary(
@@ -17,5 +17,5 @@ export async function prefetchProfileLibrary(
     return;
   }
 
-  await queryClient.prefetchQuery(userQueries.publicLibrary({ params: { id: options.userId } }));
+  await queryClient.prefetchQuery(usersQueries.publicLibrary({ params: { id: options.userId } }));
 }

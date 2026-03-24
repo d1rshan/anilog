@@ -1,10 +1,8 @@
 import { headers } from "next/headers";
 import { HydrationBoundary, QueryClient, dehydrate } from "@tanstack/react-query";
-
-import { getCurrentUser } from "@/features/auth/lib/server";
-import { prefetchAnimeHome } from "@/features/anime/server/prefetch";
-
-import { DiscoverSearchShell } from "../components/discover-search-shell";
+import { getCurrentUser } from "@/features/auth/auth.server";
+import { prefetchAnimeHome } from "./anime.server";
+import { DiscoverSearchShell } from "./components/discover-search-shell";
 
 export const HomePage = async () => {
   const headersList = await headers();

@@ -7,8 +7,8 @@ import type { Route } from "next";
 import { usePathname, useRouter } from "next/navigation";
 
 import { UserMenu } from "@/features/auth/components/user-menu";
-import { useAuth, useLogout } from "@/features/auth/lib/hooks";
-import { useMyAdminStatus } from "@/features/users/hooks";
+import { useAuth, useLogout } from "@/features/auth/auth.hooks";
+import { useMyAdminStatus } from "@/features/users/users.hooks";
 import { useRouteTransition } from "@/lib/route-transition";
 import { cn } from "@/lib/utils";
 

@@ -3,16 +3,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTrendingAnime } from "../hooks";
-import { useMyLibrary, useLogAnime } from "@/features/library/hooks";
+import { useTrendingAnime } from "../anime.hooks";
+import { useLogAnime, useMyLibrary } from "@/features/library/library.hooks";
 import { AnimeCard } from "./anime-card";
 import { AddToListDialog } from "./add-to-list-dialog";
 import {
   type LibraryEntryWithAnime,
   type LibraryStatus,
-} from "@/features/library/api/library.query";
-import type { LogAnimeData } from "@/features/library/api/library.mutation";
-import { useAuth, useRequireAuth } from "@/features/auth/lib/hooks";
+  type LogAnimeData,
+} from "@/features/library/library.api";
+import { useAuth, useRequireAuth } from "@/features/auth/auth.hooks";
 import { cn } from "@/lib/utils";
 
 type DialogState = {
