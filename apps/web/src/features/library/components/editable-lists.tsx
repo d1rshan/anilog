@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { AnimeCard } from "@/features/anime/components/anime-card";
 import { AddToListDialog } from "@/features/anime/components/add-to-list-dialog";
 import { AnimeStackPreview } from "./anime-stack-preview";
-import { useMyLibrary, groupLibraryByStatus } from "../library.hooks";
+import { useMyLibrary } from "../library.hooks";
+import { groupLibraryByStatus } from "../library.utils";
 import {
   LIBRARY_STATUSES,
   type LibraryEntryWithAnime,

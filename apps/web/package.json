@@ -9,8 +9,8 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@anilog/env": "workspace:*",
     "@anilog/contracts": "workspace:*",
+    "@anilog/env": "workspace:*",
     "@elysiajs/eden": "^1.4.6",
     "@radix-ui/react-dialog": "^1.1.15",
     "@tanstack/react-form": "^1.27.3",

@@ -13,7 +13,6 @@ export const ErrorCode = t.Union([
 export const ErrorDto = t.Object({
   code: ErrorCode,
   message: t.String(),
-  details: t.Optional(t.Record(t.String(), t.Unknown())),
 });
 
 export const ErrorResponse = t.Object({
