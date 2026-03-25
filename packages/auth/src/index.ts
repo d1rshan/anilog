@@ -2,12 +2,10 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { username } from "better-auth/plugins";
 import { UsersQueries, db } from "@anilog/db";
+import { getCorsOrigins, serverEnv } from "@anilog/env/server";
 import * as schema from "@anilog/db/schema";
 
-const trustedOrigins = (process.env.CORS_ORIGIN || "")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const trustedOrigins = getCorsOrigins();
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -15,6 +13,8 @@ export const auth = betterAuth({
     schema: schema,
   }),
   basePath: "/auth",
+  secret: serverEnv.BETTER_AUTH_SECRET,
+  baseURL: serverEnv.BETTER_AUTH_URL,
   trustedOrigins,
   emailAndPassword: {
     enabled: true,

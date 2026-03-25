@@ -9,11 +9,12 @@ import {
   UpsertAnimeBody,
   UpsertAnimeDto,
 } from "@anilog/contracts";
+import { serverEnv } from "@anilog/env/server";
 import { unauthorizedError } from "../../lib/api-error";
 import { authMiddleware } from "../../middleware/auth.middleware";
 import { AnimeService } from "./anime.service";
 
-const cronSecret = process.env.CRON_SECRET;
+const cronSecret = serverEnv.CRON_SECRET;
 
 function isCronAuthorized(request: Request) {
   if (!cronSecret) return false;

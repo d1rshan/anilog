@@ -1,15 +1,9 @@
 import { treaty } from "@elysiajs/eden";
+import { webEnv } from "@anilog/env/web";
 import type { App } from "server";
 
-const appOrigin = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "");
-if (!appOrigin) {
-  throw new Error("Missing required env: NEXT_PUBLIC_APP_URL");
-}
-
-const backendOrigin = process.env.NEXT_PUBLIC_SERVER_URL?.replace(/\/+$/, "");
-if (!backendOrigin) {
-  throw new Error("Missing required env: NEXT_PUBLIC_SERVER_URL");
-}
+const appOrigin = webEnv.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "");
+const backendOrigin = webEnv.NEXT_PUBLIC_SERVER_URL.replace(/\/+$/, "");
 
 const serverUrl = typeof window === "undefined" ? `${backendOrigin}` : `${appOrigin}/proxy`;
 

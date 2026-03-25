@@ -17,6 +17,7 @@
     "@anilog/auth": "workspace:*",
     "@anilog/contracts": "workspace:*",
     "@anilog/db": "workspace:*",
+    "@anilog/env": "workspace:*",
     "@elysiajs/cors": "^1.3.3",
     "dotenv": "catalog:",
     "elysia": "^1.4.26"
