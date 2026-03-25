@@ -4,7 +4,6 @@ export class ApiError extends Error {
   public readonly status: number;
   public readonly value: unknown;
   public readonly code: ErrorCode;
-  public readonly details?: Record<string, unknown>;
 
   constructor(status: number, value: unknown) {
     const parsed = parseErrorResponse(value);
@@ -15,7 +14,6 @@ export class ApiError extends Error {
     this.status = status;
     this.value = value;
     this.code = parsed?.error.code ?? "INTERNAL";
-    this.details = parsed?.error.details;
   }
 }
 
@@ -31,7 +29,6 @@ export function parseErrorResponse(value: unknown): ErrorResponse | null {
 
   const code = (error as { code?: unknown }).code;
   const message = (error as { message?: unknown }).message;
-  const details = (error as { details?: unknown }).details;
 
   if (typeof code !== "string" || typeof message !== "string") {
     return null;
@@ -41,9 +38,6 @@ export function parseErrorResponse(value: unknown): ErrorResponse | null {
     error: {
       code: code as ErrorCode,
       message,
-      ...(typeof details === "object" && details !== null
-        ? { details: details as Record<string, unknown> }
-        : {}),
     },
   };
 }
@@ -65,14 +59,6 @@ export function getApiErrorMessage(error: unknown): string {
   return "Something went wrong";
 }
 
-/**
- * Unwraps an Eden Treaty response, returning the data or throwing an `ApiError`.
- *
- * Usage:
- * ```ts
- * const data = await edenFetch(() => api.anime.trending.get());
- * ```
- */
 export async function edenFetch<T>(
   call: () => Promise<{
     data: T | null;
