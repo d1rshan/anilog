@@ -12,6 +12,7 @@
   "scripts": {},
   "dependencies": {
     "@anilog/db": "workspace:*",
+    "@anilog/env": "workspace:*",
     "better-auth": "catalog:"
   },
   "devDependencies": {

@@ -2,13 +2,14 @@ import "dotenv/config";
 import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { auth } from "@anilog/auth";
+import { getCorsOrigins } from "@anilog/env/server";
 import { adminRoutes } from "./features/admin/admin.route";
 import { animeRoutes } from "./features/anime/anime.route";
 import { libraryRoutes } from "./features/library/library.route";
 import { usersRoutes } from "./features/users/users.route";
 import { errorMiddleware } from "./middleware/error.middleware";
 
-const allowedOrigins = process.env.CORS_ORIGIN || "http://localhost:3001";
+const allowedOrigins = getCorsOrigins();
 
 export const app = new Elysia()
   .use(

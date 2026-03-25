@@ -1,0 +1,27 @@
+{
+  "name": "@anilog/env",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./server": {
+      "default": "./src/server.ts"
+    },
+    "./web": {
+      "default": "./src/web.ts"
+    }
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@t3-oss/env-core": "catalog:",
+    "@t3-oss/env-nextjs": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@anilog/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
+import { webEnv } from "@anilog/env/web";
 
-const apiOrigin = process.env.NEXT_PUBLIC_SERVER_URL?.replace(/\/+$/, "");
+const apiOrigin = webEnv.NEXT_PUBLIC_SERVER_URL.replace(/\/+$/, "");
 
 const nextConfig: NextConfig = {
   typedRoutes: true,

@@ -1,5 +1,6 @@
 import { defineConfig } from "drizzle-kit";
 import dotenv from "dotenv";
+import { serverEnv } from "@anilog/env/server";
 
 dotenv.config({
   path: "../../apps/server/.env",
@@ -10,6 +11,6 @@ export default defineConfig({
   out: "./src/migrations",
   dialect: "postgresql",
   dbCredentials: {
-    url: process.env.DATABASE_URL || "",
+    url: serverEnv.DATABASE_URL,
   },
 });

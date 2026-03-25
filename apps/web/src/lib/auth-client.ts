@@ -1,10 +1,8 @@
 import { createAuthClient } from "better-auth/react";
 import { usernameClient } from "better-auth/client/plugins";
+import { webEnv } from "@anilog/env/web";
 
-const appOrigin = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "");
-if (!appOrigin) {
-  throw new Error("Missing required env: NEXT_PUBLIC_APP_URL");
-}
+const appOrigin = webEnv.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "");
 
 export const authClient = createAuthClient({
   baseURL: `${appOrigin}/proxy/auth`,
